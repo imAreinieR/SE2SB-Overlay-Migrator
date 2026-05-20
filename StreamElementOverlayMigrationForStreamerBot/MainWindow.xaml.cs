@@ -7,6 +7,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace StreamElementsToStreamerBotMigrationTool;
@@ -14,7 +15,10 @@ namespace StreamElementsToStreamerBotMigrationTool;
 public partial class MainWindow: Window
 {
     private readonly List<string>                       _relevantFileExtensions = new () { ".html", ".js", ".css", ".json" };
-    private readonly ObservableCollection<ImportedFile> _importedFiles          = new ();
+    private readonly ObservableCollection<Widget>       _widgets                = new ();
+    private readonly ObservableCollection<WidgetFile>   _files                  = new ();
+
+    private Widget? _selectedWidget;
 
     private static readonly string DeployPath = Path.Combine
     (
@@ -27,13 +31,47 @@ public partial class MainWindow: Window
     {
         InitializeComponent();
 
-        FileList.ItemsSource = _importedFiles;
-        _importedFiles.CollectionChanged += (_, _) => OnFilesChanged();
+        WidgetList.ItemsSource = _widgets;
+        FileList.ItemsSource   = _files;
 
-        DeployPathBox.Text = DeployPath;
+        _files.CollectionChanged   += (_, _) => OnFilesChanged();
+        _widgets.CollectionChanged += (_, _) => OnWidgetsChanged();
     }
 
     #region Event Handlers
+
+    private void NewWidget_Click(object sender, RoutedEventArgs e)
+    {
+        var widget = new Widget($"Widget {_widgets.Count + 1}", DeployPath);
+        _widgets.Add(widget);
+        SelectWidget(widget);
+    }
+
+    private void RemoveWidget_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button button && button.Tag is Widget widget)
+        {
+            // TODO: wire up persistence deletion (phase 2)
+            _widgets.Remove(widget);
+
+            if (_selectedWidget == widget)
+            {
+                _selectedWidget = null;
+                _files.Clear();
+                ClearDetail();
+            }
+        }
+    }
+
+    private void SaveWidget_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedWidget is null)
+            return;
+
+        // TODO: persist to SQLite (phase 2)
+        _selectedWidget.Name = WidgetNameBox.Text.Trim();
+        SetStatus("Widget saved.");
+    }
 
     private void Import_Click(object sender, RoutedEventArgs e)
     {
@@ -51,23 +89,26 @@ public partial class MainWindow: Window
         {
             string? name = Path.GetFileName(path);
 
-            if (_importedFiles.Any(file => file.FileName == name))
+            if (_files.Any(file => file.FileName == name))
                 continue;
 
-            _importedFiles.Add(new ImportedFile(name, File.ReadAllText(path)));
+            _files.Add(new WidgetFile(name, File.ReadAllText(path)));
         }
     }
 
     private void RemoveFile_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is System.Windows.Controls.Button button && button.Tag is ImportedFile file)
-            _importedFiles.Remove(file);
+        if (sender is Button button && button.Tag is WidgetFile file)
+            _files.Remove(file);
     }
 
     private void CopyPath_Click(object sender, RoutedEventArgs e)
     {
-        Clipboard.SetText(DeployPath);
-        SetStatus("Path copied to clipboard.");
+        if (!string.IsNullOrEmpty(DeployPathBox.Text))
+        {
+            Clipboard.SetText(DeployPathBox.Text);
+            SetStatus("Path copied to clipboard.");
+        }
     }
 
     private void Generate_Click(object sender, RoutedEventArgs e)
@@ -76,9 +117,9 @@ public partial class MainWindow: Window
         {
             Directory.CreateDirectory(DeployPath);
 
-            string jsonData = _importedFiles.FirstOrDefault(file => file.WidgetFileType == WidgetFileType.DataJson)?.Content ?? string.Empty;
+            string jsonData = _files.FirstOrDefault(file => file.WidgetFileType == WidgetFileType.DataJson)?.Content ?? string.Empty;
 
-            foreach (ImportedFile file in _importedFiles)
+            foreach (WidgetFile file in _files)
             {
                 string fileName = file.WidgetFileType switch
                 {
@@ -159,11 +200,34 @@ public partial class MainWindow: Window
             TimeSpan.FromSeconds(1)
         );
 
+    private void SelectWidget(Widget widget)
+    {
+        _selectedWidget = widget;
+        WidgetNameBox.Text  = widget.Name;
+        DeployPathBox.Text  = GetDeployPath(widget.Name);
+
+        // TODO: load files from SQLite (phase 2) — for now starts empty
+        _files.Clear();
+        SetStatus("Import your widget files.");
+    }
+
+    private void ClearDetail()
+    {
+        WidgetNameBox.Text = "Select or create a widget";
+        DeployPathBox.Text = "";
+        SetStatus("Select or create a widget to begin.");
+        GenerateBtn.IsEnabled = false;
+        HideWarning();
+    }
+
+    private static string GetDeployPath(string widgetName)
+        => Path.Combine(DeployPath, widgetName);
+
     private void OnFilesChanged()
     {
-        bool hasFiles = _importedFiles.Any();
+        var hasFiles = _files.Count > 0;
 
-        EmptyLabel.Visibility = hasFiles
+        FilesEmptyLabel.Visibility = hasFiles
             ? Visibility.Collapsed
             : Visibility.Visible;
 
@@ -183,9 +247,14 @@ public partial class MainWindow: Window
         else
         {
             HideWarning();
-            GenerateBtn.IsEnabled = true;
+            GenerateBtn.IsEnabled = _selectedWidget is not null;
             SetStatus("Ready to generate.");
         }
+    }
+
+    private void OnWidgetsChanged()
+    {
+        // Nothing for now — phase 2 will sync to SQLite here
     }
 
     private bool IsValidFileSet(out string validationError)
@@ -194,7 +263,7 @@ public partial class MainWindow: Window
 
         foreach (string extension in _relevantFileExtensions)
         {
-            int count = _importedFiles.Count(file => Path.GetExtension(file.FileName).Equals(extension, StringComparison.OrdinalIgnoreCase));
+            int count = _files.Count(file => Path.GetExtension(file.FileName).Equals(extension, StringComparison.OrdinalIgnoreCase));
 
             if (count > 1 && extension != ".json")
                 duplicates.Add(extension);
@@ -206,7 +275,7 @@ public partial class MainWindow: Window
             return false;
         }
 
-        if (!_importedFiles.Any(file => Path.GetExtension(file.FileName).Equals(".html", StringComparison.OrdinalIgnoreCase)))
+        if (!_files.Any(file => Path.GetExtension(file.FileName).Equals(".html", StringComparison.OrdinalIgnoreCase)))
         {
             validationError = "A .html file is required. Please import your widget's HTML file.";
             return false;
