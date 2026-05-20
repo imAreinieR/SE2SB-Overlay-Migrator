@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36327.8
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamElementsToStreamerBotMigrationTool", "StreamElementOverlayMigrationForStreamerBot\StreamElementsToStreamerBotMigrationTool.csproj", "{EA21EA17-6118-4964-B996-790C55652768}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamElementsToStreamerBotOverlayMigrationTool", "StreamElementOverlayMigrationForStreamerBot\StreamElementsToStreamerBotOverlayMigrationTool.csproj", "{EA21EA17-6118-4964-B996-790C55652768}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
