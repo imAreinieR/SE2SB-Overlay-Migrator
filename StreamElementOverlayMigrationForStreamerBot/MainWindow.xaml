@@ -1,0 +1,251 @@
+<Window x:Class="StreamElementsToStreamerBotMigrationTool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SE Widget Migration Tool"
+        Width="520" Height="380"
+        MinWidth="480" MinHeight="340"
+        ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen"
+        Background="#1a1d27">
+
+    <Window.Resources>
+
+        <!-- Rounded button base -->
+        <Style x:Key="BaseBtn" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.82"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.65"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.35"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ImportBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
+            <Setter Property="Background" Value="#4a7eff"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="18,8"/>
+        </Style>
+
+        <Style x:Key="GenerateBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
+            <Setter Property="Background" Value="#3ecf8e"/>
+            <Setter Property="Foreground" Value="#0a1a10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="28,10"/>
+        </Style>
+
+        <Style x:Key="CopyBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
+            <Setter Property="Background" Value="#2d3247"/>
+            <Setter Property="Foreground" Value="#8b94bd"/>
+            <Setter Property="Padding" Value="10,0"/>
+        </Style>
+
+        <!-- Read-only path display -->
+        <Style x:Key="PathBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#0f111a"/>
+            <Setter Property="Foreground" Value="#7a84a8"/>
+            <Setter Property="BorderBrush" Value="#2d3247"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="10,0"
+                                          VerticalAlignment="Center"
+                                          VerticalScrollBarVisibility="Hidden"
+                                          HorizontalScrollBarVisibility="Hidden"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <!-- Outer padding -->
+    <Grid Margin="24,20,24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>  <!-- Import button -->
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="Auto"/>  <!-- Warning banner -->
+            <RowDefinition Height="*"/>     <!-- File list -->
+            <RowDefinition Height="16"/>
+            <RowDefinition Height="Auto"/>  <!-- Deploy path row -->
+            <RowDefinition Height="16"/>
+            <RowDefinition Height="Auto"/>  <!-- Status + Generate -->
+        </Grid.RowDefinitions>
+
+        <!-- ── Import ── -->
+        <Button Grid.Row="0"
+                Style="{StaticResource ImportBtn}"
+                HorizontalAlignment="Left"
+                Height="36"
+                Click="Import_Click">
+            Import
+        </Button>
+
+        <!-- ── Warning banner (hidden by default) ── -->
+        <Border Grid.Row="2"
+                x:Name="WarningBanner"
+                Background="#2a1a1a"
+                BorderBrush="#ff6b6b"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="12,8"
+                Margin="0,0,0,10"
+                Visibility="Collapsed">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="⚠  "
+                           Foreground="#ff6b6b"
+                           FontSize="12"
+                           VerticalAlignment="Center"/>
+                <TextBlock x:Name="WarningText"
+                           Foreground="#ff9a9a"
+                           FontFamily="Segoe UI"
+                           FontSize="12"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ── File list ── -->
+        <Border Grid.Row="3"
+                Background="#0f111a"
+                BorderBrush="#2d3247"
+                BorderThickness="1"
+                CornerRadius="4">
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          Padding="8,6">
+                <ItemsControl x:Name="FileList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="24"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Filename -->
+                                <Border Grid.Column="0"
+                                        Background="#1a1d27"
+                                        CornerRadius="3"
+                                        Padding="10,5">
+                                    <TextBlock Text="{Binding FileName}"
+                                               Foreground="#c8cfe8"
+                                               FontFamily="Consolas"
+                                               FontSize="12"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+
+                                <!-- Remove button -->
+                                <Button Grid.Column="2"
+                                        Content="✕"
+                                        Tag="{Binding}"
+                                        Click="RemoveFile_Click"
+                                        Cursor="Hand"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Foreground="#ff6b6b"
+                                        FontSize="13"
+                                        ToolTip="Remove file"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Empty state label (visible when list is empty) -->
+        <TextBlock Grid.Row="3"
+                   x:Name="EmptyLabel"
+                   Text="No files imported yet."
+                   Foreground="#3a3f58"
+                   FontFamily="Segoe UI"
+                   FontSize="12"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   IsHitTestVisible="False"/>
+
+        <!-- ── Deploy path row ── -->
+        <Grid Grid.Row="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Column="0"
+                     x:Name="DeployPathBox"
+                     Style="{StaticResource PathBox}"
+                     Height="34"/>
+
+            <Button Grid.Column="2"
+                    Style="{StaticResource CopyBtn}"
+                    Height="34"
+                    Width="34"
+                    ToolTip="Copy path to clipboard"
+                    Click="CopyPath_Click">
+                <!-- Simple copy icon using text -->
+                <TextBlock Text="⧉" FontSize="14" Foreground="#8b94bd"/>
+            </Button>
+        </Grid>
+
+        <!-- ── Status + Generate ── -->
+        <Grid Grid.Row="7">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock x:Name="StatusText"
+                       Grid.Column="0"
+                       Foreground="#3a3f58"
+                       FontFamily="Consolas"
+                       FontSize="11"
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"
+                       Text="Import your widget files to begin."/>
+
+            <Button Grid.Column="2"
+                    x:Name="GenerateBtn"
+                    Style="{StaticResource GenerateBtn}"
+                    Height="40"
+                    IsEnabled="False"
+                    Click="Generate_Click">
+                Generate
+            </Button>
+        </Grid>
+
+    </Grid>
+</Window>
