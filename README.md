@@ -22,11 +22,11 @@ flowchart TB
     classDef local   fill:#555,stroke:#333,color:#fff
     classDef obs     fill:#444,stroke:#222,color:#fff
 
-    subgraph SE ["StreamElements (before)"]
+    subgraph SE ["Before"]
         direction LR
         subgraph INET1 ["🌐 Internet"]
             direction LR
-            A[Twitch Events] --> B[StreamElements Platform] --> C[Hosted Overlay]
+            A[Twitch Events] --> B[StreamElements Platform] --> C[Hosted Overlay Widget]
         end
         subgraph LOC1 ["🖥 Local"]
             direction LR
@@ -35,7 +35,7 @@ flowchart TB
         C --> D
     end
 
-    subgraph SB ["StreamerBot (after)"]
+    subgraph SB ["After"]
         direction LR
         subgraph INET2 ["🌐 Internet"]
             direction LR
@@ -43,7 +43,7 @@ flowchart TB
         end
         subgraph LOC2 ["🖥 Local"]
             direction LR
-            F[StreamerBot] --> G[Local Widget Files] --> H[OBS]
+            F[StreamerBot] --> G[Local Overlay Widget] --> H[OBS]
         end
         E --> F
     end
@@ -62,23 +62,21 @@ flowchart TB
 ## Features
 
 ### SE to StreamerBot Migration
-Takes your existing StreamElements overlay files and converts them into a locally-hosted widget that StreamerBot can drive with events. No manual code changes needed.
+Takes your existing StreamElements overlay widget and converts them into a locally-hosted overlay widget that StreamerBot can drive with events. No manual code changes needed.
 
 ### Widget Management
-- Create and name multiple widgets in a single session.
-- Remove widgets you no longer need.
-- Each widget tracks its own file set and deploy path independently.
-
-### File Import & Validation
-- Import `.html`, `.js`, `.css`, and `.json` files via a file picker.
-- Warns if the required `.html` file is missing or if duplicate files exist for the same extension.
-- The **Generate** button stays disabled until the file set is valid.
-
+- Create and configure multiple widgets.
+- Each widget tracks its own files and configurations independently.
+- 
 ### StreamerBot Event Bridge
 A `streamerBotEvents.js` file is generated automatically alongside your widget files. This bridges StreamerBot's event system to your overlay so it can respond to stream events (follows, subs, etc.) without any manual wiring.
 
-### Deploy Path
-- The deploy path is shown in the UI and can be copied to your clipboard with one click.
+### Simple File Imports
+- Import `.html`, `.js`, `.css`, and `.json` files or even a `.zip` file.
+- Warns if the required files are missing or if duplicate files exist.
+
+### One-Click!
+- Just one click to copy URL and add to OBS as a browser source.
 
 ---
 
