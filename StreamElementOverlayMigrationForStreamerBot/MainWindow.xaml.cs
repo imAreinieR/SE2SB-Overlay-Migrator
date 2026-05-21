@@ -1,4 +1,5 @@
 using Microsoft.Win32;
+using StreamElementsToStreamerBotMigrationTool.Common.ExtensionMethods;
 using StreamElementsToStreamerBotMigrationTool.Data;
 using StreamElementsToStreamerBotMigrationTool.Managers;
 using StreamElementsToStreamerBotMigrationTool.Services;
@@ -6,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace StreamElementsToStreamerBotMigrationTool;
@@ -21,9 +23,20 @@ public partial class MainWindow: Window
         InitializeComponent();
 
         WidgetList.ItemsSource = _widgets = new ObservableCollection<Widget>(WidgetManager.GetAll());
+
+        if (_widgets.Any())
+            WidgetList.SelectedItem = _widgets.First();
+        else
+            UpdateEmptyState();
     }
 
     #region Event Handlers
+
+    private void WidgetList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (WidgetList.SelectedItem is Widget widget)
+            SelectWidget(widget);
+    }
 
     private void NewWidget_Click(object sender, RoutedEventArgs e)
     {
@@ -31,7 +44,8 @@ public partial class MainWindow: Window
         var widget = new Widget(name, DefaultDeployPath);
 
         _widgets.Add(widget);
-        SelectWidget(widget);
+        WidgetList.SelectedItem = widget;
+        UpdateEmptyState();
     }
 
     private void RemoveWidget_Click(object sender, RoutedEventArgs e)
@@ -57,7 +71,7 @@ public partial class MainWindow: Window
         {
             if (_widgets.Any())
             {
-                SelectWidget(_widgets.First());
+                WidgetList.SelectedItem = _widgets.First();
             }
             else
             {
@@ -66,6 +80,85 @@ public partial class MainWindow: Window
                 ClearDetail();
             }
         }
+
+        UpdateEmptyState();
+    }
+
+    private void EditWidgetName_MouseUp(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not FrameworkElement frameworkElement)
+            return;
+
+        DependencyObject? container = frameworkElement.FindAncestorWithChildren();
+
+        if (container == null)
+            return;
+
+        StackPanel? nameDisplay = container.FindVisualChild<StackPanel>("NameDisplayPanel");
+        TextBox?    nameEdit    = container.FindVisualChild<TextBox>("NameEditBox");
+
+        if (nameDisplay == null || nameEdit == null || frameworkElement.DataContext is not Widget widget)
+            return;
+
+        nameDisplay.Visibility = Visibility.Collapsed;
+        nameEdit.Visibility    = Visibility.Visible;
+        nameEdit.Text          = widget.Name;
+
+        nameEdit.SelectAll();
+        nameEdit.Focus();
+
+        e.Handled = true;
+    }
+
+    private void WidgetNameBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter && sender is TextBox textBox)
+            CommitWidgetRename(textBox);
+        else if (e.Key == Key.Escape && sender is TextBox textBox2)
+            CancelWidgetRename(textBox2);
+    }
+
+    private void WidgetNameBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox textBox)
+            CommitWidgetRename(textBox);
+    }
+
+    private void CommitWidgetRename(TextBox textBox)
+    {
+        string newName = textBox.Text.Trim();
+
+        if (string.IsNullOrEmpty(newName))
+        {
+            CancelWidgetRename(textBox);
+            return;
+        }
+
+        if (textBox.DataContext is Widget widget)
+        {
+            widget.Name = newName;
+            WidgetManager.Save(widget);
+
+            if (_selectedWidget == widget)
+                DeployPathBox.Text = widget.FolderLocation;
+
+            SetStatus($"Renamed to '{newName}'.");
+        }
+
+        ExitInlineEdit(textBox);
+    }
+
+    private void CancelWidgetRename(TextBox textBox)
+        => ExitInlineEdit(textBox);
+
+    private static void ExitInlineEdit(TextBox textBox)
+    {
+        StackPanel? nameDisplay = textBox.FindVisualSibling<StackPanel>("NameDisplayPanel");
+
+        if (nameDisplay != null)
+            nameDisplay.Visibility = Visibility.Visible;
+
+        textBox.Visibility = Visibility.Collapsed;
     }
 
     private void SaveWidget_Click(object sender, RoutedEventArgs e)
@@ -131,37 +224,47 @@ public partial class MainWindow: Window
             SetStatus(errorMessage, error: true);
     }
 
-    private void EditWidgetName_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
-    {
-        // TODO: show inline name input in sidebar row (phase 2)
-    }
-
     #endregion Event Handlers
 
     #region Helpers
 
     private void SelectWidget(Widget widget)
     {
-        _selectedWidget            = widget;
-        DeployPathBox.Text         = widget.DeployedLocation;
-        FileList.ItemsSource       = widget.Files;
-        SaveChangesBtn.IsEnabled   = true;
-        EmptyStatePanel.Visibility = Visibility.Collapsed;
-        DetailPanel.Visibility     = Visibility.Visible;
+        _selectedWidget      = widget;
+        DeployPathBox.Text   = widget.DeployedLocation;
+        FileList.ItemsSource = widget.Files;
+
+        if (WidgetList.SelectedItem != widget)
+            WidgetList.SelectedItem = widget;
+
+        EmptyStatePanel.Visibility    = Visibility.Collapsed;
+        DetailContentPanel.Visibility = Visibility.Visible;
+        SaveChangesBtn.IsEnabled      = true;
 
         OnFilesChanged();
         SetStatus("Import your widget files.");
     }
 
+    private void UpdateEmptyState()
+    {
+        bool noWidgets = !_widgets.Any();
+
+        EmptyStatePanel.Visibility    = noWidgets
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        DetailContentPanel.Visibility = noWidgets
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+    }
+
     private void ClearDetail()
     {
-        DeployPathBox.Text         = string.Empty;
-        GenerateBtn.IsEnabled      = false;
-        SaveChangesBtn.IsEnabled   = false;
-        EmptyStatePanel.Visibility = Visibility.Visible;
-        DetailPanel.Visibility     = Visibility.Collapsed;
+        DeployPathBox.Text       = string.Empty;
+        GenerateBtn.IsEnabled    = false;
+        SaveChangesBtn.IsEnabled = false;
         HideWarning();
         SetStatus("Select or create a widget to begin.");
+        UpdateEmptyState();
     }
 
     private void OnFilesChanged()

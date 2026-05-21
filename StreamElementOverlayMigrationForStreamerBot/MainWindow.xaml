@@ -179,6 +179,34 @@
             </Setter>
         </Style>
 
+        <!-- Inline widget name edit TextBox -->
+        <Style x:Key="InlineNameBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#21263a"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CaretBrush" Value="#4f7eff"/>
+            <Setter Property="BorderBrush" Value="#4f7eff"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="4,0"
+                                          VerticalAlignment="Center"
+                                          VerticalScrollBarVisibility="Hidden"
+                                          HorizontalScrollBarVisibility="Hidden"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Section label -->
         <Style x:Key="SectionLabel" TargetType="TextBlock">
             <Setter Property="Foreground" Value="#5a6280"/>
@@ -231,27 +259,46 @@
                 <ScrollViewer Grid.Row="1"
                               VerticalScrollBarVisibility="Auto"
                               Padding="8,8">
-                    <ItemsControl x:Name="WidgetList">
-                        <ItemsControl.ItemTemplate>
+                    <ListBox x:Name="WidgetList"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             SelectionChanged="WidgetList_SelectionChanged">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="RowBorder"
+                                                    Background="Transparent"
+                                                    BorderBrush="Transparent"
+                                                    BorderThickness="1"
+                                                    CornerRadius="5">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="RowBorder" Property="Background" Value="#1a1e2b"/>
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="RowBorder" Property="Background" Value="#21263a"/>
+                                                    <Setter TargetName="RowBorder" Property="BorderBrush" Value="#252c40"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid x:Name="WidgetRow" Margin="0,2">
 
-                                    <!-- Hover trigger to show X -->
-                                    <Grid.Style>
-                                        <Style TargetType="Grid">
-                                            <Style.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="Transparent"/>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Grid.Style>
-
                                     <Border x:Name="ItemBorder"
-                                            CornerRadius="5"
                                             Padding="10,9"
-                                            BorderThickness="1"
-                                            BorderBrush="Transparent"
                                             Background="Transparent"
                                             Cursor="Hand">
                                         <Grid>
@@ -268,24 +315,37 @@
                                                      VerticalAlignment="Center"
                                                      Fill="{Binding StatusColor}"/>
 
-                                            <!-- Widget name + edit icon -->
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding Name}"
-                                                           FontFamily="Segoe UI"
-                                                           FontSize="12"
-                                                           Foreground="#d0d6f0"
-                                                           VerticalAlignment="Center"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           MaxWidth="110"/>
-                                                <TextBlock x:Name="EditIcon"
-                                                           Text=" ✎"
-                                                           FontSize="11"
-                                                           Foreground="#5a6280"
-                                                           VerticalAlignment="Center"
-                                                           Opacity="0"
-                                                           Cursor="Hand"
-                                                           MouseLeftButtonUp="EditWidgetName_Click"/>
-                                            </StackPanel>
+                                            <!-- Widget name display + edit toggle -->
+                                            <Grid Grid.Column="1">
+                                                <!-- Display mode -->
+                                                <StackPanel x:Name="NameDisplayPanel"
+                                                            Orientation="Horizontal"
+                                                            VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Name}"
+                                                               FontFamily="Segoe UI"
+                                                               FontSize="12"
+                                                               Foreground="#d0d6f0"
+                                                               VerticalAlignment="Center"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               MaxWidth="100"/>
+                                                    <TextBlock x:Name="EditIcon"
+                                                               Text=" ✎"
+                                                               FontSize="11"
+                                                               Foreground="#5a6280"
+                                                               VerticalAlignment="Center"
+                                                               Opacity="0"
+                                                               Cursor="Hand"
+                                                               MouseLeftButtonUp="EditWidgetName_MouseUp"/>
+                                                </StackPanel>
+
+                                                <!-- Edit mode -->
+                                                <TextBox x:Name="NameEditBox"
+                                                         Style="{StaticResource InlineNameBox}"
+                                                         Visibility="Collapsed"
+                                                         Height="24"
+                                                         KeyDown="WidgetNameBox_KeyDown"
+                                                         LostFocus="WidgetNameBox_LostFocus"/>
+                                            </Grid>
 
                                             <!-- Remove X (hidden, shown on row hover) -->
                                             <Button Grid.Column="2"
@@ -326,8 +386,8 @@
                                     </Grid.Triggers>
                                 </Grid>
                             </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </ScrollViewer>
 
             </Grid>
@@ -340,8 +400,8 @@
                 <RowDefinition Height="Auto"/>  <!-- Detail footer -->
             </Grid.RowDefinitions>
 
-            <!-- Empty state (shown when no widget selected) -->
-            <Grid Grid.Row="0" x:Name="EmptyStatePanel" Visibility="Visible">
+            <!-- Empty state: only shown when no widgets exist -->
+            <Grid Grid.Row="0" x:Name="EmptyStatePanel" Visibility="Collapsed">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock Text="📦"
                                FontSize="36"
@@ -364,8 +424,10 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Detail content (shown when widget selected) -->
-            <ScrollViewer Grid.Row="0" x:Name="DetailPanel" Visibility="Collapsed"
+
+
+            <!-- Detail content -->
+            <ScrollViewer Grid.Row="0" x:Name="DetailContentPanel"
                           VerticalScrollBarVisibility="Auto"
                           Padding="20,16">
                 <StackPanel>
@@ -399,7 +461,10 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="FILES" Style="{StaticResource SectionLabel}" Margin="0" VerticalAlignment="Center"/>
+                        <TextBlock Text="FILES"
+                                   Style="{StaticResource SectionLabel}"
+                                   Margin="0"
+                                   VerticalAlignment="Center"/>
                         <Button Grid.Column="1"
                                 Style="{StaticResource SmallImportBtn}"
                                 Height="22"
