@@ -15,9 +15,8 @@ namespace StreamElementsToStreamerBotMigrationTool;
 
 public partial class MainWindow: Window
 {
-    private readonly List<string>                     _relevantFileExtensions = new () { ".html", ".js", ".css", ".json" };
-    private readonly ObservableCollection<Widget>     _widgets;
-    private readonly ObservableCollection<WidgetFile> _files;
+    private readonly List<string>                 _relevantFileExtensions = new() { ".html", ".js", ".css", ".json" };
+    private readonly ObservableCollection<Widget> _widgets;
 
     private Widget? _selectedWidget;
 
@@ -32,10 +31,6 @@ public partial class MainWindow: Window
         InitializeComponent();
 
         WidgetList.ItemsSource = _widgets = new ObservableCollection<Widget>(WidgetManager.GetAll());
-        FileList.ItemsSource   = _files   = new ObservableCollection<WidgetFile>();
-
-        _files.CollectionChanged   += (_, _) => OnFilesChanged();
-        _widgets.CollectionChanged += (_, _) => OnWidgetsChanged();
     }
 
     #region Event Handlers
@@ -51,15 +46,22 @@ public partial class MainWindow: Window
 
     private void RemoveWidget_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button button && button.Tag is Widget widget)
-        {
-            _widgets.Remove(widget);
-            WidgetManager.Delete(widget);
+        if (sender is not Button button || button.Tag is not Widget widget)
+            return;
 
-            if (_selectedWidget == widget)
+        _widgets.Remove(widget);
+        WidgetManager.Delete(widget);
+
+        if (_selectedWidget == widget)
+        {
+            if (_widgets.Any())
             {
-                _selectedWidget = null;
-                _files.Clear();
+                SelectWidget(_widgets.First());
+            }
+            else
+            {
+                _selectedWidget      = null;
+                FileList.ItemsSource = null;
                 ClearDetail();
             }
         }
@@ -76,6 +78,9 @@ public partial class MainWindow: Window
 
     private void Import_Click(object sender, RoutedEventArgs e)
     {
+        if (_selectedWidget is null)
+            return;
+
         var dialog = new OpenFileDialog
         {
             Title       = "Select widget files",
@@ -90,37 +95,44 @@ public partial class MainWindow: Window
         {
             string? name = Path.GetFileName(path);
 
-            if (_files.Any(file => file.FileName == name))
+            if (_selectedWidget.Files.Any(file => file.FileName == name))
                 continue;
 
-            _files.Add(new WidgetFile(name, File.ReadAllText(path)));
+            _selectedWidget.Files.Add(new WidgetFile(name, File.ReadAllText(path)));
         }
+
+        OnFilesChanged();
     }
 
     private void RemoveFile_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button button && button.Tag is WidgetFile file)
-            _files.Remove(file);
+        if (sender is not Button button || button.Tag is not WidgetFile file || _selectedWidget is null)
+            return;
+
+        _selectedWidget.Files.Remove(file);
     }
 
     private void CopyPath_Click(object sender, RoutedEventArgs e)
     {
-        if (!string.IsNullOrEmpty(DeployPathBox.Text))
-        {
-            Clipboard.SetText(DeployPathBox.Text);
-            SetStatus("Path copied to clipboard.");
-        }
+        if (string.IsNullOrEmpty(DeployPathBox.Text))
+            return;
+
+        Clipboard.SetText(DeployPathBox.Text);
+        SetStatus("Path copied to clipboard.");
     }
 
     private void Generate_Click(object sender, RoutedEventArgs e)
     {
+        if (_selectedWidget is null)
+            return;
+
         try
         {
             Directory.CreateDirectory(DeployPath);
 
-            string jsonData = _files.FirstOrDefault(file => file.WidgetFileType == WidgetFileType.DataJson)?.Content ?? string.Empty;
+            string jsonData = _selectedWidget.Files.FirstOrDefault(file => file.WidgetFileType == WidgetFileType.DataJson)?.Content ?? string.Empty;
 
-            foreach (WidgetFile file in _files)
+            foreach (WidgetFile file in _selectedWidget.Files)
             {
                 string fileName = file.WidgetFileType switch
                 {
@@ -155,7 +167,7 @@ public partial class MainWindow: Window
 
             File.WriteAllText(Path.Combine(DeployPath, "streamerBotEvents.js"), TemplateFiles.StreamerBotEventHandlers);
 
-            SetStatus($"Generated to {DeployPath}", success: true);
+            SetStatus($"Generated to '{DeployPath}'", success: true);
         }
         catch (Exception exception)
         {
@@ -208,29 +220,30 @@ public partial class MainWindow: Window
 
     private void SelectWidget(Widget widget)
     {
-        _selectedWidget    = widget;
-        WidgetNameBox.Text = widget.Name;
-        DeployPathBox.Text = GetDeployPath(widget.Name);
-
-        _files.Clear();
+        _selectedWidget      = widget;
+        WidgetNameBox.Text   = widget.Name;
+        DeployPathBox.Text   = widget.FolderLocation;
+        FileList.ItemsSource = widget.Files;
+    
+        OnFilesChanged();
         SetStatus("Import your widget files.");
     }
 
     private void ClearDetail()
     {
-        WidgetNameBox.Text = "Select or create a widget";
-        DeployPathBox.Text = string.Empty;
-        SetStatus("Select or create a widget to begin.");
+        WidgetNameBox.Text    = "Select or create a widget";
+        DeployPathBox.Text    = string.Empty;
         GenerateBtn.IsEnabled = false;
         HideWarning();
+        SetStatus("Select or create a widget to begin.");
     }
-
-    private static string GetDeployPath(string widgetName)
-        => Path.Combine(DeployPath, widgetName);
 
     private void OnFilesChanged()
     {
-        var hasFiles = _files.Count > 0;
+        if (_selectedWidget is null)
+            return;
+
+        bool hasFiles = _selectedWidget.Files.Count > 0;
 
         FilesEmptyLabel.Visibility = hasFiles
             ? Visibility.Collapsed
@@ -252,14 +265,9 @@ public partial class MainWindow: Window
         else
         {
             HideWarning();
-            GenerateBtn.IsEnabled = _selectedWidget is not null;
+            GenerateBtn.IsEnabled = true;
             SetStatus("Ready to generate.");
         }
-    }
-
-    private void OnWidgetsChanged()
-    {
-        // TODO
     }
 
     private bool IsValidFileSet(out string validationError)
@@ -268,7 +276,7 @@ public partial class MainWindow: Window
 
         foreach (string extension in _relevantFileExtensions)
         {
-            int count = _files.Count(file => Path.GetExtension(file.FileName).Equals(extension, StringComparison.OrdinalIgnoreCase));
+            int count = _selectedWidget!.Files.Count(file => Path.GetExtension(file.FileName).Equals(extension, StringComparison.OrdinalIgnoreCase));
 
             if (count > 1 && extension != ".json")
                 duplicates.Add(extension);
@@ -280,7 +288,7 @@ public partial class MainWindow: Window
             return false;
         }
 
-        if (!_files.Any(file => Path.GetExtension(file.FileName).Equals(".html", StringComparison.OrdinalIgnoreCase)))
+        if (!_selectedWidget!.Files.Any(file => Path.GetExtension(file.FileName).Equals(".html", StringComparison.OrdinalIgnoreCase)))
         {
             validationError = "A .html file is required. Please import your widget's HTML file.";
             return false;
