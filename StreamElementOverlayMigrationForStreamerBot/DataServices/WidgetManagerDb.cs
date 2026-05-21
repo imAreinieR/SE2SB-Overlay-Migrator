@@ -152,6 +152,9 @@ public static class WidgetManagerDb
 
     public static void Delete(SqliteConnection connection, Widget widget)
     {
+        foreach (WidgetFile file in widget.Files)
+            WidgetFileManagerDb.DeleteById(connection, file.Id);
+
         SqliteCommand command = connection.CreateCommand();
         command.CommandText = @"
             DELETE FROM Widget
