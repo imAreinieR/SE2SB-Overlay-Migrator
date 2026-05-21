@@ -1,6 +1,7 @@
 using Microsoft.Win32;
 using StreamElementsToStreamerBotMigrationTool.Common;
 using StreamElementsToStreamerBotMigrationTool.Data;
+using StreamElementsToStreamerBotMigrationTool.Managers;
 using StreamElementsToStreamerBotMigrationTool.Templates;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -14,25 +15,24 @@ namespace StreamElementsToStreamerBotMigrationTool;
 
 public partial class MainWindow: Window
 {
-    private readonly List<string>                       _relevantFileExtensions = new () { ".html", ".js", ".css", ".json" };
-    private readonly ObservableCollection<Widget>       _widgets                = new ();
-    private readonly ObservableCollection<WidgetFile>   _files                  = new ();
+    private readonly List<string>                     _relevantFileExtensions = new () { ".html", ".js", ".css", ".json" };
+    private readonly ObservableCollection<Widget>     _widgets;
+    private readonly ObservableCollection<WidgetFile> _files;
 
     private Widget? _selectedWidget;
 
     private static readonly string DeployPath = Path.Combine
     (
         Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-        "imA-SB-Widgets",
-        "widget1"
+        "imA-SB-Widgets"
     );
 
     public MainWindow()
     {
         InitializeComponent();
 
-        WidgetList.ItemsSource = _widgets;
-        FileList.ItemsSource   = _files;
+        WidgetList.ItemsSource = _widgets = new ObservableCollection<Widget>(WidgetManager.GetAll());
+        FileList.ItemsSource   = _files   = new ObservableCollection<WidgetFile>();
 
         _files.CollectionChanged   += (_, _) => OnFilesChanged();
         _widgets.CollectionChanged += (_, _) => OnWidgetsChanged();
@@ -42,7 +42,9 @@ public partial class MainWindow: Window
 
     private void NewWidget_Click(object sender, RoutedEventArgs e)
     {
-        var widget = new Widget($"Widget {_widgets.Count + 1}", DeployPath);
+        string name = $"Widget {_widgets.Count + 1}";
+        var widget = new Widget(name, DeployPath);
+
         _widgets.Add(widget);
         SelectWidget(widget);
     }
@@ -51,8 +53,8 @@ public partial class MainWindow: Window
     {
         if (sender is Button button && button.Tag is Widget widget)
         {
-            // TODO: wire up persistence deletion (phase 2)
             _widgets.Remove(widget);
+            WidgetManager.Delete(widget);
 
             if (_selectedWidget == widget)
             {
@@ -68,8 +70,7 @@ public partial class MainWindow: Window
         if (_selectedWidget is null)
             return;
 
-        // TODO: persist to SQLite (phase 2)
-        _selectedWidget.Name = WidgetNameBox.Text.Trim();
+        WidgetManager.Save(_selectedWidget);
         SetStatus("Widget saved.");
     }
 
@@ -137,7 +138,7 @@ public partial class MainWindow: Window
 
                 string destination = Path.Combine(DeployPath, fileName);
                 string content = file.WidgetFileType == WidgetFileType.Html || file.WidgetFileType == WidgetFileType.Css
-                    ? ApplySEFieldData(file.Content, jsonData)
+                    ? SearchAndReplaceDataVariables(file.Content, jsonData)
                     : file.Content;
 
                 if (file.WidgetFileType == WidgetFileType.Html)
@@ -166,23 +167,28 @@ public partial class MainWindow: Window
 
     #region Helpers
 
-    public static string ApplySEFieldData(string content, string jsonData)
+    public static string SearchAndReplaceDataVariables(string content, string jsonData)
     {
-        using JsonDocument doc = JsonDocument.Parse(jsonData);
+        using JsonDocument jsonDocument = JsonDocument.Parse(jsonData);
 
-        foreach (JsonProperty field in doc.RootElement.EnumerateObject())
+        foreach (JsonProperty field in jsonDocument.RootElement.EnumerateObject())
         {
             string value = field.Value.ValueKind switch
             {
-                JsonValueKind.String => field.Value.GetString() ?? "",
-                JsonValueKind.Number => field.Value.GetRawText(),
-                JsonValueKind.True => "true",
-                JsonValueKind.False => "false",
-                JsonValueKind.Null => "",
-                _ => field.Value.GetRawText()
+                JsonValueKind.String
+                    => field.Value.GetString() ?? string.Empty,
+                JsonValueKind.Number
+                    => field.Value.GetRawText(),
+                JsonValueKind.True
+                    => "true",
+                JsonValueKind.False
+                    => "false",
+                JsonValueKind.Null
+                    => string.Empty,
+                _
+                    => field.Value.GetRawText()
             };
 
-            // Replace double-brace first to avoid partial matches
             content = content.Replace("{{" + field.Name + "}}", value);
             content = content.Replace("{" + field.Name + "}", value);
         }
@@ -202,11 +208,10 @@ public partial class MainWindow: Window
 
     private void SelectWidget(Widget widget)
     {
-        _selectedWidget = widget;
-        WidgetNameBox.Text  = widget.Name;
-        DeployPathBox.Text  = GetDeployPath(widget.Name);
+        _selectedWidget    = widget;
+        WidgetNameBox.Text = widget.Name;
+        DeployPathBox.Text = GetDeployPath(widget.Name);
 
-        // TODO: load files from SQLite (phase 2) — for now starts empty
         _files.Clear();
         SetStatus("Import your widget files.");
     }
@@ -214,7 +219,7 @@ public partial class MainWindow: Window
     private void ClearDetail()
     {
         WidgetNameBox.Text = "Select or create a widget";
-        DeployPathBox.Text = "";
+        DeployPathBox.Text = string.Empty;
         SetStatus("Select or create a widget to begin.");
         GenerateBtn.IsEnabled = false;
         HideWarning();
@@ -254,7 +259,7 @@ public partial class MainWindow: Window
 
     private void OnWidgetsChanged()
     {
-        // Nothing for now — phase 2 will sync to SQLite here
+        // TODO
     }
 
     private bool IsValidFileSet(out string validationError)

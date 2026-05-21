@@ -7,9 +7,16 @@
     <UseWPF>true</UseWPF>
 	<AssemblyName>StreamElementsToStreamerBotMigrationTool</AssemblyName>
     <RootNamespace>StreamElementsToStreamerBotMigrationTool</RootNamespace>
+	<Product>SE To SB Migration Tool</Product>
+	<Company>imACompany</Company>
+	<Copyright>Copyright © Ami Reinier 2026</Copyright>
+	<Version>0.1.0</Version>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+  	<DebugType>none</DebugType>
+  	<DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="DataServices\" />
-    <Folder Include="Services\" />
+  	<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.8" />
   </ItemGroup>
 </Project>

@@ -4,15 +4,26 @@ namespace StreamElementsToStreamerBotMigrationTool.Data;
 
 public class WidgetFile
 {
-    public string FileName { get; set; }
-    public string Content { get; set; }
+    public int            Id             { get; set; }
+    public int            WidgetId       { get; set; }
+    public string         FileName       { get; set; }
+    public string         Content        { get; set; }
     public WidgetFileType WidgetFileType { get; set; }
 
     public WidgetFile(string fileName, string fileContent)
     {
-        FileName = fileName;
-        Content = fileContent;
+        FileName       = fileName;
+        Content        = fileContent;
         WidgetFileType = DetermineWidgetFileType(fileName);
+    }
+
+    public WidgetFile(int id, int widgetId, string fileName, string fileContent, WidgetFileType widgetFileType)
+    {
+        Id             = id;
+        WidgetId       = widgetId;
+        FileName       = fileName;
+        Content        = fileContent;
+        WidgetFileType = widgetFileType;
     }
 
     private WidgetFileType DetermineWidgetFileType(string fileName)
