@@ -99,7 +99,7 @@ Click **Start Server**. The server status should update to show it's running.
 
 ![Start up WebSocket Server](Images/streamerbot_websocket_stopped.png)
 
-The WebSocket Server is now running, and launchering StreamerBot in the future will automatically start the server for you.
+The WebSocket Server is now running.
 ![WebSocket Server is Running](Images/streamerbot_websocket_started.png)
 
 > **Note:** The default host and port (`127.0.0.1:8080`) are what this tool expects. Only change these if you have a conflict with another application, and update the connection settings in this tool to match.
