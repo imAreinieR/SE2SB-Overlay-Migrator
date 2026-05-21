@@ -58,6 +58,23 @@
             <Setter Property="Padding" Value="14,6"/>
         </Style>
 
+        <Style x:Key="SmallImportBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
+            <Setter Property="Background" Value="#21263a"/>
+            <Setter Property="Foreground" Value="#d0d6f0"/>
+            <Setter Property="BorderBrush" Value="#252c40"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+
+        <Style x:Key="SaveChangesBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
+            <Setter Property="Background" Value="#21263a"/>
+            <Setter Property="Foreground" Value="#d0d6f0"/>
+            <Setter Property="BorderBrush" Value="#252c40"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,0"/>
+        </Style>
+
         <Style x:Key="GenerateBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
             <Setter Property="Background" Value="#3ecf8e"/>
             <Setter Property="Foreground" Value="#07200f"/>
@@ -251,14 +268,24 @@
                                                      VerticalAlignment="Center"
                                                      Fill="{Binding StatusColor}"/>
 
-                                            <!-- Widget name -->
-                                            <TextBlock Grid.Column="1"
-                                                       Text="{Binding Name}"
-                                                       FontFamily="Segoe UI"
-                                                       FontSize="12"
-                                                       Foreground="#d0d6f0"
-                                                       VerticalAlignment="Center"
-                                                       TextTrimming="CharacterEllipsis"/>
+                                            <!-- Widget name + edit icon -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontFamily="Segoe UI"
+                                                           FontSize="12"
+                                                           Foreground="#d0d6f0"
+                                                           VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           MaxWidth="110"/>
+                                                <TextBlock x:Name="EditIcon"
+                                                           Text=" ✎"
+                                                           FontSize="11"
+                                                           Foreground="#5a6280"
+                                                           VerticalAlignment="Center"
+                                                           Opacity="0"
+                                                           Cursor="Hand"
+                                                           MouseLeftButtonUp="EditWidgetName_Click"/>
+                                            </StackPanel>
 
                                             <!-- Remove X (hidden, shown on row hover) -->
                                             <Button Grid.Column="2"
@@ -278,6 +305,9 @@
                                                     <DoubleAnimation Storyboard.TargetName="RemoveBtn"
                                                                      Storyboard.TargetProperty="Opacity"
                                                                      To="0.6" Duration="0:0:0.15"/>
+                                                    <DoubleAnimation Storyboard.TargetName="EditIcon"
+                                                                     Storyboard.TargetProperty="Opacity"
+                                                                     To="0.6" Duration="0:0:0.15"/>
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </EventTrigger>
@@ -285,6 +315,9 @@
                                             <BeginStoryboard>
                                                 <Storyboard>
                                                     <DoubleAnimation Storyboard.TargetName="RemoveBtn"
+                                                                     Storyboard.TargetProperty="Opacity"
+                                                                     To="0" Duration="0:0:0.15"/>
+                                                    <DoubleAnimation Storyboard.TargetName="EditIcon"
                                                                      Storyboard.TargetProperty="Opacity"
                                                                      To="0" Duration="0:0:0.15"/>
                                                 </Storyboard>
@@ -303,40 +336,36 @@
         <!-- ── RIGHT DETAIL PANEL ── -->
         <Grid Grid.Column="1" Background="#13161f">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>  <!-- Detail header -->
-                <RowDefinition Height="*"/>     <!-- Detail content -->
+                <RowDefinition Height="*"/>     <!-- Detail content / empty state -->
                 <RowDefinition Height="Auto"/>  <!-- Detail footer -->
             </Grid.RowDefinitions>
 
-            <!-- Detail header: name + save -->
-            <Border Grid.Row="0"
-                    BorderBrush="#252c40"
-                    BorderThickness="0,0,0,1"
-                    Padding="20,14">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBox Grid.Column="0"
-                             x:Name="WidgetNameBox"
-                             Style="{StaticResource NameBox}"
-                             Height="34"
-                             Text="Select or create a widget"/>
-
-                    <Button Grid.Column="2"
-                            Style="{StaticResource SaveBtn}"
-                            Height="34"
-                            Click="SaveWidget_Click">
-                        Save
+            <!-- Empty state (shown when no widget selected) -->
+            <Grid Grid.Row="0" x:Name="EmptyStatePanel" Visibility="Visible">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="📦"
+                               FontSize="36"
+                               HorizontalAlignment="Center"
+                               Opacity="0.2"
+                               Margin="0,0,0,12"/>
+                    <TextBlock Text="No widgets yet."
+                               Foreground="#3a4060"
+                               FontFamily="Segoe UI"
+                               FontSize="13"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,14"/>
+                    <Button Style="{StaticResource NewWidgetBtn}"
+                            Padding="20,10"
+                            Click="NewWidget_Click">
+                        <TextBlock Text="＋  Create a widget to get started"
+                                   FontFamily="Segoe UI"
+                                   FontSize="13"/>
                     </Button>
-                </Grid>
-            </Border>
+                </StackPanel>
+            </Grid>
 
-            <!-- Detail content -->
-            <ScrollViewer Grid.Row="1"
+            <!-- Detail content (shown when widget selected) -->
+            <ScrollViewer Grid.Row="0" x:Name="DetailPanel" Visibility="Collapsed"
                           VerticalScrollBarVisibility="Auto"
                           Padding="20,16">
                 <StackPanel>
@@ -365,12 +394,22 @@
                     </Border>
 
                     <!-- Files section -->
-                    <TextBlock Text="FILES" Style="{StaticResource SectionLabel}"/>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="FILES" Style="{StaticResource SectionLabel}" Margin="0" VerticalAlignment="Center"/>
+                        <Button Grid.Column="1"
+                                Style="{StaticResource SmallImportBtn}"
+                                Height="22"
+                                Click="Import_Click">
+                            ＋ Import
+                        </Button>
+                    </Grid>
                     <Grid Margin="0,0,0,20">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
                         <!-- File list -->
@@ -463,14 +502,6 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- Import button -->
-                        <Button Grid.Column="2"
-                                Style="{StaticResource ImportBtn}"
-                                Height="34"
-                                VerticalAlignment="Top"
-                                Click="Import_Click">
-                            Import
-                        </Button>
                     </Grid>
 
                     <!-- Deploy path section -->
@@ -500,7 +531,7 @@
             </ScrollViewer>
 
             <!-- Detail footer: status + generate -->
-            <Border Grid.Row="2"
+            <Border Grid.Row="1"
                     Background="#0e1017"
                     BorderBrush="#252c40"
                     BorderThickness="0,1,0,0"
@@ -521,13 +552,23 @@
                                TextTrimming="CharacterEllipsis"
                                Text="Select or create a widget to begin."/>
 
-                    <Button Grid.Column="2"
-                            x:Name="GenerateBtn"
-                            Style="{StaticResource GenerateBtn}"
-                            IsEnabled="False"
-                            Click="Generate_Click">
-                        Generate
-                    </Button>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button x:Name="SaveChangesBtn"
+                                Style="{StaticResource SaveChangesBtn}"
+                                Height="38"
+                                Margin="0,0,8,0"
+                                IsEnabled="False"
+                                Click="SaveWidget_Click">
+                            Save Changes
+                        </Button>
+                        <Button x:Name="GenerateBtn"
+                                Style="{StaticResource GenerateBtn}"
+                                Height="38"
+                                IsEnabled="False"
+                                Click="Generate_Click">
+                            Generate
+                        </Button>
+                    </StackPanel>
                 </Grid>
             </Border>
 

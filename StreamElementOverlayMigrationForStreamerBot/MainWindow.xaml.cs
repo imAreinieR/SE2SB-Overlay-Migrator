@@ -175,6 +175,11 @@ public partial class MainWindow: Window
         }
     }
 
+    private void EditWidgetName_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        // TODO: show inline name input in sidebar row (phase 2)
+    }
+
     #endregion Event Handlers
 
     #region Helpers
@@ -220,20 +225,24 @@ public partial class MainWindow: Window
 
     private void SelectWidget(Widget widget)
     {
-        _selectedWidget      = widget;
-        WidgetNameBox.Text   = widget.Name;
-        DeployPathBox.Text   = widget.FolderLocation;
-        FileList.ItemsSource = widget.Files;
-    
+        _selectedWidget            = widget;
+        DeployPathBox.Text         = widget.FolderLocation;
+        FileList.ItemsSource       = widget.Files;
+        SaveChangesBtn.IsEnabled   = true;
+        EmptyStatePanel.Visibility = Visibility.Collapsed;
+        DetailPanel.Visibility     = Visibility.Visible;
+
         OnFilesChanged();
         SetStatus("Import your widget files.");
     }
 
     private void ClearDetail()
     {
-        WidgetNameBox.Text    = "Select or create a widget";
-        DeployPathBox.Text    = string.Empty;
-        GenerateBtn.IsEnabled = false;
+        DeployPathBox.Text         = string.Empty;
+        GenerateBtn.IsEnabled      = false;
+        SaveChangesBtn.IsEnabled   = false;
+        EmptyStatePanel.Visibility = Visibility.Visible;
+        DetailPanel.Visibility     = Visibility.Collapsed;
         HideWarning();
         SetStatus("Select or create a widget to begin.");
     }
