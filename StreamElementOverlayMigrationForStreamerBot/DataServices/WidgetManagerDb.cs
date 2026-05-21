@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using StreamElementsToStreamerBotMigrationTool.Data;
+using System.Collections.ObjectModel;
 using System.IO;
 
 namespace StreamElementsToStreamerBotMigrationTool.DataServices;
@@ -13,84 +14,94 @@ public static class WidgetManagerDb
 
     public static void CreateTableIfNotExists()
     {
-        using (var connection = new SqliteConnection(_connectionString))
-        {
-            connection.Open();
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        CreateTableIfNotExists(connection);
+    }
 
-            SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS Widget (
-                    Id             INTEGER PRIMARY KEY,
-                    Name           TEXT    NOT NULL,
-                    FolderLocation TEXT    NOT NULL
-                );";
-            command.ExecuteNonQuery();
-        }
+    public static void CreateTableIfNotExists(SqliteConnection connection)
+    {
+        SqliteCommand command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS Widget (
+                Id             INTEGER PRIMARY KEY,
+                Name           TEXT    NOT NULL,
+                FolderLocation TEXT    NOT NULL
+            );";
+        command.ExecuteNonQuery();
     }
 
     public static List<Widget> GetAll()
     {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        return GetAll(connection);
+    }
+
+    public static List<Widget> GetAll(SqliteConnection connection)
+    {
+        SqliteCommand command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT Id, Name, FolderLocation
+            FROM Widget;";
+
         var widgets = new List<Widget>();
-
-        using (var connection = new SqliteConnection(_connectionString))
+        using (SqliteDataReader reader = command.ExecuteReader())
         {
-            connection.Open();
-
-            SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                SELECT Id, Name, FolderLocation
-                FROM Widget;";
-
-            using SqliteDataReader reader = command.ExecuteReader();
-
             while (reader.Read())
-            {
-                Widget widget = ReadWidget(reader);
-                widget.Files = WidgetFileManagerDb.GetByWidgetId(widget.Id);
-                widgets.Add(widget);
-            }
+                widgets.Add(ReadWidget(reader));
         }
+
+        foreach (Widget widget in widgets)
+            widget.Files = new ObservableCollection<WidgetFile>
+            (
+                WidgetFileManagerDb.GetByWidgetId(connection, widget.Id)
+            );
 
         return widgets;
     }
 
     public static Widget? Get(string name)
     {
-        using (var connection = new SqliteConnection(_connectionString))
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        return Get(connection, name);
+    }
+
+    public static Widget? Get(SqliteConnection connection, string name)
+    {
+        SqliteCommand command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT Id, Name, FolderLocation
+            FROM Widget
+            WHERE Name = $name;";
+
+        command.Parameters.AddWithValue("$name", name);
+
+        Widget? widget = null;
+        using (SqliteDataReader reader = command.ExecuteReader())
         {
-            connection.Open();
-
-            SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                SELECT Id, Name, FolderLocation
-                FROM Widget
-                WHERE Name = $name;";
-
-            command.Parameters.AddWithValue("$name", name);
-
-            using SqliteDataReader reader = command.ExecuteReader();
-
             if (reader.Read())
-            {
-                Widget widget = ReadWidget(reader);
-                widget.Files = WidgetFileManagerDb.GetByWidgetId(widget.Id);
-                return widget;
-            }
-
-            return null;
+                widget = ReadWidget(reader);
         }
+
+        if (widget is not null)
+            widget.Files = new ObservableCollection<WidgetFile>
+            (
+                WidgetFileManagerDb.GetByWidgetId(connection, widget.Id)
+            );
+
+        return widget;
     }
 
     public static void Insert(Widget widget)
     {
-        using (var connection = new SqliteConnection(_connectionString))
-        {
-            connection.Open();
-            Insert(connection, widget);
-        }
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        Insert(connection, widget);
     }
 
-    private static void Insert(SqliteConnection connection, Widget widget)
+    public static void Insert(SqliteConnection connection, Widget widget)
     {
         SqliteCommand command = connection.CreateCommand();
         command.CommandText = @"
@@ -100,53 +111,55 @@ public static class WidgetManagerDb
         command.Parameters.AddWithValue("$name",           widget.Name);
         command.Parameters.AddWithValue("$folderLocation", widget.FolderLocation);
 
-        command.ExecuteNonQuery();
-
-        widget.Id = (int)(long) command.ExecuteScalar()!;
+        widget.Id = command.ExecuteNonQuery();
 
         foreach (WidgetFile file in widget.Files)
         {
             file.WidgetId = widget.Id;
-            WidgetFileManagerDb.Insert(file);
+            WidgetFileManagerDb.Insert(connection, file);
         }
     }
 
     public static void Update(Widget widget)
     {
-        using (var connection = new SqliteConnection(_connectionString))
-        {
-            connection.Open();
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        Update(connection, widget);
+    }
 
-            SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                UPDATE Widget
-                SET Name           = $name,
-                    FolderLocation = $folderLocation
-                WHERE Id = $id;";
+    public static void Update(SqliteConnection connection, Widget widget)
+    {
+        SqliteCommand command = connection.CreateCommand();
+        command.CommandText = @"
+            UPDATE Widget
+            SET Name           = $name,
+                FolderLocation = $folderLocation
+            WHERE Id = $id;";
 
-            command.Parameters.AddWithValue("$id",             widget.Id);
-            command.Parameters.AddWithValue("$name",           widget.Name);
-            command.Parameters.AddWithValue("$folderLocation", widget.FolderLocation);
+        command.Parameters.AddWithValue("$id",             widget.Id);
+        command.Parameters.AddWithValue("$name",           widget.Name);
+        command.Parameters.AddWithValue("$folderLocation", widget.FolderLocation);
 
-            command.ExecuteNonQuery();
-        }
+        command.ExecuteNonQuery();
     }
 
     public static void Delete(Widget widget)
     {
-        using (var connection = new SqliteConnection(_connectionString))
-        {
-            connection.Open();
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        Delete(connection, widget);
+    }
 
-            SqliteCommand command = connection.CreateCommand();
-            command.CommandText = @"
-                DELETE FROM Widget
-                WHERE Id = $id;";
+    public static void Delete(SqliteConnection connection, Widget widget)
+    {
+        SqliteCommand command = connection.CreateCommand();
+        command.CommandText = @"
+            DELETE FROM Widget
+            WHERE Id = $id;";
 
-            command.Parameters.AddWithValue("$id", widget.Id);
+        command.Parameters.AddWithValue("$id", widget.Id);
 
-            command.ExecuteNonQuery();
-        }
+        command.ExecuteNonQuery();
     }
 
     private static Widget ReadWidget(SqliteDataReader reader)
