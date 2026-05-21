@@ -1,12 +1,9 @@
 using Microsoft.Win32;
-using StreamElementsToStreamerBotMigrationTool.Common;
 using StreamElementsToStreamerBotMigrationTool.Data;
 using StreamElementsToStreamerBotMigrationTool.Managers;
-using StreamElementsToStreamerBotMigrationTool.Templates;
+using StreamElementsToStreamerBotMigrationTool.Services;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -15,16 +12,9 @@ namespace StreamElementsToStreamerBotMigrationTool;
 
 public partial class MainWindow: Window
 {
-    private readonly List<string>                 _relevantFileExtensions = new() { ".html", ".js", ".css", ".json" };
-    private readonly ObservableCollection<Widget> _widgets;
-
-    private Widget? _selectedWidget;
-
-    private static readonly string DeployPath = Path.Combine
-    (
-        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-        "imA-SB-Widgets"
-    );
+    private static readonly string                       DefaultDeployPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "imA-SB-Widgets");
+    private        readonly ObservableCollection<Widget> _widgets;
+    private                 Widget?                      _selectedWidget;
 
     public MainWindow()
     {
@@ -38,7 +28,7 @@ public partial class MainWindow: Window
     private void NewWidget_Click(object sender, RoutedEventArgs e)
     {
         string name = $"Widget {_widgets.Count + 1}";
-        var widget = new Widget(name, DeployPath);
+        var widget = new Widget(name, DefaultDeployPath);
 
         _widgets.Add(widget);
         SelectWidget(widget);
@@ -91,14 +81,12 @@ public partial class MainWindow: Window
         if (dialog.ShowDialog() != true)
             return;
 
-        foreach (string path in dialog.FileNames)
+        foreach (WidgetFile widgetFile in WidgetFileImportAndExportService.FetchWidgetFiles(dialog.FileNames))
         {
-            string? name = Path.GetFileName(path);
-
-            if (_selectedWidget.Files.Any(file => file.FileName == name))
+            if (_selectedWidget.Files.Any(file => file.FileName == widgetFile.FileName))
                 continue;
 
-            _selectedWidget.Files.Add(new WidgetFile(name, File.ReadAllText(path)));
+            _selectedWidget.Files.Add(widgetFile);
         }
 
         OnFilesChanged();
@@ -126,53 +114,10 @@ public partial class MainWindow: Window
         if (_selectedWidget is null)
             return;
 
-        try
-        {
-            Directory.CreateDirectory(DeployPath);
-
-            string jsonData = _selectedWidget.Files.FirstOrDefault(file => file.WidgetFileType == WidgetFileType.DataJson)?.Content ?? string.Empty;
-
-            foreach (WidgetFile file in _selectedWidget.Files)
-            {
-                string fileName = file.WidgetFileType switch
-                {
-                    WidgetFileType.Html
-                        => "index.html",
-                    WidgetFileType.Javascript
-                        => "index.js",
-                    WidgetFileType.Css
-                        => "index.css",
-                    WidgetFileType.DataJson
-                        => "config.js",
-                    _
-                        => file.FileName
-                };
-
-                string destination = Path.Combine(DeployPath, fileName);
-                string content = file.WidgetFileType == WidgetFileType.Html || file.WidgetFileType == WidgetFileType.Css
-                    ? SearchAndReplaceDataVariables(file.Content, jsonData)
-                    : file.Content;
-
-                if (file.WidgetFileType == WidgetFileType.Html)
-                {
-                    content = string.Format(TemplateFiles.HtmlTemplate, FixProtocolRelativeUrls(file.Content));
-                }
-                else if (file.WidgetFileType == WidgetFileType.DataJson)
-                {
-                    content = string.Format(TemplateFiles.JavascriptDataFileTemplate, file.Content);
-                }
-
-                File.WriteAllText(destination, content);
-            }
-
-            File.WriteAllText(Path.Combine(DeployPath, "streamerBotEvents.js"), TemplateFiles.StreamerBotEventHandlers);
-
-            SetStatus($"Generated to '{DeployPath}'", success: true);
-        }
-        catch (Exception exception)
-        {
-            SetStatus($"Error: {exception.Message}", error: true);
-        }
+        if (WidgetFileImportAndExportService.GenerateExportFilesForWidget(_selectedWidget, out string errorMessage))
+            SetStatus(errorMessage, success: true);
+        else
+            SetStatus(errorMessage, error: true);
     }
 
     private void EditWidgetName_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -184,49 +129,10 @@ public partial class MainWindow: Window
 
     #region Helpers
 
-    public static string SearchAndReplaceDataVariables(string content, string jsonData)
-    {
-        using JsonDocument jsonDocument = JsonDocument.Parse(jsonData);
-
-        foreach (JsonProperty field in jsonDocument.RootElement.EnumerateObject())
-        {
-            string value = field.Value.ValueKind switch
-            {
-                JsonValueKind.String
-                    => field.Value.GetString() ?? string.Empty,
-                JsonValueKind.Number
-                    => field.Value.GetRawText(),
-                JsonValueKind.True
-                    => "true",
-                JsonValueKind.False
-                    => "false",
-                JsonValueKind.Null
-                    => string.Empty,
-                _
-                    => field.Value.GetRawText()
-            };
-
-            content = content.Replace("{{" + field.Name + "}}", value);
-            content = content.Replace("{" + field.Name + "}", value);
-        }
-
-        return content;
-    }
-
-    public static string FixProtocolRelativeUrls(string htmlContent)
-        => Regex.Replace
-        (
-            htmlContent,
-            @"(src|href)=""//",
-            "$1=\"https://",
-            RegexOptions.IgnoreCase,
-            TimeSpan.FromSeconds(1)
-        );
-
     private void SelectWidget(Widget widget)
     {
         _selectedWidget            = widget;
-        DeployPathBox.Text         = widget.FolderLocation;
+        DeployPathBox.Text         = widget.DeployedLocation;
         FileList.ItemsSource       = widget.Files;
         SaveChangesBtn.IsEnabled   = true;
         EmptyStatePanel.Visibility = Visibility.Collapsed;
@@ -266,7 +172,7 @@ public partial class MainWindow: Window
             return;
         }
 
-        if (!IsValidFileSet(out string warning))
+        if (!_selectedWidget.Files.CheckIsValidFileSet(out string warning))
         {
             ShowWarning(warning);
             GenerateBtn.IsEnabled = false;
@@ -277,34 +183,6 @@ public partial class MainWindow: Window
             GenerateBtn.IsEnabled = true;
             SetStatus("Ready to generate.");
         }
-    }
-
-    private bool IsValidFileSet(out string validationError)
-    {
-        var duplicates = new List<string>();
-
-        foreach (string extension in _relevantFileExtensions)
-        {
-            int count = _selectedWidget!.Files.Count(file => Path.GetExtension(file.FileName).Equals(extension, StringComparison.OrdinalIgnoreCase));
-
-            if (count > 1 && extension != ".json")
-                duplicates.Add(extension);
-        }
-
-        if (duplicates.Count > 0)
-        {
-            validationError = $"Duplicate files detected: {string.Join(", ", duplicates)}. Remove the extra file(s).";
-            return false;
-        }
-
-        if (!_selectedWidget!.Files.Any(file => Path.GetExtension(file.FileName).Equals(".html", StringComparison.OrdinalIgnoreCase)))
-        {
-            validationError = "A .html file is required. Please import your widget's HTML file.";
-            return false;
-        }
-
-        validationError = string.Empty;
-        return true;
     }
 
     private void ShowWarning(string message)
