@@ -10,6 +10,8 @@ StreamElements hosts overlays and services them with stream events out of the bo
 
 This tool migrates your existing SE overlays so they live locally on your machine and can be served by StreamerBot instead — keeping your overlays working without rebuilding them from scratch.
 
+![Application UI](Images/application_ui_1.png)
+
 ---
 
 ## Architecture
@@ -80,23 +82,45 @@ A `streamerBotEvents.js` file is generated automatically alongside your widget f
 
 ---
 
-## How to Get Started
+## Setting Up the StreamerBot WebSocket Server
+
+This tool communicates with StreamerBot via its built-in WebSocket server. You'll need to enable and start it before generating or using any widgets.
+
+### Step 1 — Open the WebSocket Server settings
+In StreamerBot, navigate to **Servers/Clients** → **WebSocket Server**.
+
+![Navigate to WebSocket Server Settings](Images/streamerbot_websocket_server.png)
+
+### Step 2 — Enable Auto Start
+Check the **Auto Start** option. This ensures the WebSocket server starts automatically every time StreamerBot launches, so your overlays are always ready without any manual steps.
+
+### Step 3 — Start the server
+Click **Start Server**. The server status should update to show it's running.
+
+![Start up WebSocket Server](Images/streamerbot_select_server_stopped.png)
+[WebSocket Server is Running](Images/streamerbot_select_server_started.png)
+
+> **Note:** The default host and port (`127.0.0.1:8080`) are what this tool expects. Only change these if you have a conflict with another application, and update the connection settings in this tool to match.
+
+---
+
+## How to Get Started with the SE Overlay Migration Tool
 
 ### Step 1 — Create a widget
 Click **+ New Widget** in the left panel. A widget entry appears with a default name.
 
-### Step 2 — Name it (optional)
-Edit the name in the text field at the top and click **Save**.
-
-### Step 3 — Import your StreamElements files
+### Step 2 — Import your widget files
 Click **Import** and select your overlay files. You'll typically need:
 - `widget.html` (required)
 - `widget.css`
 - `widget.js`
-- `data.json` and/or `fields.json`
+- `fields.json` and `data.json`
 
-### Step 4 — Fix any warnings
+### Step 3 — Fix any warnings
 If the warning banner appears, follow its instructions (e.g. add the missing HTML file, or remove a duplicate). The Generate button will remain disabled until the file set is clean.
+
+### Step 4 — Save your work
+Click **Save**.
 
 ### Step 5 — Generate
 Click **Generate**. The tool writes the processed files to the deploy path shown under **Deploy Location**.
