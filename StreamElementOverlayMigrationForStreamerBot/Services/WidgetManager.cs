@@ -65,11 +65,14 @@ public static class WidgetManager
 
     public static void Delete(Widget widget)
     {
+        if (widget.Id == 0)
+            return;
+
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
         foreach (WidgetFile file in widget.Files)
-            WidgetFileManagerDb.DeleteById(connection, file.Id);
+            WidgetFileManagerDb.Delete(connection, file);
 
         WidgetManagerDb.Delete(connection, widget);
     }

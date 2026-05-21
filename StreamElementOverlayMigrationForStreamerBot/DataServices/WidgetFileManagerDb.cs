@@ -55,7 +55,7 @@ public static class WidgetFileManagerDb
         widgetFile.Id = command.ExecuteNonQuery();
     }
 
-    public static void Update(SqliteConnection connection, int id, WidgetFile widgetFile)
+    public static void Update(SqliteConnection connection, WidgetFile widgetFile)
     {
         SqliteCommand command = connection.CreateCommand();
         command.CommandText = @"
@@ -65,19 +65,22 @@ public static class WidgetFileManagerDb
                 WidgetFileType = $widgetFileType
             WHERE Id = $id;";
 
-        command.Parameters.AddWithValue("$id", id);
+        command.Parameters.AddWithValue("$id", widgetFile.Id);
         AddWidgetFileParameters(command, widgetFile);
         command.ExecuteNonQuery();
     }
 
-    public static void DeleteById(SqliteConnection connection, int id)
+    public static void Delete(SqliteConnection connection, WidgetFile widgetFile)
     {
+        if (widgetFile.Id == 0)
+            return;
+
         SqliteCommand command = connection.CreateCommand();
         command.CommandText = @"
             DELETE FROM WidgetFile
             WHERE Id = $id;";
 
-        command.Parameters.AddWithValue("$id", id);
+        command.Parameters.AddWithValue("$id", widgetFile.Id);
         command.ExecuteNonQuery();
     }
 
