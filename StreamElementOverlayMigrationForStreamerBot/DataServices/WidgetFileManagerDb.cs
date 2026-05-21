@@ -1,24 +1,11 @@
 ﻿using Microsoft.Data.Sqlite;
 using StreamElementsToStreamerBotMigrationTool.Common;
 using StreamElementsToStreamerBotMigrationTool.Data;
-using System.IO;
 
 namespace StreamElementsToStreamerBotMigrationTool.DataServices;
 
 public static class WidgetFileManagerDb
 {
-    private static readonly string _connectionString = $"Data Source={Path.Combine(AppContext.BaseDirectory, "database.db")}";
-
-    static WidgetFileManagerDb()
-        => CreateTableIfNotExists();
-
-    public static void CreateTableIfNotExists()
-    {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        CreateTableIfNotExists(connection);
-    }
-
     public static void CreateTableIfNotExists(SqliteConnection connection)
     {
         SqliteCommand command = connection.CreateCommand();
@@ -34,13 +21,6 @@ public static class WidgetFileManagerDb
         command.ExecuteNonQuery();
     }
 
-    public static List<WidgetFile> GetByWidgetId(int widgetId)
-    {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        return GetByWidgetId(connection, widgetId);
-    }
-
     public static List<WidgetFile> GetByWidgetId(SqliteConnection connection, int widgetId)
     {
         SqliteCommand command = connection.CreateCommand();
@@ -54,13 +34,6 @@ public static class WidgetFileManagerDb
         return ReadWidgetFiles(command);
     }
 
-    public static List<WidgetFile> GetAll()
-    {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        return GetAll(connection);
-    }
-
     public static List<WidgetFile> GetAll(SqliteConnection connection)
     {
         SqliteCommand command = connection.CreateCommand();
@@ -69,13 +42,6 @@ public static class WidgetFileManagerDb
             FROM WidgetFile;";
 
         return ReadWidgetFiles(command);
-    }
-
-    public static void Insert(WidgetFile widgetFile)
-    {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        Insert(connection, widgetFile);
     }
 
     public static void Insert(SqliteConnection connection, WidgetFile widgetFile)
@@ -87,13 +53,6 @@ public static class WidgetFileManagerDb
 
         AddWidgetFileParameters(command, widgetFile);
         widgetFile.Id = command.ExecuteNonQuery();
-    }
-
-    public static void Update(int id, WidgetFile widgetFile)
-    {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        Update(connection, id, widgetFile);
     }
 
     public static void Update(SqliteConnection connection, int id, WidgetFile widgetFile)
@@ -109,13 +68,6 @@ public static class WidgetFileManagerDb
         command.Parameters.AddWithValue("$id", id);
         AddWidgetFileParameters(command, widgetFile);
         command.ExecuteNonQuery();
-    }
-
-    public static void DeleteById(int id)
-    {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        DeleteById(connection, id);
     }
 
     public static void DeleteById(SqliteConnection connection, int id)

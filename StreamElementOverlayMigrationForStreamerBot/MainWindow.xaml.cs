@@ -114,7 +114,7 @@ public partial class MainWindow: Window
         if (_selectedWidget is null)
             return;
 
-        if (WidgetFileImportAndExportService.GenerateExportFilesForWidget(_selectedWidget, out string errorMessage))
+        if (WidgetManager.GenerateExportFiles(_selectedWidget, out string errorMessage))
             SetStatus(errorMessage, success: true);
         else
             SetStatus(errorMessage, error: true);

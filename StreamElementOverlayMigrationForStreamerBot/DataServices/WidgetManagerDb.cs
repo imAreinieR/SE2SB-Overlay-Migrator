@@ -1,24 +1,10 @@
 ﻿using Microsoft.Data.Sqlite;
 using StreamElementsToStreamerBotMigrationTool.Data;
-using System.Collections.ObjectModel;
-using System.IO;
 
 namespace StreamElementsToStreamerBotMigrationTool.DataServices;
 
 public static class WidgetManagerDb
 {
-    private static readonly string _connectionString = $"Data Source={Path.Combine(AppContext.BaseDirectory, "database.db")}";
-
-    static WidgetManagerDb()
-        => CreateTableIfNotExists();
-
-    public static void CreateTableIfNotExists()
-    {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        CreateTableIfNotExists(connection);
-    }
-
     public static void CreateTableIfNotExists(SqliteConnection connection)
     {
         SqliteCommand command = connection.CreateCommand();
@@ -29,13 +15,6 @@ public static class WidgetManagerDb
                 FolderLocation TEXT    NOT NULL
             );";
         command.ExecuteNonQuery();
-    }
-
-    public static List<Widget> GetAll()
-    {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        return GetAll(connection);
     }
 
     public static List<Widget> GetAll(SqliteConnection connection)
@@ -52,23 +31,10 @@ public static class WidgetManagerDb
                 widgets.Add(ReadWidget(reader));
         }
 
-        foreach (Widget widget in widgets)
-            widget.Files = new ObservableCollection<WidgetFile>
-            (
-                WidgetFileManagerDb.GetByWidgetId(connection, widget.Id)
-            );
-
         return widgets;
     }
 
-    public static Widget? Get(string name)
-    {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        return Get(connection, name);
-    }
-
-    public static Widget? Get(SqliteConnection connection, string name)
+    public static Widget? GetByName(SqliteConnection connection, string name)
     {
         SqliteCommand command = connection.CreateCommand();
         command.CommandText = @"
@@ -85,20 +51,7 @@ public static class WidgetManagerDb
                 widget = ReadWidget(reader);
         }
 
-        if (widget is not null)
-            widget.Files = new ObservableCollection<WidgetFile>
-            (
-                WidgetFileManagerDb.GetByWidgetId(connection, widget.Id)
-            );
-
         return widget;
-    }
-
-    public static void Insert(Widget widget)
-    {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        Insert(connection, widget);
     }
 
     public static void Insert(SqliteConnection connection, Widget widget)
@@ -120,13 +73,6 @@ public static class WidgetManagerDb
         }
     }
 
-    public static void Update(Widget widget)
-    {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        Update(connection, widget);
-    }
-
     public static void Update(SqliteConnection connection, Widget widget)
     {
         SqliteCommand command = connection.CreateCommand();
@@ -143,18 +89,8 @@ public static class WidgetManagerDb
         command.ExecuteNonQuery();
     }
 
-    public static void Delete(Widget widget)
-    {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        Delete(connection, widget);
-    }
-
     public static void Delete(SqliteConnection connection, Widget widget)
     {
-        foreach (WidgetFile file in widget.Files)
-            WidgetFileManagerDb.DeleteById(connection, file.Id);
-
         SqliteCommand command = connection.CreateCommand();
         command.CommandText = @"
             DELETE FROM Widget
