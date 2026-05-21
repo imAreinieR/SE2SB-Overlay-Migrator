@@ -39,6 +39,17 @@ public partial class MainWindow: Window
         if (sender is not Button button || button.Tag is not Widget widget)
             return;
 
+        MessageBoxResult messageBoxResult = MessageBox.Show
+        (
+            $"Are you sure you want to delete '{widget.Name}'? This action cannot be undone.",
+            "Confirm Deletion",
+            MessageBoxButton.OKCancel,
+            MessageBoxImage.Warning
+        );
+
+        if (messageBoxResult != MessageBoxResult.OK)
+            return;
+
         _widgets.Remove(widget);
         WidgetManager.Delete(widget);
 
