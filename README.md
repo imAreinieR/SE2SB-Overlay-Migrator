@@ -89,7 +89,7 @@ This tool communicates with StreamerBot via its built-in WebSocket server. You'l
 ### Step 1 — Open the WebSocket Server settings
 In StreamerBot, navigate to **Servers/Clients** → **WebSocket Server**.
 
-![Navigate to WebSocket Server Settings](Images/streamerbot_websocket_server.png)
+![Navigate to WebSocket Server Settings](Images/streamerbot_select_server.png)
 
 ### Step 2 — Enable Auto Start
 Check the **Auto Start** option. This ensures the WebSocket server starts automatically every time StreamerBot launches, so your overlays are always ready without any manual steps.
@@ -98,7 +98,9 @@ Check the **Auto Start** option. This ensures the WebSocket server starts automa
 Click **Start Server**. The server status should update to show it's running.
 
 ![Start up WebSocket Server](Images/streamerbot_websocket_stopped.png)
-[WebSocket Server is Running](Images/streamerbot_websocket_started.png)
+
+The WebSocket Server is now running, and launchering StreamerBot in the future will automatically start the server for you.
+![WebSocket Server is Running](Images/streamerbot_websocket_started.png)
 
 > **Note:** The default host and port (`127.0.0.1:8080`) are what this tool expects. Only change these if you have a conflict with another application, and update the connection settings in this tool to match.
 
