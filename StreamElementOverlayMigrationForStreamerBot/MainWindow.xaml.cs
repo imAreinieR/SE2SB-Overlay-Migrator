@@ -224,6 +224,17 @@ public partial class MainWindow: Window
             SetStatus(errorMessage, error: true);
     }
 
+    private void Configure_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedWidget is null) return;
+
+        var configWindow = new WidgetConfigWindow(_selectedWidget)
+        {
+            Owner = this
+        };
+        configWindow.ShowDialog();
+    }
+
     #endregion Event Handlers
 
     #region Helpers
@@ -233,6 +244,10 @@ public partial class MainWindow: Window
         _selectedWidget      = widget;
         DeployPathBox.Text   = widget.DeployedLocation;
         FileList.ItemsSource = widget.Files;
+
+        ConfigureBtn.IsEnabled = widget
+            .Files
+            .Any(file => file.FileName.Equals("fields.json", StringComparison.OrdinalIgnoreCase));
 
         if (WidgetList.SelectedItem != widget)
             WidgetList.SelectedItem = widget;
