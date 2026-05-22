@@ -28,7 +28,7 @@ const client = new StreamerbotClient({
   autoReconnect: true,
   retries: -1,
   onConnect: (data) => {
-    console.log('Streamer.bot Client Connected!', data);
+    console.log('Streamer.bot Client Connected!');
 
     const seEvent = new CustomEvent('onWidgetLoad', {
       detail: {
@@ -57,10 +57,7 @@ function dispatchSEEvent(listener, eventData) {
   const seEvent = new CustomEvent('onEventReceived', {
     detail: {
       listener: listener,
-          event: {
-              service: 'twitch',
-              data: eventData
-          }
+      event: eventData
     }
   });
   window.dispatchEvent(seEvent);
@@ -70,14 +67,17 @@ function dispatchSEEvent(listener, eventData) {
 client.on('Twitch.Follow', ({ event, data }) => {
   console.log('Twitch.Follow', data);
   dispatchSEEvent('follower-latest', {
-    name: data.user?.name ?? '',
-    amount: 1,
-    message: '',
-    gifted: 0,
-    sender: '',
-    bulkGifted: false,
-    isCommunityGift: false,
-    playedAsCommunityGift: false
+    service: 'twitch',
+    data: {
+      name: data.user?.name ?? '',
+      amount: 1,
+      message: '',
+      gifted: 0,
+      sender: '',
+      bulkGifted: false,
+      isCommunityGift: false,
+      playedAsCommunityGift: false
+    }
   });
 });
 
@@ -85,14 +85,17 @@ client.on('Twitch.Follow', ({ event, data }) => {
 client.on('Twitch.Sub', ({ event, data }) => {
   console.log('Twitch.Sub', data);
   dispatchSEEvent('subscriber-latest', {
-    name: data.user?.name ?? '',
-    amount: 1,
-    message: data.systemMessage ?? '',
-    gifted: 0,
-    sender: '',
-    bulkGifted: false,
-    isCommunityGift: false,
-    playedAsCommunityGift: false
+    service: 'twitch',
+    data: {
+      name: data.user?.name ?? '',
+      amount: 1,
+      message: data.systemMessage ?? '',
+      gifted: 0,
+      sender: '',
+      bulkGifted: false,
+      isCommunityGift: false,
+      playedAsCommunityGift: false
+    }
   });
 });
 
@@ -100,29 +103,34 @@ client.on('Twitch.Sub', ({ event, data }) => {
 client.on('Twitch.ReSub', ({ event, data }) => {
   console.log('Twitch.ReSub', data);
   dispatchSEEvent('subscriber-latest', {
-    name: data.user?.name ?? '',
-    amount: data.cumulativeMonths ?? 1,
-    message: data.text ?? data.systemMessage ?? '',
-    gifted: data.isGift ? 1 : 0,
-    sender: data.gifter?.name ?? '',
-    bulkGifted: false,
-    isCommunityGift: data.isGift ?? false,
-    playedAsCommunityGift: false
+    service: 'twitch',
+    data: {
+      name: data.user?.name ?? '',
+      amount: data.cumulativeMonths ?? 1,
+      message: data.text ?? data.systemMessage ?? '',
+      gifted: data.isGift ? 1 : 0,
+      sender: data.gifter?.name ?? '',
+      bulkGifted: false,
+      isCommunityGift: data.isGift ?? false,
+      playedAsCommunityGift: false
+    }
   });
 });
 
 // subscriber-latest - Individual Gift Sub
 client.on('Twitch.GiftSub', ({ event, data }) => {
-  console.log('Twitch.GiftSub', data);
   dispatchSEEvent('subscriber-latest', {
-    name: data.recipient?.name ?? '',
-    amount: 1,
-    message: data.systemMessage ?? '',
-    gifted: 1,
-    sender: data.user?.name ?? '',
-    bulkGifted: isBulk,
-    isCommunityGift: isBulk,
-    playedAsCommunityGift: false
+    service: 'twitch',
+    data: {
+      name: data.recipient?.name ?? '',
+      amount: 1,
+      message: data.systemMessage ?? '',
+      gifted: 1,
+      sender: data.user?.name ?? '',
+      bulkGifted: isBulk,
+      isCommunityGift: isBulk,
+      playedAsCommunityGift: false
+    }
   });
 });
 
@@ -130,14 +138,17 @@ client.on('Twitch.GiftSub', ({ event, data }) => {
 client.on('Twitch.GiftBomb', ({ event, data }) => {
   console.log('Twitch.GiftBomb', data);
   dispatchSEEvent('subscriber-latest', {
-    name: data.gifterUser?.name ?? data.user?.name ?? '',
-    amount: data.gifts ?? 1,
-    message: '',
-    gifted: 1,
-    sender: data.gifterUser?.name ?? data.user?.name ?? '',
-    bulkGifted: true,
-    isCommunityGift: true,
-    playedAsCommunityGift: false
+    service: 'twitch',
+    data: {
+      name: data.gifterUser?.name ?? data.user?.name ?? '',
+      amount: data.gifts ?? 1,
+      message: '',
+      gifted: 1,
+      sender: data.gifterUser?.name ?? data.user?.name ?? '',
+      bulkGifted: true,
+      isCommunityGift: true,
+      playedAsCommunityGift: false
+    }
   });
 });
 
@@ -145,31 +156,34 @@ client.on('Twitch.GiftBomb', ({ event, data }) => {
 client.on('Twitch.Cheer', ({ event, data }) => {
   console.log('Twitch.Cheer', data);
   dispatchSEEvent('cheer-latest', {
-    name: data.anonymous ? 'anonymous' : (data.user?.name ?? ''),
-    amount: data.bits ?? 0,
-    message: data.text ?? '',
-    gifted: 0,
-    sender: '',
-    bulkGifted: false,
-    isCommunityGift: false,
-    playedAsCommunityGift: false
+    service: 'twitch',
+    data: {
+      name: data.anonymous ? 'anonymous' : (data.user?.name ?? ''),
+      amount: data.bits ?? 0,
+      message: data.text ?? '',
+      gifted: 0,
+      sender: '',
+      bulkGifted: false,
+      isCommunityGift: false,
+      playedAsCommunityGift: false
+    }
   });
 });
 
 // raid-latest - Incoming raid
 client.on('Twitch.Raid', ({ event, data }) => {
-  console.log('Twitch.Raid', data);
   dispatchSEEvent('raid-latest', {
-    name: data.from_broadcaster_user_name ?? data.from_broadcaster_user_login ?? '',
-    amount: data.viewers ?? 0,
-    message: ''
+    service: 'twitch',
+    data: {
+      name: data.from_broadcaster_user_name ?? data.from_broadcaster_user_login ?? '',
+      amount: data.viewers ?? 0,
+      message: ''
+    }
   });
 });
 
 // message - New chat message
 client.on('Twitch.ChatMessage', ({ event, data }) => {
-  console.log('Twitch.ChatMessage', data);
-
   const msg = data.message ?? {};
   const user = data.user ?? {};
 
@@ -177,7 +191,7 @@ client.on('Twitch.ChatMessage', ({ event, data }) => {
     type: b.name,
     version: b.version,
     url: b.imageUrl,
-    description: b.name.charAt(0).toUpperCase() + b.name.slice(1) // e.g. ""Broadcaster""
+    description: b.name.charAt(0).toUpperCase() + b.name.slice(1)
   }));
 
   const emotes = (data.emotes ?? []).map(e => ({
@@ -208,28 +222,29 @@ client.on('Twitch.ChatMessage', ({ event, data }) => {
   };
 
   dispatchSEEvent('message', {
-    time: Date.now(),
-    tags,
-    nick: user.login ?? msg.username ?? '',
-    userId: user.id ?? msg.userId ?? '',
-    displayName: user.name ?? msg.displayName ?? '',
-    displayColor: user.color ?? msg.color ?? '',
-    badges,
-    channel: msg.channel ?? user.login ?? '',
-    text: data.text ?? msg.message ?? '',
-    isAction: msg.isMe ?? false,
-    emotes,
-    msgId: msg.msgId ?? data.messageId ?? ''
+    service: 'twitch',
+    data: {
+      time: Date.now(),
+      tags,
+      nick: user.login ?? msg.username ?? '',
+      userId: user.id ?? msg.userId ?? '',
+      displayName: user.name ?? msg.displayName ?? '',
+      displayColor: user.color ?? msg.color ?? '',
+      badges,
+      channel: msg.channel ?? user.login ?? '',
+      text: data.text ?? msg.message ?? '',
+      isAction: msg.isMe ?? false,
+      emotes,
+      msgId: msg.msgId ?? data.messageId ?? ''
+    }
   });
 });
 
 // delete-message / delete-messages - Chat message deleted
 client.on('Twitch.ChatMessageDeleted', ({ event, data }) => {
-  console.log('Twitch.ChatMessageDeleted', data);
-  // Single message delete
   dispatchSEEvent('delete-message', {
-    msgId: data.messageId ?? '',
-    name: data.targetUserLogin ?? data.targetUser ?? ''
+    service: 'twitch',
+    msgId: data.messageId ?? ''
   });
 });
 
