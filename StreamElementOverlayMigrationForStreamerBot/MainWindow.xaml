@@ -592,39 +592,17 @@
                         </Button>
                     </Grid>
 
-                    <Border Margin="0,8,0,0" HorizontalAlignment="Right">
-                        <Button x:Name="ConfigureBtn"
-                                Width="48" Height="48"
-                                IsEnabled="False"
-                                Click="Configure_Click"
-                                ToolTip="Configure widget fields"
-                                Cursor="Hand">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="#4f7eff"
-                                            CornerRadius="24"
-                                            Width="48" Height="48">
-                                        <TextBlock Text="⚙"
-                                                   FontSize="20"
-                                                   Foreground="White"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Opacity" Value="0.85"/>
-                                        </Trigger>
-                                        <Trigger Property="IsPressed" Value="True">
-                                            <Setter Property="Opacity" Value="0.7"/>
-                                        </Trigger>
-                                        <Trigger Property="IsEnabled" Value="False">
-                                            <Setter Property="Opacity" Value="0.3"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                    </Border>
+                    <!-- Configuration section -->
+                    <TextBlock Text="CONFIGURATION" Style="{StaticResource SectionLabel}" Margin="0,12,0,6"/>
+                    <Button x:Name="ConfigureBtn"
+                            Style="{StaticResource ImportBtn}"
+                            Height="34"
+                            HorizontalAlignment="Left"
+                            IsEnabled="False"
+                            Click="Configure_Click"
+                            ToolTip="Configure widget fields">
+                        ⚙  Edit Configuration
+                    </Button>
                     
                 </StackPanel>
             </ScrollViewer>
