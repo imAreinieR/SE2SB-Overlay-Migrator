@@ -1,5 +1,7 @@
 using StreamElementsToStreamerBotMigrationTool.Data;
+using StreamElementsToStreamerBotMigrationTool.Managers;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -11,15 +13,44 @@ public partial class WidgetConfigWindow: Window
 {
     private readonly Widget                               _widget;
     private readonly Dictionary<string, FrameworkElement> _fieldControls = new ();
+    private readonly List<WidgetDataField>                _allFields     = new ();
+    private          Dictionary<string, JsonElement>?     _dataValues;
+    private          bool                                 _isDirty;
+    private          Button?                              _saveBtn;
 
     public WidgetConfigWindow(Widget widget)
     {
         InitializeComponent();
 
-        _widget = widget;
-        Title   = $"Configure — {widget.Name}";
+        _widget  = widget;
+        Title    = $"Configure — {widget.Name}";
+        _saveBtn = SaveBtn;
 
+        LoadDataJson();
         LoadFields();
+    }
+
+    private void LoadDataJson()
+    {
+        WidgetFile? dataFile = _widget
+            .Files
+            .FirstOrDefault(f => f.FileName.Equals("data.json", StringComparison.OrdinalIgnoreCase));
+
+        if (dataFile is null)
+            return;
+
+        try
+        {
+            using JsonDocument doc = JsonDocument.Parse(dataFile.Content);
+
+            _dataValues = doc.RootElement
+                .EnumerateObject()
+                .ToDictionary(p => p.Name, p => p.Value.Clone());
+        }
+        catch
+        {
+            _dataValues = null;
+        }
     }
 
     private void LoadFields()
@@ -55,7 +86,7 @@ public partial class WidgetConfigWindow: Window
             GroupsPanel.Children.Add(BuildGroupPanel(group));
     }
 
-    private static List<WidgetDataFieldGroup> ParseFieldGroups(string json)
+    private List<WidgetDataFieldGroup> ParseFieldGroups(string json)
     {
         JsonDocument? doc    = JsonDocument.Parse(json);
         var           fields = new List<WidgetDataField>();
@@ -64,25 +95,35 @@ public partial class WidgetConfigWindow: Window
         {
             WidgetDataField? field = JsonSerializer.Deserialize<WidgetDataField>(prop.Value.GetRawText());
 
-            if (field is null|| field.Type.Equals("hidden", StringComparison.OrdinalIgnoreCase))
+            if (field is null || field.Type.Equals("hidden", StringComparison.OrdinalIgnoreCase))
                 continue;
 
             field.Key = prop.Name;
 
-            if (prop.Value.TryGetProperty("value", out JsonElement jsonElement))
+            // Determine the effective value:
+            //   1. Use data.json value if available for this key
+            //   2. Fall back to the default in fields.json
+            if (_dataValues is not null && _dataValues.TryGetValue(prop.Name, out JsonElement dataElement))
             {
-                field.Value = jsonElement.ValueKind switch
+                field.Value = dataElement.ValueKind switch
                 {
-                    JsonValueKind.String
-                        => jsonElement.GetString(),
-                    JsonValueKind.Number
-                        => jsonElement.GetDouble(),
-                    _
-                        => jsonElement.ToString()
+                    JsonValueKind.String => dataElement.GetString(),
+                    JsonValueKind.Number => dataElement.GetDouble(),
+                    _                    => dataElement.ToString()
+                };
+            }
+            else if (prop.Value.TryGetProperty("value", out JsonElement defaultElement))
+            {
+                field.Value = defaultElement.ValueKind switch
+                {
+                    JsonValueKind.String => defaultElement.GetString(),
+                    JsonValueKind.Number => defaultElement.GetDouble(),
+                    _                    => defaultElement.ToString()
                 };
             }
 
             fields.Add(field);
+            _allFields.Add(field);
         }
 
         return fields
@@ -110,7 +151,7 @@ public partial class WidgetConfigWindow: Window
                 Text       = group.Name.ToUpper(),
                 FontFamily = new FontFamily("IBM Plex Mono, Consolas"),
                 FontSize   = 10,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x5a, 0x62, 0x80)),
+                Foreground = new SolidColorBrush(Color.FromRgb(0x5a, 0x62, 0x80))
             },
             IsChecked = false
         };
@@ -124,7 +165,7 @@ public partial class WidgetConfigWindow: Window
         foreach (WidgetDataField field in group.Fields)
         {
             Border? row = BuildFieldRow(field);
-            if (row != null)
+            if (row is not null)
                 fieldsPanel.Children.Add(row);
         }
 
@@ -170,6 +211,7 @@ public partial class WidgetConfigWindow: Window
                 Margin = new Thickness(8, 0, 0, 0),
                 Tag    = field.Key + "__hex"
             };
+            hexBox.TextChanged += OnControlChanged;
             colorRow.Children.Add(hexBox);
             row.Children.Add(colorRow);
         }
@@ -200,6 +242,7 @@ public partial class WidgetConfigWindow: Window
                     Text  = valueStr,
                     Tag   = field.Key
                 };
+                textBox.TextChanged += OnControlChanged;
                 return textBox;
             }
             case "number":
@@ -210,6 +253,7 @@ public partial class WidgetConfigWindow: Window
                     Text  = valueStr,
                     Tag   = field.Key
                 };
+                numberBox.TextChanged += OnControlChanged;
                 return numberBox;
             }
             case "dropdown":
@@ -237,28 +281,29 @@ public partial class WidgetConfigWindow: Window
                 {
                     if (item.Tag?.ToString() == valueStr)
                     {
-                        comboBox.SelectedItem = item;
+                            comboBox.SelectedItem = item;
                         break;
                     }
                 }
 
+                comboBox.SelectionChanged += OnControlChanged;
                 return comboBox;
             }
+
             case "colorpicker":
             {
-                var colorPicker = new Button
+                var swatch = new Button
                 {
                     Style  = (Style) FindResource("ColorSwatchBtn"),
                     Tag    = field.Key,
                     Width  = 30,
                     Height = 30
                 };
-
-                colorPicker.Background = ParseColorBrush(valueStr) ?? new SolidColorBrush(Colors.Black);
-                colorPicker.Click += ColorSwatch_Click;
-
-                return colorPicker;
+                swatch.Background = ParseColorBrush(valueStr) ?? new SolidColorBrush(Colors.Black);
+                swatch.Click += ColorSwatch_Click;
+                return swatch;
             }
+
             case "button":
             {
                 var button = new Button
@@ -275,11 +320,24 @@ public partial class WidgetConfigWindow: Window
         }
     }
 
+    private void OnControlChanged(object sender, EventArgs e)
+    {
+        if (_isDirty)
+            return;
+
+        _isDirty = true;
+
+        if (_saveBtn is not null)
+            _saveBtn.IsEnabled = true;
+
+        SetStatus("Unsaved changes.");
+    }
+
     #region Event Handlers
 
     private void ColorSwatch_Click(object sender, RoutedEventArgs e)
     {
-        // TODO: open WPF color picker dialog, update swatch background + hex box
+        // TODO: open WPF color picker dialog, update swatch background + paired hex box
     }
 
     private void FieldButton_Click(object sender, RoutedEventArgs e)
@@ -289,24 +347,128 @@ public partial class WidgetConfigWindow: Window
 
     private void Save_Click(object sender, RoutedEventArgs e)
     {
-        // TODO: read values from _fieldControls, write to data.json
-        SetStatus("Saved.", success: true);
+        try
+        {
+            string json = BuildDataJson();
+
+            // Write back into the widget's in-memory data.json file
+            WidgetFile? dataFile = _widget
+                .Files
+                .FirstOrDefault(f => f.FileName.Equals("data.json", StringComparison.OrdinalIgnoreCase));
+
+            if (dataFile is not null)
+            {
+                dataFile.Content = json;
+            }
+            else
+            {
+                // data.json didn't exist yet — create it
+                _widget.Files.Add(new WidgetFile("data.json", json));
+            }
+
+            WidgetManager.Save(_widget);
+
+            _isDirty          = false;
+            _saveBtn.IsEnabled = false;
+
+            SetStatus("Saved.", success: true);
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"Save failed: {ex.Message}", error: true);
+        }
+    }
+
+    private string BuildDataJson()
+    {
+        // Start from the existing data.json values so we preserve keys that
+        // aren't represented by any field control (e.g. eventsLimit, theme, …)
+        var output = new JsonObject();
+
+        if (_dataValues is not null)
+        {
+            foreach ((string key, JsonElement element) in _dataValues)
+                output[key] = JsonNode.Parse(element.GetRawText());
+        }
+
+        // Overlay every field control's current value
+        foreach (WidgetDataField field in _allFields)
+        {
+            if (!_fieldControls.TryGetValue(field.Key, out FrameworkElement? control))
+                continue;
+
+            switch (control)
+            {
+                case TextBox tb:
+                    // Preserve numeric type for "number" fields
+                    if (field.Type.Equals("number", StringComparison.OrdinalIgnoreCase)
+                        && double.TryParse(tb.Text, out double num))
+                        output[field.Key] = num;
+                    else
+                        output[field.Key] = tb.Text;
+                    break;
+
+                case ComboBox cb:
+                    output[field.Key] = (cb.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "";
+                    break;
+
+                case Button swatch when field.Type.Equals("colorpicker", StringComparison.OrdinalIgnoreCase):
+                    // Read the paired hex TextBox value (more accurate than parsing the brush back)
+                    string hexKey = field.Key + "__hex";
+                    var hexBox    = FindHexBox(hexKey);
+                    output[field.Key] = hexBox?.Text ?? ColorBrushToString(swatch.Background);
+                    break;
+            }
+        }
+
+        return output.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
     }
 
     #endregion Event Handlers
 
     #region Helpers
 
+    private TextBox? FindHexBox(string tag)
+    {
+        foreach (FrameworkElement el in _fieldControls.Values)
+        {
+            if (el is not Button)
+                continue;
+
+            // The hex box is a sibling inside the same colorRow StackPanel
+            if (el.Parent is StackPanel colorRow)
+            {
+                foreach (UIElement child in colorRow.Children)
+                {
+                    if (child is TextBox tb && tb.Tag?.ToString() == tag)
+                        return tb;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static string ColorBrushToString(Brush? brush)
+    {
+        if (brush is SolidColorBrush scb)
+        {
+            Color c = scb.Color;
+            double a = Math.Round(c.A / 255.0, 2);
+            return $"rgba({c.R},{c.G},{c.B},{a})";
+        }
+        return "rgba(0,0,0,1)";
+    }
+
     private void ShowNoFieldsMessage(string message)
     {
         GroupsPanel.Children.Add(new TextBlock
         {
-            Text              = message,
-            Foreground        = new SolidColorBrush(Color.FromRgb(0x5a, 0x62, 0x80)),
-            FontFamily        = new FontFamily("Segoe UI"),
-            FontSize          = 13,
+            Text                = message,
+            Foreground          = new SolidColorBrush(Color.FromRgb(0x5a, 0x62, 0x80)),
+            FontFamily          = new FontFamily("Segoe UI"),
+            FontSize            = 13,
             HorizontalAlignment = HorizontalAlignment.Center,
-            Margin            = new Thickness(0, 40, 0, 0)
+            Margin              = new Thickness(0, 40, 0, 0)
         });
     }
 
@@ -314,18 +476,18 @@ public partial class WidgetConfigWindow: Window
     {
         try
         {
-            if (value.StartsWith("rgba("))
+            if (value.StartsWith("rgb(") || value.StartsWith("rgba("))
             {
-                var parts = value[5..^1].Split(',');
+                int start  = value.IndexOf('(') + 1;
+                var parts  = value[start..^1].Split(',');
                 if (parts.Length >= 3)
                 {
                     byte r = (byte) double.Parse(parts[0].Trim());
                     byte g = (byte) double.Parse(parts[1].Trim());
                     byte b = (byte) double.Parse(parts[2].Trim());
-                    byte a = parts.Length == 4
+                    byte a = parts.Length >= 4
                         ? (byte) Math.Round(double.Parse(parts[3].Trim()) * 255)
                         : (byte) 255;
-
                     return new SolidColorBrush(Color.FromArgb(a, r, g, b));
                 }
             }

@@ -192,6 +192,9 @@
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter Property="Opacity" Value="0.7"/>
                             </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.35"/>
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -233,8 +236,10 @@
                            VerticalAlignment="Center"
                            Text="Adjust settings then save."/>
 
-                <Button Grid.Column="1"
+                <Button x:Name="SaveBtn"
+                        Grid.Column="1"
                         Style="{StaticResource SaveBtn}"
+                        IsEnabled="False"
                         Click="Save_Click">
                     Save
                 </Button>
