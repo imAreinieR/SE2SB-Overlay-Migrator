@@ -16,6 +16,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{ACF2A73E-BE6A-4A31-BE5C-26DCF1D0CABD}"
 	ProjectSection(SolutionItems) = preProject
 		Images\application_ui_1.png = Images\application_ui_1.png
+		Images\export_streamelements_widget_files_1.png = Images\export_streamelements_widget_files_1.png
+		Images\export_streamelements_widget_files_2.png = Images\export_streamelements_widget_files_2.png
 		Images\streamerbot_select_server.png = Images\streamerbot_select_server.png
 		Images\streamerbot_websocket_started.png = Images\streamerbot_websocket_started.png
 		Images\streamerbot_websocket_stopped.png = Images\streamerbot_websocket_stopped.png

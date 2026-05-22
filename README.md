@@ -106,6 +106,38 @@ The WebSocket Server is now running.
 
 ---
 
+## Exporting Your Widget Files from StreamElements
+
+Before importing into SE2SB, you need to export your widget's source files from StreamElements manually.
+
+### Step 1 — Open your overlay in the editor
+
+In StreamElements, navigate to your overlay and open it in the editor. In the left panel, click **Settings**, then click **Open Editor**.
+
+![Open Editor button in StreamElements](Images/export_streamelements_widget_files_1.png)
+
+### Step 2 — Copy each tab's contents into a file
+
+The editor has five tabs along the top: **HTML**, **CSS**, **JS**, **Fields**, and **Data**. For each tab, click it, select all the contents, and paste them into a new file on your machine using the corresponding file name and extension below:
+
+| Tab | Save as |
+|-----|---------|
+| HTML | `widget.html` |
+| CSS | `widget.css` |
+| JS | `widget.js` |
+| Fields | `fields.json` |
+| Data | `data.json` |
+
+> **Note:** The `.html`, `.css`, and `.js` files can be named anything you like, but the two JSON files **must** be named `fields.json` and `data.json` exactly so the tool can identify them correctly.
+
+![StreamElements widget editor tabs](Images/export_streamelements_widget_files_2.png)
+
+### Step 3 — Proceed to import
+
+Once you have your files saved, follow the steps below to import them into the tool.
+
+---
+
 ## How to Get Started with the SE2SB Overlay Migrator
 
 ### Step 1 — Create a widget
