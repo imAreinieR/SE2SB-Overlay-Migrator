@@ -206,10 +206,10 @@ public partial class MainWindow: Window
 
     private void CopyPath_Click(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrEmpty(DeployPathBox.Text))
+        if (string.IsNullOrEmpty(_selectedWidget?.HtmlFilePath))
             return;
 
-        Clipboard.SetText(DeployPathBox.Text);
+        Clipboard.SetText(_selectedWidget.HtmlFilePath);
         SetStatus("Path copied to clipboard.");
     }
 

@@ -61,6 +61,9 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Data
         public string DeployedLocation
             => Path.Combine(FolderLocation, Name.Replace(" ", "-"));
 
+        public string HtmlFilePath
+            => Path.Combine(DeployedLocation, "index.html");
+
         protected void OnPropertyChanged(string propertyName)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
