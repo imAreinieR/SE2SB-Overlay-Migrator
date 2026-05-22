@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
-using StreamElementsToStreamerBotMigrationTool.Data;
+using StreamElementsToStreamerBotOverlayMigrator.Data;
 
-namespace StreamElementsToStreamerBotMigrationTool.DataServices;
+namespace StreamElementsToStreamerBotOverlayMigrator.DataServices;
 
 public static class WidgetManagerDb
 {

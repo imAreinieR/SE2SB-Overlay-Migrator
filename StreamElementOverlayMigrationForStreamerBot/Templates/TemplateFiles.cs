@@ -1,4 +1,4 @@
-﻿namespace StreamElementsToStreamerBotMigrationTool.Templates;
+﻿namespace StreamElementsToStreamerBotOverlayMigrator.Templates;
 
 public static class TemplateFiles
 {

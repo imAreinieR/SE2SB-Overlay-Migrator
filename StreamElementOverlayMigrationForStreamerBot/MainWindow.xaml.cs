@@ -1,8 +1,8 @@
 using Microsoft.Win32;
-using StreamElementsToStreamerBotMigrationTool.Common.ExtensionMethods;
-using StreamElementsToStreamerBotMigrationTool.Data;
-using StreamElementsToStreamerBotMigrationTool.Managers;
-using StreamElementsToStreamerBotMigrationTool.Services;
+using StreamElementsToStreamerBotOverlayMigrator.Common.ExtensionMethods;
+using StreamElementsToStreamerBotOverlayMigrator.Data;
+using StreamElementsToStreamerBotOverlayMigrator.Managers;
+using StreamElementsToStreamerBotOverlayMigrator.Services;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -10,7 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace StreamElementsToStreamerBotMigrationTool;
+namespace StreamElementsToStreamerBotOverlayMigrator;
 
 public partial class MainWindow: Window
 {

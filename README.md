@@ -1,4 +1,4 @@
-# SE Overlay Migration Tool
+# SE2SB Overlay Migrator
 
 A desktop utility for migrating StreamElements overlay widgets to [StreamerBot](https://streamer.bot/), making your existing overlays compatible with StreamerBot's event system without having to rebuild them from scratch.
 
@@ -106,7 +106,7 @@ The WebSocket Server is now running.
 
 ---
 
-## How to Get Started with the SE Overlay Migration Tool
+## How to Get Started with the SE2SB Overlay Migrator
 
 ### Step 1 — Create a widget
 Click **+ New Widget** in the left panel. A widget entry appears with a default name.

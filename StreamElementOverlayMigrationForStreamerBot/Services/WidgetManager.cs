@@ -1,11 +1,11 @@
 ﻿using Microsoft.Data.Sqlite;
-using StreamElementsToStreamerBotMigrationTool.Data;
-using StreamElementsToStreamerBotMigrationTool.DataServices;
-using StreamElementsToStreamerBotMigrationTool.Services;
+using StreamElementsToStreamerBotOverlayMigrator.Data;
+using StreamElementsToStreamerBotOverlayMigrator.DataServices;
+using StreamElementsToStreamerBotOverlayMigrator.Services;
 using System.Collections.ObjectModel;
 using System.IO;
 
-namespace StreamElementsToStreamerBotMigrationTool.Managers;
+namespace StreamElementsToStreamerBotOverlayMigrator.Managers;
 
 public static class WidgetManager
 {

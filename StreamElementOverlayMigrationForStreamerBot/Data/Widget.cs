@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 
-namespace StreamElementsToStreamerBotMigrationTool.Data
+namespace StreamElementsToStreamerBotOverlayMigrator.Data
 {
     public class Widget: INotifyPropertyChanged
     {

@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-	<AssemblyName>StreamElementsToStreamerBotMigrationTool</AssemblyName>
-    <RootNamespace>StreamElementsToStreamerBotMigrationTool</RootNamespace>
+	<AssemblyName>SE2SB Overlay Migrator</AssemblyName>
+    <RootNamespace>StreamElementsToStreamerBotOverlayMigrator</RootNamespace>
 	<Product>SE To SB Migration Tool</Product>
 	<Company>imACompany</Company>
 	<Copyright>Copyright © Ami Reinier 2026</Copyright>

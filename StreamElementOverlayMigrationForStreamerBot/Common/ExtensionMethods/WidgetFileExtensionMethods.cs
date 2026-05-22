@@ -1,6 +1,6 @@
-﻿using StreamElementsToStreamerBotMigrationTool.Data;
+﻿using StreamElementsToStreamerBotOverlayMigrator.Data;
 
-namespace StreamElementsToStreamerBotMigrationTool.Common.ExtensionMethods;
+namespace StreamElementsToStreamerBotOverlayMigrator.Common.ExtensionMethods;
 
 public static partial class ExtensionMethods
 {
