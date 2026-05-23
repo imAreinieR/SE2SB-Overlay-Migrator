@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace StreamElementsToStreamerBotMigrationTool.Common.ExtensionMethods;
+namespace StreamElementsToStreamerBotOverlayMigrator.Common.ExtensionMethods;
 
 public static partial class ExtensionMethods
 {

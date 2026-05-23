@@ -1,6 +1,6 @@
-﻿using StreamElementsToStreamerBotMigrationTool.Common;
+﻿using StreamElementsToStreamerBotOverlayMigrator.Common;
 
-namespace StreamElementsToStreamerBotMigrationTool.Data;
+namespace StreamElementsToStreamerBotOverlayMigrator.Data;
 
 public class WidgetFile
 {

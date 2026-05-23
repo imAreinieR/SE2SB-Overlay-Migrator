@@ -1,4 +1,4 @@
-﻿namespace StreamElementsToStreamerBotMigrationTool.Common;
+﻿namespace StreamElementsToStreamerBotOverlayMigrator.Common;
 
 public enum WidgetFileType
 {

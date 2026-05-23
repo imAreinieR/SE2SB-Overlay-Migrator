@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace StreamElementsToStreamerBotMigrationTool.Data;
+namespace StreamElementsToStreamerBotOverlayMigrator.Data;
 
 public class WidgetDataField
 {

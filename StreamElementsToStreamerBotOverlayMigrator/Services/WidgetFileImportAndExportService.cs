@@ -1,13 +1,13 @@
-﻿using StreamElementsToStreamerBotMigrationTool.Common;
-using StreamElementsToStreamerBotMigrationTool.Common.ExtensionMethods;
-using StreamElementsToStreamerBotMigrationTool.Data;
-using StreamElementsToStreamerBotMigrationTool.Templates;
+﻿using StreamElementsToStreamerBotOverlayMigrator.Common;
+using StreamElementsToStreamerBotOverlayMigrator.Common.ExtensionMethods;
+using StreamElementsToStreamerBotOverlayMigrator.Data;
+using StreamElementsToStreamerBotOverlayMigrator.Templates;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace StreamElementsToStreamerBotMigrationTool.Services;
+namespace StreamElementsToStreamerBotOverlayMigrator.Services;
 
 public static class WidgetFileImportAndExportService
 {

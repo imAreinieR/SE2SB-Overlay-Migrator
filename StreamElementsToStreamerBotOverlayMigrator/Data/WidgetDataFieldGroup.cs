@@ -1,4 +1,4 @@
-﻿namespace StreamElementsToStreamerBotMigrationTool.Data;
+﻿namespace StreamElementsToStreamerBotOverlayMigrator.Data;
 
 public class WidgetDataFieldGroup
 {

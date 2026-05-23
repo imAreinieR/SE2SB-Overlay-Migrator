@@ -1,4 +1,4 @@
-<Window x:Class="StreamElementsToStreamerBotMigrationTool.WidgetConfigWindow"
+<Window x:Class="StreamElementsToStreamerBotOverlayMigrator.WidgetConfigWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Widget Configuration"

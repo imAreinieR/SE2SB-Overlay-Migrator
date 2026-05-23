@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 
-namespace StreamElementsToStreamerBotMigrationTool.Data
+namespace StreamElementsToStreamerBotOverlayMigrator.Data
 {
     public class Widget: INotifyPropertyChanged
     {
@@ -60,6 +60,9 @@ namespace StreamElementsToStreamerBotMigrationTool.Data
 
         public string DeployedLocation
             => Path.Combine(FolderLocation, Name.Replace(" ", "-"));
+
+        public string HtmlFilePath
+            => Path.Combine(DeployedLocation, "index.html");
 
         protected void OnPropertyChanged(string propertyName)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

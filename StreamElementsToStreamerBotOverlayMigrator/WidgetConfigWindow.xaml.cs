@@ -1,5 +1,5 @@
-using StreamElementsToStreamerBotMigrationTool.Data;
-using StreamElementsToStreamerBotMigrationTool.Managers;
+using StreamElementsToStreamerBotOverlayMigrator.Data;
+using StreamElementsToStreamerBotOverlayMigrator.Managers;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Windows;
@@ -7,7 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 
-namespace StreamElementsToStreamerBotMigrationTool;
+namespace StreamElementsToStreamerBotOverlayMigrator;
 
 public partial class WidgetConfigWindow: Window
 {

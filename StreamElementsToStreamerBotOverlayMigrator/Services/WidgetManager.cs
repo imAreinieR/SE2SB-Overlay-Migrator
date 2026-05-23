@@ -1,11 +1,11 @@
 ﻿using Microsoft.Data.Sqlite;
-using StreamElementsToStreamerBotMigrationTool.Data;
-using StreamElementsToStreamerBotMigrationTool.DataServices;
-using StreamElementsToStreamerBotMigrationTool.Services;
+using StreamElementsToStreamerBotOverlayMigrator.Data;
+using StreamElementsToStreamerBotOverlayMigrator.DataServices;
+using StreamElementsToStreamerBotOverlayMigrator.Services;
 using System.Collections.ObjectModel;
 using System.IO;
 
-namespace StreamElementsToStreamerBotMigrationTool.Managers;
+namespace StreamElementsToStreamerBotOverlayMigrator.Managers;
 
 public static class WidgetManager
 {
@@ -58,9 +58,34 @@ public static class WidgetManager
         connection.Open();
 
         if (widget.Id == 0)
+        {
             WidgetManagerDb.Insert(connection, widget);
+        }
         else
+        {
+            List<WidgetFile> existingWidgetFiles = WidgetFileManagerDb
+                .GetByWidgetId(connection, widget.Id)
+                .ToList();
+
+            foreach (WidgetFile widgetFile in widget.Files.Where(file => file.Id <= 0))
+            {
+                widgetFile.WidgetId = widget.Id;
+                WidgetFileManagerDb.Insert(connection, widgetFile);
+            }
+
+            List<int> currentWidgetFileIds = widget
+                .Files
+                .Where(file => file.Id > 0)
+                .Select(file => file.Id)
+                .ToList();
+
+            foreach (WidgetFile widgetFile in existingWidgetFiles.Where(file => !currentWidgetFileIds.Contains(file.Id)))
+            {
+                WidgetFileManagerDb.Delete(connection, widgetFile);
+            }
+
             WidgetManagerDb.Update(connection, widget);
+        }
     }
 
     public static void Delete(Widget widget)

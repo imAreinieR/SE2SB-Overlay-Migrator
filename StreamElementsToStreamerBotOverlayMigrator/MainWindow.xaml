@@ -1,4 +1,4 @@
-<Window x:Class="StreamElementsToStreamerBotMigrationTool.MainWindow"
+<Window x:Class="StreamElementsToStreamerBotOverlayMigrator.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="SE Overlay Migration Tool"

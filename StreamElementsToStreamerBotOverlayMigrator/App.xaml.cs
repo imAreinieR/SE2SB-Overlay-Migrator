@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace StreamElementsToStreamerBotMigrationTool;
+namespace StreamElementsToStreamerBotOverlayMigrator;
 
 public partial class App: Application
 {}
