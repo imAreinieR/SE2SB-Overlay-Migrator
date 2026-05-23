@@ -194,19 +194,32 @@ client.on('Twitch.ChatMessage', ({ event, data }) => {
     description: b.name.charAt(0).toUpperCase() + b.name.slice(1)
   }));
 
-  const emotes = (data.emotes ?? []).map(e => ({
-    type: ""twitch"",
-    name: e.name ?? e.id,
-    id: e.id,
-    gif: false,
-    urls: {
-      1: `https://static-cdn.jtvnw.net/emoticons/v1/${e.id}/1.0`,
-      2: `https://static-cdn.jtvnw.net/emoticons/v1/${e.id}/2.0`,
-      4: `https://static-cdn.jtvnw.net/emoticons/v1/${e.id}/4.0`
-    },
-    start: e.startIndex ?? e.start ?? 0,
-    end: e.endIndex ?? e.end ?? 0
-  }));
+  const emotes = (data.emotes ?? []).map(e => {
+    const isThirdParty = e.type !== 'Twitch';
+  
+    // for BTTV/FFZ, extract ID from imageUrl
+    const id = e.id ?? e.imageUrl?.split('/').find((seg, i, arr) => 
+      /^[a-f0-9]{24}$/.test(seg) // BTTV IDs are 24-char hex
+    );
+  
+    const urls = isThirdParty
+      ? { 1: e.imageUrl, 2: e.imageUrl, 4: e.imageUrl }
+      : {
+          1: `https://static-cdn.jtvnw.net/emoticons/v2/${e.id}/default/dark/1.0`,
+          2: `https://static-cdn.jtvnw.net/emoticons/v2/${e.id}/default/dark/2.0`,
+          4: `https://static-cdn.jtvnw.net/emoticons/v2/${e.id}/default/dark/3.0`,
+        };
+  
+    return {
+      type: e.type === 'Twitch' ? 'twitch' : e.type.toLowerCase(),
+      name: e.name,
+      id: id ?? e.name, // fallback to name if ID truly can't be found
+      gif: false,
+      urls,
+      start: e.startIndex ?? e.start ?? 0,
+      end: e.endIndex ?? e.end ?? 0
+    };
+  });
 
   const tags = {
     ""display-name"": user.name ?? msg.displayName ?? '',
