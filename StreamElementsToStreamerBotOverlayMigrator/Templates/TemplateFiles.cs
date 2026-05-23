@@ -69,7 +69,7 @@ client.on('Twitch.Follow', ({ event, data }) => {
   dispatchSEEvent('follower-latest', {
     service: 'twitch',
     data: {
-      name: data.user?.name ?? '',
+      name: data.user_name ?? data.user_login ?? '',
       amount: 1,
       message: '',
       gifted: 0,
@@ -105,7 +105,7 @@ client.on('Twitch.ReSub', ({ event, data }) => {
   dispatchSEEvent('subscriber-latest', {
     service: 'twitch',
     data: {
-      name: data.user?.name ?? '',
+      name: data.user?.name ?? data.user?.login ?? '',
       amount: data.cumulativeMonths ?? 1,
       message: data.text ?? data.systemMessage ?? '',
       gifted: data.isGift ? 1 : 0,
@@ -126,9 +126,9 @@ client.on('Twitch.GiftSub', ({ event, data }) => {
       amount: 1,
       message: data.systemMessage ?? '',
       gifted: 1,
-      sender: data.user?.name ?? '',
-      bulkGifted: isBulk,
-      isCommunityGift: isBulk,
+      sender: data.user?.name ?? data.user?.login ?? '',
+      bulkGifted: data.randomCommunitySubGift,
+      isCommunityGift: data.fromCommunitySubGift,
       playedAsCommunityGift: false
     }
   });
@@ -158,7 +158,7 @@ client.on('Twitch.Cheer', ({ event, data }) => {
   dispatchSEEvent('cheer-latest', {
     service: 'twitch',
     data: {
-      name: data.anonymous ? 'anonymous' : (data.user?.name ?? ''),
+      name: data.anonymous ? 'anonymous' : (data.user?.name ?? data.user?.login ?? ''),
       amount: data.bits ?? 0,
       message: data.text ?? '',
       gifted: 0,
