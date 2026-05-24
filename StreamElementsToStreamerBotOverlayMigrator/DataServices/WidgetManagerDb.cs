@@ -59,18 +59,13 @@ public static class WidgetManagerDb
         SqliteCommand command = connection.CreateCommand();
         command.CommandText = @"
             INSERT INTO Widget (Name, FolderLocation)
-            VALUES ($name, $folderLocation);";
+            VALUES ($name, $folderLocation);
+            SELECT last_insert_rowid();";
 
         command.Parameters.AddWithValue("$name",           widget.Name);
         command.Parameters.AddWithValue("$folderLocation", widget.FolderLocation);
 
-        widget.Id = command.ExecuteNonQuery();
-
-        foreach (WidgetFile file in widget.Files)
-        {
-            file.WidgetId = widget.Id;
-            WidgetFileManagerDb.Insert(connection, file);
-        }
+        widget.Id = Convert.ToInt32(command.ExecuteScalar());
     }
 
     public static void Update(SqliteConnection connection, Widget widget)

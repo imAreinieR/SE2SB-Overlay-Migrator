@@ -49,10 +49,11 @@ public static class WidgetFileManagerDb
         SqliteCommand command = connection.CreateCommand();
         command.CommandText = @"
             INSERT INTO WidgetFile (WidgetId, FileName, Content, WidgetFileType)
-            VALUES ($widgetId, $fileName, $content, $widgetFileType);";
+            VALUES ($widgetId, $fileName, $content, $widgetFileType);
+            SELECT last_insert_rowid();";
 
         AddWidgetFileParameters(command, widgetFile);
-        widgetFile.Id = command.ExecuteNonQuery();
+        widgetFile.Id = Convert.ToInt32(command.ExecuteScalar());
     }
 
     public static void Update(SqliteConnection connection, WidgetFile widgetFile)
