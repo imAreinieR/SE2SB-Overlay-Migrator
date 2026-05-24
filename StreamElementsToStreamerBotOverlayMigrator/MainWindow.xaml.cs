@@ -179,7 +179,7 @@ public partial class MainWindow: Window
         {
             Title       = "Select widget files",
             Multiselect = true,
-            Filter      = "Widget files (*.html;*.js;*.css;*.json)|*.html;*.js;*.css;*.json|All files (*.*)|*.*"
+            Filter      = "Widget files (*.html;*.js;*.css;*.json;*.zip)|*.html;*.js;*.css;*.json;*.zip|All files (*.*)|*.*"
         };
 
         if (dialog.ShowDialog() != true)
