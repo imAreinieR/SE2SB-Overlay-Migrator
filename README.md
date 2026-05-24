@@ -64,14 +64,14 @@ flowchart TB
 ## Features
 
 ### SE to StreamerBot Migration
-Takes your existing StreamElements overlay widget and converts them into a locally-hosted overlay widget that StreamerBot can drive with events. No manual code changes needed.
+- Takes your existing StreamElements overlay widget and converts them into a locally-hosted overlay widget that StreamerBot can drive with events. No manual code changes needed.
 
 ### Widget Management
 - Create and configure multiple widgets.
 - Each widget tracks its own files and configurations independently.
-- 
+
 ### StreamerBot Event Bridge
-A `streamerBotEvents.js` file is generated automatically alongside your widget files. This bridges StreamerBot's event system to your overlay so it can respond to stream events (follows, subs, etc.) without any manual wiring.
+- A `streamerBotEvents.js` file is generated automatically alongside your widget files. This bridges StreamerBot's event system to your overlay so it can respond to stream events (follows, subs, etc.) without any manual wiring.
 
 ### Simple File Imports
 - Import `.html`, `.js`, `.css`, and `.json` files or even a `.zip` file.
@@ -118,7 +118,7 @@ In StreamElements, navigate to your overlay and open it in the editor. In the le
 
 ### Step 2 — Copy each tab's contents into a file
 
-The editor has five tabs along the top: **HTML**, **CSS**, **JS**, **Fields**, and **Data**. For each tab, click it, select all the contents, and paste them into a new file on your machine using the corresponding file name and extension below:
+The editor has five tabs along the top: **HTML**, **CSS**, **JS**, **Fields**, and **Data**. For each tab, click it, select all the contents, and paste them each into new individual file with the corresponding file name and extension below:
 
 | Tab | Save as |
 |-----|---------|
@@ -151,16 +151,17 @@ Click **Import** and select your overlay files. You'll typically need:
 - `fields.json` and `data.json`
 
 ### Step 3 — Fix any warnings
-If the warning banner appears, follow its instructions (e.g. add the missing HTML file, or remove a duplicate). The Generate button will remain disabled until the file set is clean.
+If the warning banner appears, follow its instructions (e.g. add the missing HTML file, or remove a duplicate). The Generate button will remain disabled until the file set is ready.
 
 ### Step 4 — Save your work
 Click **Save**.
 
 ### Step 5 — Generate
-Click **Generate**. The tool writes the processed files to the deploy path shown under **Deploy Location**.
+Click **Generate**. The tool writes the processed files to the path shown under **Deploy Location**.
 
 ### Step 6 — Add to OBS
 Copy the deploy URL and create a browser source in OBS pointing to it.
+![OBS Browser Source Settings](Images/obs_browser_source.png)
 
 ---
 
