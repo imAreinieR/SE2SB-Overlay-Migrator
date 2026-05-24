@@ -32,14 +32,20 @@ const client = new StreamerbotClient({
 
     const seEvent = new CustomEvent('onWidgetLoad', {
       detail: {
-        fieldData: CONFIG,
+        session:  {},
+        recents:  {},
+        currency: {},
         channel: {
-          id: ""12345"",
-          username: data.name,
-          providerId: ""12345""
+          username:   data.name,
+          apiToken:   '',
+          id:         '', // this is streamelements user id
+          providerId: '12345' //this is twitch user id
+          avatar:     '',
         },
+        fieldData: CONFIG,
         overlay: {
-          encryptedToken: """"
+          isEditorMode: false,
+          muted:        false
         }
       }
     });
@@ -184,23 +190,25 @@ client.on('Twitch.Raid', ({ event, data }) => {
 
 // message - New chat message
 client.on('Twitch.ChatMessage', ({ event, data }) => {
-  const msg = data.message ?? {};
-  const user = data.user ?? {};
+  const msg  = data.message ?? {};
+  const user = data.user    ?? {};
 
   const badges = (msg.badges ?? []).map(b => ({
-    type: b.name,
-    version: b.version,
-    url: b.imageUrl,
-    description: b.name.charAt(0).toUpperCase() + b.name.slice(1)
+    'type':        b.name,
+    'version':     b.version,
+    'url':         b.imageUrl,
+    'description': b.name.charAt(0).toUpperCase() + b.name.slice(1)
   }));
 
   const emotes = (data.emotes ?? []).map(e => {
     const isThirdParty = e.type !== 'Twitch';
   
     // for BTTV/FFZ, extract ID from imageUrl
-    const id = e.id ?? e.imageUrl?.split('/').find((seg, i, arr) => 
-      /^[a-f0-9]{24}$/.test(seg) // BTTV IDs are 24-char hex
-    );
+    const id = !isThirdParty
+      ? e.id
+      : e.imageUrl?.split('/').find((seg, i, arr) => 
+          /^[a-f0-9]{24}$/.test(seg) // BTTV IDs are 24-char hex
+        );
   
     const urls = isThirdParty
       ? { 1: e.imageUrl, 2: e.imageUrl, 4: e.imageUrl }
@@ -211,44 +219,47 @@ client.on('Twitch.ChatMessage', ({ event, data }) => {
         };
   
     return {
-      type: e.type === 'Twitch' ? 'twitch' : e.type.toLowerCase(),
-      name: e.name,
-      id: id ?? e.name, // fallback to name if ID truly can't be found
-      gif: false,
-      urls,
-      start: e.startIndex ?? e.start ?? 0,
-      end: e.endIndex ?? e.end ?? 0
+      'type':  e.type === 'Twitch' ? 'twitch' : e.type.toLowerCase(),
+      'name':  e.name,
+      'id':    id                  ?? e.name  ?? '',
+      'gif':   false,
+      'urls':  urls,
+      'start': e.startIndex        ?? 0,
+      'end':   e.endIndex          ?? 0
     };
   });
 
   const tags = {
-    ""display-name"": user.name ?? msg.displayName ?? '',
-    color: user.color ?? msg.color ?? '',
-    ""user-id"": user.id ?? msg.userId ?? '',
-    mod: (msg.role === 2) ? ""1"" : ""0"",
-    subscriber: msg.subscriber ? ""1"" : ""0"",
-    badges: badges.map(b => `${b.type}/${b.version}`).join(','),
-    id: msg.msgId ?? data.messageId ?? '',
-    ""tmi-sent-ts"": String(Date.now()),
-    turbo: ""0"",
-    ""user-type"": (msg.role === 2) ? ""mod"" : """"
+    'badges':       badges,
+    'color':        user.color         ?? msg.color       ?? '',
+    'display-name': user.name          ?? msg.displayName ?? '',
+    'emotes':       emotes,
+    'flags':        '',
+    'id':           msg.msgId          ?? data.messageId  ?? '',
+    'mod':          (msg.role === 2)   ? '1' : '0',
+    'room-id':      '',
+    'subscriber':   msg.subscriber     ? '1' : '0',
+    'tmi-sent-ts':  String(Date.now()),
+    'turbo':        '0',
+    'user-id':      user.id            ?? msg.userId      ?? '',
+    'user-type':    (msg.role === 2)   ? 'mod' : ''
   };
 
   dispatchSEEvent('message', {
     service: 'twitch',
     data: {
-      time: Date.now(),
-      tags,
-      nick: user.login ?? msg.username ?? '',
-      userId: user.id ?? msg.userId ?? '',
-      displayName: user.name ?? msg.displayName ?? '',
-      displayColor: user.color ?? msg.color ?? '',
-      badges,
-      channel: msg.channel ?? user.login ?? '',
-      text: data.text ?? msg.message ?? '',
-      isAction: msg.isMe ?? false,
-      emotes,
-      msgId: msg.msgId ?? data.messageId ?? ''
+      'time':         Date.now(),
+      'tags':         tags,
+      'nick':         user.login  ?? msg.username    ?? '',
+      'userId':       user.id     ?? msg.userId      ?? '',
+      'displayName':  user.name   ?? msg.displayName ?? '',
+      'displayColor': user.color  ?? msg.color       ?? '',
+      'badges':       badges,
+      'channel':      msg.channel ?? user.login      ?? '',
+      'text':         data.text   ?? msg.message     ?? '',
+      'isAction':     msg.isMe    ?? false,
+      'emotes':       emotes,
+      'msgId':        msg.msgId   ?? data.messageId  ?? ''
     }
   });
 });
