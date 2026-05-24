@@ -69,17 +69,17 @@ public static class WidgetFileImportAndExportService
 
                 if (file.WidgetFileType == WidgetFileType.Html)
                 {
-                    content = string.Format(TemplateFiles.HtmlTemplate, FixProtocolRelativeUrls(file.Content));
+                    content = string.Format(TemplateFiles.HtmlFile, FixProtocolRelativeUrls(file.Content));
                 }
                 else if (file.WidgetFileType == WidgetFileType.DataJson)
                 {
-                    content = string.Format(TemplateFiles.JavascriptDataFileTemplate, file.Content);
+                    content = string.Format(TemplateFiles.JavascriptDataFile, file.Content);
                 }
 
                 File.WriteAllText(destination, content);
             }
 
-            File.WriteAllText(Path.Combine(widget.DeployedLocation, "streamerBotEvents.js"), TemplateFiles.StreamerBotEventHandlers);
+            File.WriteAllText(Path.Combine(widget.DeployedLocation, "streamerBotEvents.js"), TemplateFiles.StreamerBotEventHandlersFile);
 
             errorMessage = $"Generated to '{widget.DeployedLocation}'";
             return true;

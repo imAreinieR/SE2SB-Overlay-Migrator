@@ -2,7 +2,7 @@
 
 public static class TemplateFiles
 {
-    public const string HtmlTemplate = @"<!DOCTYPE html>
+    public const string HtmlFile = @"<!DOCTYPE html>
 <html>
 <head>
   <title>imA SB Widget</title>
@@ -21,9 +21,9 @@ public static class TemplateFiles
 </body>
 </html>";
 
-    public const string JavascriptDataFileTemplate = "const CONFIG = {0}";
+    public const string JavascriptDataFile = "const CONFIG = {0}";
 
-    public const string StreamerBotEventHandlers = @"// StreamerBotEventHandlers - bridges StreamerBot with StreamElements Widget
+    public const string StreamerBotEventHandlersFile = @"// StreamerBotEventHandlers - bridges StreamerBot with StreamElements Widget
 const client = new StreamerbotClient({
   autoReconnect: true,
   retries: -1,

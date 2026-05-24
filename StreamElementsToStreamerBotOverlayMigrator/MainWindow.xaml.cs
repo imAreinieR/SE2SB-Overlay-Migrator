@@ -5,6 +5,7 @@ using StreamElementsToStreamerBotOverlayMigrator.Managers;
 using StreamElementsToStreamerBotOverlayMigrator.Services;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -40,8 +41,14 @@ public partial class MainWindow: Window
 
     private void NewWidget_Click(object sender, RoutedEventArgs e)
     {
-        string name = $"Widget {_widgets.Count + 1}";
-        var widget = new Widget(name, DefaultDeployPath);
+        int maxNumber = _widgets
+            .Select(widget => Regex.Match(widget.Name, @"^Widget (\d+)$", RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1)))
+            .Where(match => match.Success)
+            .Select(match => int.Parse(match.Groups[1].Value))
+            .DefaultIfEmpty(0)
+            .Max();
+
+        var widget = new Widget($"Widget {maxNumber + 1}", DefaultDeployPath);
 
         _widgets.Add(widget);
         WidgetList.SelectedItem = widget;
