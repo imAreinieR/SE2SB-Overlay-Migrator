@@ -11,7 +11,8 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Services;
 
 public static class WidgetFileImportAndExportService
 {
-    private static List<string> _relevantFileExtensions = new() { ".html", ".js", ".css", ".json" };
+    private readonly static List<string> _relevantFileExtensions = new() { ".html", ".js", ".css", ".json" };
+    private readonly static TimeSpan     _defaultRegexTimeout = TimeSpan.FromSeconds(1);
 
     public static IEnumerable<WidgetFile> FetchWidgetFiles(string[] filePaths)
     {
@@ -63,7 +64,7 @@ public static class WidgetFileImportAndExportService
             {
                 string fileName    = file.GetFileNameForWidgetFileType();
                 string destination = Path.Combine(widget.DeployedLocation, fileName);
-                string content     = file.WidgetFileType == WidgetFileType.Html || file.WidgetFileType == WidgetFileType.Css
+                string content     = file.WidgetFileType == WidgetFileType.Html || file.WidgetFileType == WidgetFileType.Css || file.WidgetFileType == WidgetFileType.Javascript
                     ? SearchAndReplaceDataVariables(file.Content, jsonData)
                     : file.Content;
 
@@ -96,14 +97,14 @@ public static class WidgetFileImportAndExportService
     {
         using JsonDocument jsonDocument = JsonDocument.Parse(jsonData);
 
-        foreach (JsonProperty field in jsonDocument.RootElement.EnumerateObject())
+        foreach (JsonProperty jsonProperty in jsonDocument.RootElement.EnumerateObject())
         {
-            string value = field.Value.ValueKind switch
+            string value = jsonProperty.Value.ValueKind switch
             {
                 JsonValueKind.String
-                    => field.Value.GetString() ?? string.Empty,
+                    => jsonProperty.Value.GetString() ?? string.Empty,
                 JsonValueKind.Number
-                    => field.Value.GetRawText(),
+                    => jsonProperty.Value.GetRawText(),
                 JsonValueKind.True
                     => "true",
                 JsonValueKind.False
@@ -111,13 +112,36 @@ public static class WidgetFileImportAndExportService
                 JsonValueKind.Null
                     => string.Empty,
                 _
-                    => field.Value.GetRawText()
+                    => jsonProperty.Value.GetRawText()
             };
 
-            content = content.Replace("{{" + field.Name + "}}", value);
-            content = content.Replace("{" + field.Name + "}", value);
-        }
+            string escapedName = Regex.Escape(jsonProperty.Name);
 
+            try
+            {
+                content = Regex.Replace
+                (
+                    content,
+                    @"(?<!\$)\{\{" + escapedName + @"\}\}",
+                    value,
+                    RegexOptions.None,
+                    _defaultRegexTimeout
+                );
+
+                content = Regex.Replace
+                (
+                    content,
+                    @"(?<!\$)(?<!\{)\{" + escapedName + @"\}(?!\})",
+                    value,
+                    RegexOptions.None,
+                    _defaultRegexTimeout
+                );
+            }
+            catch (RegexMatchTimeoutException exception)
+            {
+                throw new InvalidOperationException($"Regex timed out while replacing variable '{jsonProperty.Name}'. Pattern may be too complex for the given input.", exception);
+            }
+        }
         return content;
     }
 
@@ -128,6 +152,6 @@ public static class WidgetFileImportAndExportService
             @"(src|href)=""//",
             "$1=\"https://",
             RegexOptions.IgnoreCase,
-            TimeSpan.FromSeconds(1)
+            _defaultRegexTimeout
         );
 }

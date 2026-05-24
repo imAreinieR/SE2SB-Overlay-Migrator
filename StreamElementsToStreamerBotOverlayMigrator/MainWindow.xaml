@@ -478,7 +478,8 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- File list -->
-                        <Border Grid.Column="0"
+                        <Border x:Name="FileListBorder"
+                                Grid.Column="0"
                                 Background="#1a1e2b"
                                 BorderBrush="#252c40"
                                 BorderThickness="1"
@@ -556,14 +557,43 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
 
-                                <!-- Empty state -->
-                                <TextBlock x:Name="FilesEmptyLabel"
-                                           Text="No files imported."
-                                           Foreground="#2e3450"
-                                           FontFamily="Segoe UI"
-                                           FontSize="12"
-                                           HorizontalAlignment="Center"
-                                           Margin="0,14"/>
+                                <!-- Empty state / drop zone (hidden once files are present) -->
+                                <Grid x:Name="FilesEmptyLabel"
+                                      AllowDrop="True"
+                                      Margin="8,8"
+                                      DragOver="DropZone_DragOver"
+                                      DragLeave="DropZone_DragLeave"
+                                      Drop="DropZone_Drop">
+                                    <!-- Dashed border drawn as a Rectangle -->
+                                    <Rectangle x:Name="DropZoneDash"
+                                               Stroke="#3d4a6e"
+                                               StrokeThickness="1.5"
+                                               StrokeDashArray="4 3"
+                                               RadiusX="4" RadiusY="4"
+                                               Fill="Transparent"/>
+                                    <StackPanel HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Margin="0,18">
+                                        <TextBlock x:Name="DropZoneIcon"
+                                                   Text="⬆"
+                                                   FontSize="20"
+                                                   HorizontalAlignment="Center"
+                                                   Foreground="#4a5680"
+                                                   Margin="0,0,0,6"/>
+                                        <TextBlock x:Name="DropZoneText"
+                                                   Text="Drop files here"
+                                                   Foreground="#7a86aa"
+                                                   FontFamily="Segoe UI"
+                                                   FontSize="12"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,0,0,2"/>
+                                        <TextBlock Text="or use ＋ Import above"
+                                                   Foreground="#4a5275"
+                                                   FontFamily="Segoe UI"
+                                                   FontSize="10"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Grid>
                             </StackPanel>
                         </Border>
 
