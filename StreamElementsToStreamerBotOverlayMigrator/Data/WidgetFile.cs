@@ -1,4 +1,5 @@
 ﻿using StreamElementsToStreamerBotOverlayMigrator.Common;
+using System.Text.Json;
 
 namespace StreamElementsToStreamerBotOverlayMigrator.Data;
 
@@ -26,7 +27,7 @@ public class WidgetFile
         WidgetFileType = widgetFileType;
     }
 
-    private WidgetFileType DetermineWidgetFileType(string fileName)
+    private WidgetFileType DetermineWidgetFileType(string fileName, string? fileContent = null)
     {
         if (fileName.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
             return WidgetFileType.Html;
@@ -34,10 +35,39 @@ public class WidgetFile
             return WidgetFileType.Javascript;
         if (fileName.EndsWith(".css", StringComparison.OrdinalIgnoreCase))
             return WidgetFileType.Css;
-        if (fileName.Equals("fields.json", StringComparison.OrdinalIgnoreCase))
-            return WidgetFileType.FieldJson;
-        if (fileName.Equals("data.json", StringComparison.OrdinalIgnoreCase))
-            return WidgetFileType.DataJson;
+
+        if (fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase) && fileContent != null)
+            return DetermineJsonFileType(fileContent);
+
         return WidgetFileType.Other;
+    }
+
+    private WidgetFileType DetermineJsonFileType(string fileContent)
+    {
+        try
+        {
+            using var jsonDocument = JsonDocument.Parse(fileContent);
+            JsonElement jsonRootElement = jsonDocument.RootElement;
+
+            if (jsonRootElement.ValueKind != JsonValueKind.Object)
+                return WidgetFileType.Other;
+
+            foreach (JsonProperty jsonProperty in jsonRootElement.EnumerateObject())
+            {
+                if
+                (
+                    jsonProperty.Value.ValueKind == JsonValueKind.Object
+                        && jsonProperty.Value.TryGetProperty("type", out _)
+                        && jsonProperty.Value.TryGetProperty("value", out _)
+                )
+                    return WidgetFileType.FieldJson;
+            }
+
+            return WidgetFileType.DataJson;
+        }
+        catch (JsonException)
+        {
+            return WidgetFileType.Other;
+        }
     }
 }

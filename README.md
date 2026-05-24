@@ -128,7 +128,7 @@ The editor has five tabs along the top: **HTML**, **CSS**, **JS**, **Fields**, a
 | Fields | `fields.json` |
 | Data | `data.json` |
 
-> **Note:** The `.html`, `.css`, and `.js` files can be named anything you like, but the two JSON files **must** be named `fields.json` and `data.json` exactly so the tool can identify them correctly.
+> **Note:** The files can be named anything you like as long as the extensions are correct.
 
 ![StreamElements widget editor tabs](Images/export_streamelements_widget_files_2.png)
 
