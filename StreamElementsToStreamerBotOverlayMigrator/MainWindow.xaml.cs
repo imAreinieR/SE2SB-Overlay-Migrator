@@ -231,6 +231,59 @@ public partial class MainWindow: Window
             SetStatus(errorMessage, error: true);
     }
 
+    private void DropZone_DragOver(object sender, DragEventArgs e)
+    {
+        bool hasFiles = e.Data.GetDataPresent(DataFormats.FileDrop);
+
+        e.Effects = hasFiles
+            ? DragDropEffects.Copy
+            : DragDropEffects.None;
+        e.Handled = true;
+
+        if (hasFiles)
+            SetDropZoneHighlight(true);
+    }
+
+    private void DropZone_DragLeave(object sender, DragEventArgs e)
+        => SetDropZoneHighlight(false);
+
+    private void DropZone_Drop(object sender, DragEventArgs e)
+    {
+        SetDropZoneHighlight(false);
+
+        if (_selectedWidget is null || e.Data.GetData(DataFormats.FileDrop) is not string[] paths)
+            return;
+
+        foreach (WidgetFile widgetFile in WidgetFileImportAndExportService.FetchWidgetFiles(paths))
+        {
+            if (_selectedWidget.Files.Any(file => file.FileName == widgetFile.FileName))
+                continue;
+
+            _selectedWidget.Files.Add(widgetFile);
+        }
+
+        OnFilesChanged();
+    }
+
+    private void SetDropZoneHighlight(bool active)
+    {
+        if (FilesEmptyLabel.FindName("DropZoneDash") is not System.Windows.Shapes.Rectangle dash)
+            return;
+
+        dash.Stroke = new SolidColorBrush
+        (
+            active
+                ? Color.FromRgb(0x4F, 0x7E, 0xFF)
+                : Color.FromRgb(0x3D, 0x4A, 0x6E)
+        );
+        dash.Fill = new SolidColorBrush
+        (
+            active
+                ? Color.FromArgb(0x1A, 0x4F, 0x7E, 0xFF)
+                : Colors.Transparent
+        );
+    }
+
     private void Configure_Click(object sender, RoutedEventArgs e)
     {
         if (_selectedWidget is null)
@@ -252,10 +305,6 @@ public partial class MainWindow: Window
         _selectedWidget      = widget;
         DeployPathBox.Text   = widget.DeployedLocation;
         FileList.ItemsSource = widget.Files;
-
-        ConfigureBtn.IsEnabled = widget
-            .Files
-            .Any(file => file.WidgetFileType == Common.WidgetFileType.FieldJson);
 
         if (WidgetList.SelectedItem != widget)
             WidgetList.SelectedItem = widget;
@@ -300,6 +349,16 @@ public partial class MainWindow: Window
         FilesEmptyLabel.Visibility = hasFiles
             ? Visibility.Collapsed
             : Visibility.Visible;
+
+        FileListBorder.BorderThickness = hasFiles
+            ? new Thickness(1)
+            : new Thickness(0);
+        FileListBorder.Background = new SolidColorBrush
+        (
+            hasFiles
+                ? Color.FromRgb(0x1A, 0x1E, 0x2B)
+                : Colors.Transparent
+        );
 
         ConfigureBtn.IsEnabled = _selectedWidget
             .Files
