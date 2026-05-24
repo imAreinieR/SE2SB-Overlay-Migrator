@@ -166,6 +166,7 @@ public partial class WidgetConfigWindow: Window
         foreach (WidgetDataField widgetDataField in widgetDataFieldGroup.Fields)
         {
             Border? row = BuildFieldRow(widgetDataField);
+
             if (row is not null)
                 fieldsPanel.Children.Add(row);
         }
@@ -175,12 +176,14 @@ public partial class WidgetConfigWindow: Window
 
         container.Children.Add(header);
         container.Children.Add(fieldsPanel);
+
         return container;
     }
 
     private Border? BuildFieldRow(WidgetDataField widgetDataField)
     {
         FrameworkElement? control = BuildControl(widgetDataField);
+
         if (control is null)
             return null;
 
@@ -217,7 +220,7 @@ public partial class WidgetConfigWindow: Window
             {
                 var textBox = new TextBox
                 {
-                    Style = (Style)FindResource("FieldInput"),
+                    Style = (Style) FindResource("FieldInput"),
                     Text  = valueStr,
                     Tag   = field.Key
                 };
@@ -243,7 +246,7 @@ public partial class WidgetConfigWindow: Window
 
                 var comboBox = new ComboBox
                 {
-                    Style = (Style)FindResource("FieldDropdown"),
+                    Style = (Style) FindResource("FieldDropdown"),
                     Tag   = field.Key
                 };
 
@@ -261,7 +264,7 @@ public partial class WidgetConfigWindow: Window
                 {
                     if (item.Tag?.ToString() == valueStr)
                     {
-                            comboBox.SelectedItem = item;
+                        comboBox.SelectedItem = item;
                         break;
                     }
                 }
@@ -269,7 +272,6 @@ public partial class WidgetConfigWindow: Window
                 comboBox.SelectionChanged += OnControlChanged;
                 return comboBox;
             }
-
             case "colorpicker":
             {
                 Color initial = ParseColor(valueStr);
@@ -282,12 +284,11 @@ public partial class WidgetConfigWindow: Window
                 picker.ColorChanged += OnControlChanged;
                 return picker;
             }
-
             case "button":
             {
                 var button = new Button
                 {
-                    Style   = (Style)FindResource("FieldButton"),
+                    Style   = (Style) FindResource("FieldButton"),
                     Content = field.Label,
                     Tag     = field.Key
                 };
@@ -357,7 +358,6 @@ public partial class WidgetConfigWindow: Window
                 output[key] = JsonNode.Parse(element.GetRawText());
         }
 
-        // Overlay every field control's current value
         foreach (WidgetDataField field in _allFields)
         {
             if (!_fieldControls.TryGetValue(field.Key, out FrameworkElement? control))
@@ -365,20 +365,17 @@ public partial class WidgetConfigWindow: Window
 
             switch (control)
             {
-                case TextBox tb:
-                    output[field.Key] = tb.Text;
+                case TextBox textBox:
+                    output[field.Key] = textBox.Text;
                     break;
-
                 case NumericSpinner spinner:
                     output[field.Key] = spinner.Value;
                     break;
-
                 case ColorSwatchPicker picker:
                     output[field.Key] = picker.RgbaString;
                     break;
-
-                case ComboBox cb:
-                    output[field.Key] = (cb.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "";
+                case ComboBox comboBox:
+                    output[field.Key] = (comboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
                     break;
             }
         }
@@ -391,20 +388,18 @@ public partial class WidgetConfigWindow: Window
     #region Helpers
 
     private void ShowNoFieldsMessage(string message)
-    {
-        GroupsPanel.Children.Add
+        => GroupsPanel.Children.Add
         (
             new TextBlock
             {
-                Text                = message,
-                Foreground          = new SolidColorBrush(Color.FromRgb(0x5a, 0x62, 0x80)),
-                FontFamily          = new FontFamily("Segoe UI"),
-                FontSize            = 13,
+                Text = message,
+                Foreground = new SolidColorBrush(Color.FromRgb(0x5a, 0x62, 0x80)),
+                FontFamily = new FontFamily("Segoe UI"),
+                FontSize = 13,
                 HorizontalAlignment = HorizontalAlignment.Center,
-                Margin              = new Thickness(0, 40, 0, 0)
+                Margin = new Thickness(0, 40, 0, 0)
             }
         );
-    }
 
     private static Color ParseColor(string value)
     {

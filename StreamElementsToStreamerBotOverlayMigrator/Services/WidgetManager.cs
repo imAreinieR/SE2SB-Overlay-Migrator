@@ -80,9 +80,14 @@ public static class WidgetManager
                 .ToList();
 
             foreach (WidgetFile widgetFile in existingWidgetFiles.Where(file => !currentWidgetFileIds.Contains(file.Id)))
-            {
                 WidgetFileManagerDb.Delete(connection, widgetFile);
-            }
+
+            List<int> existingWidgetFileIds = existingWidgetFiles
+                .Select(file => file.Id)
+                .ToList(); 
+
+            foreach (WidgetFile widgetFile in widget.Files.Where(file => existingWidgetFileIds.Contains(file.Id)))
+                WidgetFileManagerDb.Update(connection, widgetFile);
 
             WidgetManagerDb.Update(connection, widget);
         }
