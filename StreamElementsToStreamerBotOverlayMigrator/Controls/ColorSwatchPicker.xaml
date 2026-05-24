@@ -1,0 +1,77 @@
+<UserControl x:Class="StreamElementsToStreamerBotOverlayMigrator.Controls.ColorSwatchPicker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <UserControl.Resources>
+
+        <Style x:Key="SwatchBtn" TargetType="Button">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg"
+                                CornerRadius="4"
+                                BorderBrush="#252c40"
+                                BorderThickness="1"
+                                Background="{TemplateBinding Background}"
+                                ClipToBounds="True"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="#4f7eff"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bg" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+    <StackPanel Orientation="Horizontal">
+
+        <!-- Colour swatch button -->
+        <Grid Width="30" Height="30">
+            <!-- Checkerboard for alpha visibility -->
+            <Border CornerRadius="4" ClipToBounds="True">
+                <Border.Background>
+                    <DrawingBrush TileMode="Tile" Viewport="0,0,6,6" ViewportUnits="Absolute">
+                        <DrawingBrush.Drawing>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="#555" Geometry="M0,0 H6 V6 H0 Z"/>
+                                <GeometryDrawing Brush="#888" Geometry="M0,0 H3 V3 H0 Z M3,3 H6 V6 H3 Z"/>
+                            </DrawingGroup>
+                        </DrawingBrush.Drawing>
+                    </DrawingBrush>
+                </Border.Background>
+            </Border>
+            <!-- The actual colour layer on top -->
+            <Button x:Name="SwatchButton"
+                    Style="{StaticResource SwatchBtn}"
+                    Click="SwatchButton_Click"/>
+        </Grid>
+
+        <!-- Rgba string display -->
+        <TextBox x:Name="RgbaBox"
+                 Margin="8,0,0,0"
+                 IsReadOnly="True"
+                 Focusable="False"
+                 FontFamily="Consolas"
+                 FontSize="11"
+                 Height="30"
+                 VerticalContentAlignment="Center"
+                 Padding="6,0"
+                 Background="#0f111a"
+                 Foreground="#5a6280"
+                 BorderBrush="#252c40"
+                 BorderThickness="1"
+                 MinWidth="140"/>
+
+    </StackPanel>
+</UserControl>
