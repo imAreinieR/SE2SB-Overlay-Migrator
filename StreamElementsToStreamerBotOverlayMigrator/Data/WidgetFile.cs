@@ -15,7 +15,7 @@ public class WidgetFile
     {
         FileName       = fileName;
         Content        = fileContent;
-        WidgetFileType = DetermineWidgetFileType(fileName);
+        WidgetFileType = DetermineWidgetFileType(fileName, fileContent);
     }
 
     public WidgetFile(int id, int widgetId, string fileName, string fileContent, WidgetFileType widgetFileType)
@@ -27,7 +27,7 @@ public class WidgetFile
         WidgetFileType = widgetFileType;
     }
 
-    private WidgetFileType DetermineWidgetFileType(string fileName, string? fileContent = null)
+    private WidgetFileType DetermineWidgetFileType(string fileName, string fileContent)
     {
         if (fileName.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
             return WidgetFileType.Html;
