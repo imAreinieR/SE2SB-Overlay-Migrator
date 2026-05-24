@@ -33,7 +33,7 @@ public partial class WidgetConfigWindow: Window
     {
         WidgetFile? dataFile = _widget
             .Files
-            .FirstOrDefault(file => file.FileName.Equals("data.json", StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(file => file.WidgetFileType == Common.WidgetFileType.DataJson);
 
         if (dataFile is null)
             return;
@@ -61,7 +61,7 @@ public partial class WidgetConfigWindow: Window
     {
         WidgetFile? fieldsFile = _widget
             .Files
-            .FirstOrDefault(file => file.FileName.Equals("fields.json", StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(file => file.WidgetFileType == Common.WidgetFileType.FieldJson);
 
         if (fieldsFile is null)
         {

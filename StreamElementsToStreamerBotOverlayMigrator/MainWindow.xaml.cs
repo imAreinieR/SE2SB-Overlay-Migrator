@@ -233,7 +233,8 @@ public partial class MainWindow: Window
 
     private void Configure_Click(object sender, RoutedEventArgs e)
     {
-        if (_selectedWidget is null) return;
+        if (_selectedWidget is null)
+            return;
 
         var configWindow = new WidgetConfigWindow(_selectedWidget)
         {
@@ -254,7 +255,7 @@ public partial class MainWindow: Window
 
         ConfigureBtn.IsEnabled = widget
             .Files
-            .Any(file => file.FileName.Equals("fields.json", StringComparison.OrdinalIgnoreCase));
+            .Any(file => file.WidgetFileType == Common.WidgetFileType.FieldJson);
 
         if (WidgetList.SelectedItem != widget)
             WidgetList.SelectedItem = widget;
@@ -299,6 +300,10 @@ public partial class MainWindow: Window
         FilesEmptyLabel.Visibility = hasFiles
             ? Visibility.Collapsed
             : Visibility.Visible;
+
+        ConfigureBtn.IsEnabled = _selectedWidget
+            .Files
+            .Any(file => file.WidgetFileType == Common.WidgetFileType.FieldJson);
 
         if (!hasFiles)
         {
