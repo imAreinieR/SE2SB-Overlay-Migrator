@@ -244,9 +244,8 @@ public partial class WidgetConfigWindow: Window
                 if (field.Options is null)
                     return null;
 
-                var comboBox = new ComboBox
+                var comboBox = new StyledDropdown
                 {
-                    Style = (Style) FindResource("FieldDropdown"),
                     Tag   = field.Key
                 };
 
@@ -374,7 +373,7 @@ public partial class WidgetConfigWindow: Window
                 case ColorSwatchPicker picker:
                     output[field.Key] = picker.RgbaString;
                     break;
-                case ComboBox comboBox:
+                case StyledDropdown comboBox:
                     output[field.Key] = (comboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
                     break;
             }
