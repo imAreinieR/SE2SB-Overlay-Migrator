@@ -156,10 +156,13 @@ If the warning banner appears, follow its instructions (e.g. add the missing HTM
 ### Step 4 — Save your work
 Click **Save**.
 
-### Step 5 — Generate
+### Step 6 — Edit Configuration (optional)
+Click **Edit Configuration**. Configure the widget settings as needed.
+
+### Step 7 — Generate
 Click **Generate**. The tool writes the processed files to the deploy path shown under **Deploy Location**.
 
-### Step 6 — Add to OBS
+### Step 8 — Add to OBS
 Copy the deploy URL and create a browser source in OBS pointing to it.
 
 ---
