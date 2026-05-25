@@ -60,18 +60,18 @@ public static class WidgetManager
         if (widget.Id == 0)
         {
             WidgetManagerDb.Insert(connection, widget);
+
+            foreach (WidgetFile widgetFile in widget.Files)
+            {
+                widgetFile.WidgetId = widget.Id;
+                WidgetFileManagerDb.Insert(connection, widgetFile);
+            }
         }
         else
         {
             List<WidgetFile> existingWidgetFiles = WidgetFileManagerDb
                 .GetByWidgetId(connection, widget.Id)
                 .ToList();
-
-            foreach (WidgetFile widgetFile in widget.Files.Where(file => file.Id <= 0))
-            {
-                widgetFile.WidgetId = widget.Id;
-                WidgetFileManagerDb.Insert(connection, widgetFile);
-            }
 
             List<int> currentWidgetFileIds = widget
                 .Files
@@ -84,10 +84,16 @@ public static class WidgetManager
 
             List<int> existingWidgetFileIds = existingWidgetFiles
                 .Select(file => file.Id)
-                .ToList(); 
+                .ToList();
 
             foreach (WidgetFile widgetFile in widget.Files.Where(file => existingWidgetFileIds.Contains(file.Id)))
                 WidgetFileManagerDb.Update(connection, widgetFile);
+
+            foreach (WidgetFile widgetFile in widget.Files.Where(file => file.Id <= 0))
+            {
+                widgetFile.WidgetId = widget.Id;
+                WidgetFileManagerDb.Insert(connection, widgetFile);
+            }
 
             WidgetManagerDb.Update(connection, widget);
         }
@@ -105,6 +111,13 @@ public static class WidgetManager
             WidgetFileManagerDb.Delete(connection, file);
 
         WidgetManagerDb.Delete(connection, widget);
+
+        try
+        {
+            Directory.Delete(widget.DeployedLocation, true);
+        }
+        catch (Exception)
+        {}
     }
     
     public static bool GenerateExportFiles(Widget widget, out string errorMessage)

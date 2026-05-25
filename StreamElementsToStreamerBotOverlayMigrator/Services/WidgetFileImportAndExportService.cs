@@ -4,6 +4,7 @@ using StreamElementsToStreamerBotOverlayMigrator.Data;
 using StreamElementsToStreamerBotOverlayMigrator.Templates;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -11,16 +12,28 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Services;
 
 public static class WidgetFileImportAndExportService
 {
-    private readonly static List<string> _relevantFileExtensions = new() { ".html", ".js", ".css", ".json" };
+    private readonly static List<string> _allowedImportFileExtensions = new() { ".html", ".js", ".css", ".json", ".zip" };
+    private readonly static List<string> _allowedWidgetFileExtensions = new() { ".html", ".js", ".css", ".json" };
     private readonly static TimeSpan     _defaultRegexTimeout = TimeSpan.FromSeconds(1);
 
     public static IEnumerable<WidgetFile> FetchWidgetFiles(string[] filePaths)
-    {
-        foreach (string filePath in filePaths)
-        {
-            string? fileName = Path.GetFileName(filePath);
+        => filePaths
+        .Where(filePath => _allowedImportFileExtensions.Contains(Path.GetExtension(filePath)))
+        .SelectMany
+        (
+            filePath => Path.GetExtension(filePath).Equals(".zip", StringComparison.OrdinalIgnoreCase)
+                ? UnZipAndExtractWidgetFiles(filePath)
+                : new[] { new WidgetFile(Path.GetFileName(filePath), File.ReadAllText(filePath)) }
+        );
 
-            yield return new WidgetFile(fileName, File.ReadAllText(filePath));
+    private static IEnumerable<WidgetFile> UnZipAndExtractWidgetFiles(string filePath)
+    {
+        using (var file = File.OpenRead(filePath))
+        using (var zip = new ZipArchive(file, ZipArchiveMode.Read))
+        {
+            foreach (var entry in zip.Entries.Where(entry => _allowedWidgetFileExtensions.Contains(Path.GetExtension(entry.Name))))
+                using (var stream = entry.Open())
+                    yield return new WidgetFile(entry.Name, new StreamReader(stream).ReadToEnd());
         }
     }
 
@@ -28,7 +41,7 @@ public static class WidgetFileImportAndExportService
     {
         var duplicates = new List<string>();
 
-        foreach (string extension in _relevantFileExtensions)
+        foreach (string extension in _allowedWidgetFileExtensions)
         {
             int count = widgetFiles.Count(file => Path.GetExtension(file.FileName).Equals(extension, StringComparison.OrdinalIgnoreCase));
 
