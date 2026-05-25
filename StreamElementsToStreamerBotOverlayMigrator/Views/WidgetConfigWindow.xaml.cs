@@ -29,116 +29,7 @@ public partial class WidgetConfigWindow: Window
         LoadFields();
     }
 
-    private void LoadDataJson()
-    {
-        WidgetFile? dataFile = _widget
-            .Files
-            .FirstOrDefault(file => file.WidgetFileType == Common.WidgetFileType.DataJson);
-
-        if (dataFile is null)
-            return;
-
-        try
-        {
-            using JsonDocument jsonDocument = JsonDocument.Parse(dataFile.Content);
-
-            _dataValues = jsonDocument
-                .RootElement
-                .EnumerateObject()
-                .ToDictionary
-                (
-                    jsonProperty => jsonProperty.Name,
-                    jsonProperty => jsonProperty.Value.Clone()
-                );
-        }
-        catch
-        {
-            _dataValues = null;
-        }
-    }
-
-    private void LoadFields()
-    {
-        WidgetFile? fieldsFile = _widget
-            .Files
-            .FirstOrDefault(file => file.WidgetFileType == Common.WidgetFileType.FieldJson);
-
-        if (fieldsFile is null)
-        {
-            ShowNoFieldsMessage("No fields.json found in this widget.");
-            return;
-        }
-
-        List<WidgetDataFieldGroup> groups;
-        try
-        {
-            groups = ParseFieldGroups(fieldsFile.Content);
-        }
-        catch (Exception exception)
-        {
-            ShowNoFieldsMessage($"Could not parse fields.json: {exception.Message}");
-            return;
-        }
-
-        if (!groups.Any())
-        {
-            ShowNoFieldsMessage("No configurable fields found.");
-            return;
-        }
-
-        foreach (WidgetDataFieldGroup group in groups)
-            GroupsPanel.Children.Add(BuildGroupPanel(group));
-    }
-
-    private List<WidgetDataFieldGroup> ParseFieldGroups(string json)
-    {
-        JsonDocument? jsonDocument     = JsonDocument.Parse(json);
-        var           widgetDataFields = new List<WidgetDataField>();
-
-        foreach (JsonProperty jsonProperty in jsonDocument.RootElement.EnumerateObject())
-        {
-            WidgetDataField? widgetDataField = JsonSerializer.Deserialize<WidgetDataField>(jsonProperty.Value.GetRawText());
-
-            if (widgetDataField is null || widgetDataField.Type.Equals("hidden", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            widgetDataField.Key = jsonProperty.Name;
-
-            if (_dataValues is not null && _dataValues.TryGetValue(jsonProperty.Name, out JsonElement dataElement))
-            {
-                widgetDataField.Value = dataElement.ValueKind switch
-                {
-                    JsonValueKind.String => dataElement.GetString(),
-                    JsonValueKind.Number => dataElement.GetDouble(),
-                    _                    => dataElement.ToString()
-                };
-            }
-            else if (jsonProperty.Value.TryGetProperty("value", out JsonElement defaultElement))
-            {
-                widgetDataField.Value = defaultElement.ValueKind switch
-                {
-                    JsonValueKind.String => defaultElement.GetString(),
-                    JsonValueKind.Number => defaultElement.GetDouble(),
-                    _                    => defaultElement.ToString()
-                };
-            }
-
-            widgetDataFields.Add(widgetDataField);
-            _allFields.Add(widgetDataField);
-        }
-
-        return widgetDataFields
-            .GroupBy(widgetDataField => widgetDataField.Group ?? "General")
-            .Select
-            (
-                group => new WidgetDataFieldGroup
-                {
-                    Name   = group.Key,
-                    Fields = group.ToList()
-                }
-            )
-            .ToList();
-    }
+    #region UI Elements
 
     private StackPanel BuildGroupPanel(WidgetDataFieldGroup widgetDataFieldGroup)
     {
@@ -299,6 +190,10 @@ public partial class WidgetConfigWindow: Window
         }
     }
 
+    #endregion UI Elements
+
+    #region Event Handlers
+
     private void OnControlChanged(object sender, EventArgs e)
     {
         if (_isDirty)
@@ -311,8 +206,6 @@ public partial class WidgetConfigWindow: Window
 
         SetStatus("Unsaved changes.");
     }
-
-    #region Event Handlers
 
     private void FieldButton_Click(object sender, RoutedEventArgs e)
     {
@@ -345,6 +238,121 @@ public partial class WidgetConfigWindow: Window
         {
             SetStatus($"Save failed: {exception.Message}", error: true);
         }
+    }
+
+    #endregion Event Handlers
+
+    #region Helpers
+
+    private void LoadDataJson()
+    {
+        WidgetFile? dataFile = _widget
+            .Files
+            .FirstOrDefault(file => file.WidgetFileType == Common.WidgetFileType.DataJson);
+
+        if (dataFile is null)
+            return;
+
+        try
+        {
+            using JsonDocument jsonDocument = JsonDocument.Parse(dataFile.Content);
+
+            _dataValues = jsonDocument
+                .RootElement
+                .EnumerateObject()
+                .ToDictionary
+                (
+                    jsonProperty => jsonProperty.Name,
+                    jsonProperty => jsonProperty.Value.Clone()
+                );
+        }
+        catch
+        {
+            _dataValues = null;
+        }
+    }
+
+    private void LoadFields()
+    {
+        WidgetFile? fieldsFile = _widget
+            .Files
+            .FirstOrDefault(file => file.WidgetFileType == Common.WidgetFileType.FieldJson);
+
+        if (fieldsFile is null)
+        {
+            ShowNoFieldsMessage("No fields.json found in this widget.");
+            return;
+        }
+
+        List<WidgetDataFieldGroup> groups;
+        try
+        {
+            groups = ParseFieldGroups(fieldsFile.Content);
+        }
+        catch (Exception exception)
+        {
+            ShowNoFieldsMessage($"Could not parse fields.json: {exception.Message}");
+            return;
+        }
+
+        if (!groups.Any())
+        {
+            ShowNoFieldsMessage("No configurable fields found.");
+            return;
+        }
+
+        foreach (WidgetDataFieldGroup group in groups)
+            GroupsPanel.Children.Add(BuildGroupPanel(group));
+    }
+
+    private List<WidgetDataFieldGroup> ParseFieldGroups(string json)
+    {
+        JsonDocument? jsonDocument = JsonDocument.Parse(json);
+        var widgetDataFields = new List<WidgetDataField>();
+
+        foreach (JsonProperty jsonProperty in jsonDocument.RootElement.EnumerateObject())
+        {
+            WidgetDataField? widgetDataField = JsonSerializer.Deserialize<WidgetDataField>(jsonProperty.Value.GetRawText());
+
+            if (widgetDataField is null || widgetDataField.Type.Equals("hidden", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            widgetDataField.Key = jsonProperty.Name;
+
+            if (_dataValues is not null && _dataValues.TryGetValue(jsonProperty.Name, out JsonElement dataElement))
+            {
+                widgetDataField.Value = dataElement.ValueKind switch
+                {
+                    JsonValueKind.String => dataElement.GetString(),
+                    JsonValueKind.Number => dataElement.GetDouble(),
+                    _                    => dataElement.ToString()
+                };
+            }
+            else if (jsonProperty.Value.TryGetProperty("value", out JsonElement defaultElement))
+            {
+                widgetDataField.Value = defaultElement.ValueKind switch
+                {
+                    JsonValueKind.String => defaultElement.GetString(),
+                    JsonValueKind.Number => defaultElement.GetDouble(),
+                    _                    => defaultElement.ToString()
+                };
+            }
+
+            widgetDataFields.Add(widgetDataField);
+            _allFields.Add(widgetDataField);
+        }
+
+        return widgetDataFields
+            .GroupBy(widgetDataField => widgetDataField.Group ?? "General")
+            .Select
+            (
+                group => new WidgetDataFieldGroup
+                {
+                    Name   = group.Key,
+                    Fields = group.ToList()
+                }
+            )
+            .ToList();
     }
 
     private string BuildDataJson()
@@ -381,10 +389,6 @@ public partial class WidgetConfigWindow: Window
 
         return output.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
     }
-
-    #endregion Event Handlers
-
-    #region Helpers
 
     private void ShowNoFieldsMessage(string message)
         => GroupsPanel.Children.Add

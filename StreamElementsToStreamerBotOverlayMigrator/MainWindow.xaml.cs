@@ -31,6 +31,47 @@ public partial class MainWindow: Window
             UpdateEmptyState();
     }
 
+    #region UI Elements
+
+    private void CommitWidgetRename(TextBox textBox)
+    {
+        string newName = textBox.Text.Trim();
+
+        if (string.IsNullOrEmpty(newName))
+        {
+            CancelWidgetRename(textBox);
+            return;
+        }
+
+        if (textBox.DataContext is Widget widget)
+        {
+            widget.Name = newName;
+            WidgetManager.Save(widget);
+
+            if (_selectedWidget == widget)
+                DeployPathBox.Text = widget.FolderLocation;
+
+            SetStatus($"Renamed to '{newName}'.");
+        }
+
+        ExitInlineEdit(textBox);
+    }
+
+    private void CancelWidgetRename(TextBox textBox)
+        => ExitInlineEdit(textBox);
+
+    private static void ExitInlineEdit(TextBox textBox)
+    {
+        StackPanel? nameDisplay = textBox.FindVisualSibling<StackPanel>("NameDisplayPanel");
+
+        if (nameDisplay != null)
+            nameDisplay.Visibility = Visibility.Visible;
+
+        textBox.Visibility = Visibility.Collapsed;
+    }
+
+    #endregion UI Elements
+
     #region Event Handlers
 
     private void WidgetList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -131,43 +172,6 @@ public partial class MainWindow: Window
             CommitWidgetRename(textBox);
     }
 
-    private void CommitWidgetRename(TextBox textBox)
-    {
-        string newName = textBox.Text.Trim();
-
-        if (string.IsNullOrEmpty(newName))
-        {
-            CancelWidgetRename(textBox);
-            return;
-        }
-
-        if (textBox.DataContext is Widget widget)
-        {
-            widget.Name = newName;
-            WidgetManager.Save(widget);
-
-            if (_selectedWidget == widget)
-                DeployPathBox.Text = widget.FolderLocation;
-
-            SetStatus($"Renamed to '{newName}'.");
-        }
-
-        ExitInlineEdit(textBox);
-    }
-
-    private void CancelWidgetRename(TextBox textBox)
-        => ExitInlineEdit(textBox);
-
-    private static void ExitInlineEdit(TextBox textBox)
-    {
-        StackPanel? nameDisplay = textBox.FindVisualSibling<StackPanel>("NameDisplayPanel");
-
-        if (nameDisplay != null)
-            nameDisplay.Visibility = Visibility.Visible;
-
-        textBox.Visibility = Visibility.Collapsed;
-    }
-
     private void SaveWidget_Click(object sender, RoutedEventArgs e)
     {
         if (_selectedWidget is null)
@@ -250,19 +254,6 @@ public partial class MainWindow: Window
         AddWidgetFilesToFromPaths(_selectedWidget, paths);
     }
 
-    private void AddWidgetFilesToFromPaths(Widget widget, IEnumerable<string> paths)
-    {
-        foreach (WidgetFile widgetFile in WidgetFileImportAndExportService.FetchWidgetFiles(paths.ToArray()))
-        {
-            if (widget.Files.Any(file => file.FileName == widgetFile.FileName))
-                continue;
-
-            widget.Files.Add(widgetFile);
-        }
-
-        OnFilesChanged();
-    }
-
     private void SetDropZoneHighlight(bool active)
     {
         if (FilesEmptyLabel.FindName("DropZoneDash") is not System.Windows.Shapes.Rectangle dash)
@@ -313,6 +304,19 @@ public partial class MainWindow: Window
 
         OnFilesChanged();
         SetStatus("Import your widget files.");
+    }
+
+    private void AddWidgetFilesToFromPaths(Widget widget, IEnumerable<string> paths)
+    {
+        foreach (WidgetFile widgetFile in WidgetFileImportAndExportService.FetchWidgetFiles(paths.ToArray()))
+        {
+            if (widget.Files.Any(file => file.FileName == widgetFile.FileName))
+                continue;
+
+            widget.Files.Add(widgetFile);
+        }
+
+        OnFilesChanged();
     }
 
     private void UpdateEmptyState()
