@@ -39,13 +39,13 @@ const client = new StreamerbotClient({
           username:   data.name,
           apiToken:   '',
           id:         '', // this is streamelements user id
-          providerId: '12345' //this is twitch user id
+          providerId: '12345', //this is twitch user id
           avatar:     '',
         },
         fieldData: CONFIG,
         overlay: {
           isEditorMode: false,
-          muted:        false
+          muted:        false,
         }
       }
     });
