@@ -23,6 +23,10 @@ public partial class MainWindow: Window
     {
         InitializeComponent();
 
+        Version? version = GetType().Assembly.GetName().Version;
+        if (version != null)
+            VersionLabel.Text = $"v{version.Major}.{version.Minor}.{version.MajorRevision}";
+
         WidgetList.ItemsSource = _widgets = new ObservableCollection<Widget>(WidgetManager.GetAll());
 
         if (_widgets.Any())

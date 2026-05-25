@@ -70,4 +70,18 @@ public class WidgetFile
             return WidgetFileType.Other;
         }
     }
+
+    public System.Windows.Media.SolidColorBrush WidgetFileTypeColor
+        => new System.Windows.Media.SolidColorBrush
+        (
+            WidgetFileType switch
+            {
+                WidgetFileType.Html       => System.Windows.Media.Color.FromArgb(255, 255,  99, 132),
+                WidgetFileType.Javascript => System.Windows.Media.Color.FromArgb(255,  54, 162, 235),
+                WidgetFileType.Css        => System.Windows.Media.Color.FromArgb(255, 255, 206,  86),
+                WidgetFileType.FieldJson  => System.Windows.Media.Color.FromArgb(255,  75, 192, 192),
+                WidgetFileType.DataJson   => System.Windows.Media.Color.FromArgb(255, 153, 102, 255),
+                _                         => System.Windows.Media.Color.FromArgb(255, 201, 203, 207)
+            }
+        );
 }

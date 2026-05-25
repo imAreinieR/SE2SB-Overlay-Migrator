@@ -243,9 +243,19 @@
                         BorderThickness="0,0,0,1"
                         Padding="14,14,14,12">
                     <StackPanel>
-                        <TextBlock Text="WIDGETS"
-                                   Style="{StaticResource SectionLabel}"
-                                   Margin="0,0,0,10"/>
+                        <Grid Margin="0,0,0,10">
+                            <TextBlock Text="WIDGETS"
+                                       Style="{StaticResource SectionLabel}"
+                                       Margin="0"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock x:Name="VersionLabel"
+                                       Text="v0.1.0"
+                                       Style="{StaticResource SectionLabel}"
+                                       Margin="0"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
                         <Button Style="{StaticResource NewWidgetBtn}"
                                 Click="NewWidget_Click">
                             <TextBlock Text="＋  New Widget"
@@ -313,7 +323,7 @@
                                                      Width="6" Height="6"
                                                      Margin="0,0,8,0"
                                                      VerticalAlignment="Center"
-                                                     Fill="{Binding StatusColor}"/>
+                                                     Fill="Green"/>
 
                                             <!-- Widget name display + edit toggle -->
                                             <Grid Grid.Column="1">
@@ -501,16 +511,20 @@
                                                         </Grid.ColumnDefinitions>
 
                                                         <!-- Extension badge -->
-                                                        <Border Grid.Column="0"
-                                                                Background="{Binding ExtBackground}"
-                                                                CornerRadius="3"
-                                                                Padding="5,2"
-                                                                Margin="0,0,8,0">
-                                                            <TextBlock Text="{Binding Extension}"
-                                                                       Foreground="{Binding ExtColor}"
-                                                                       FontFamily="Consolas"
-                                                                       FontSize="10"/>
-                                                        </Border>
+                                                        <Grid Grid.Column="0"
+                                                              Width="80">
+                                                            <Border Background="{Binding WidgetFileTypeColor}"
+                                                                    CornerRadius="3"
+                                                                    Padding="5,2"
+                                                                    Margin="0,0,8,0"
+                                                                    HorizontalAlignment="Left"
+                                                                    VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding WidgetFileType}"
+                                                                           Foreground="Black"
+                                                                           FontFamily="Consolas"
+                                                                           FontSize="10"/>
+                                                            </Border>
+                                                        </Grid>
 
                                                         <!-- Filename -->
                                                         <TextBlock Grid.Column="1"
