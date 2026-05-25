@@ -192,15 +192,7 @@ public partial class MainWindow: Window
         if (dialog.ShowDialog() != true)
             return;
 
-        foreach (WidgetFile widgetFile in WidgetFileImportAndExportService.FetchWidgetFiles(dialog.FileNames))
-        {
-            if (_selectedWidget.Files.Any(file => file.FileName == widgetFile.FileName))
-                continue;
-
-            _selectedWidget.Files.Add(widgetFile);
-        }
-
-        OnFilesChanged();
+        AddWidgetFilesToFromPaths(_selectedWidget, dialog.FileNames);
     }
 
     private void RemoveFile_Click(object sender, RoutedEventArgs e)
@@ -209,6 +201,7 @@ public partial class MainWindow: Window
             return;
 
         _selectedWidget.Files.Remove(file);
+        OnFilesChanged();
     }
 
     private void CopyPath_Click(object sender, RoutedEventArgs e)
@@ -254,12 +247,17 @@ public partial class MainWindow: Window
         if (_selectedWidget is null || e.Data.GetData(DataFormats.FileDrop) is not string[] paths)
             return;
 
-        foreach (WidgetFile widgetFile in WidgetFileImportAndExportService.FetchWidgetFiles(paths))
+        AddWidgetFilesToFromPaths(_selectedWidget, paths);
+    }
+
+    private void AddWidgetFilesToFromPaths(Widget widget, IEnumerable<string> paths)
+    {
+        foreach (WidgetFile widgetFile in WidgetFileImportAndExportService.FetchWidgetFiles(paths.ToArray()))
         {
-            if (_selectedWidget.Files.Any(file => file.FileName == widgetFile.FileName))
+            if (widget.Files.Any(file => file.FileName == widgetFile.FileName))
                 continue;
 
-            _selectedWidget.Files.Add(widgetFile);
+            widget.Files.Add(widgetFile);
         }
 
         OnFilesChanged();
