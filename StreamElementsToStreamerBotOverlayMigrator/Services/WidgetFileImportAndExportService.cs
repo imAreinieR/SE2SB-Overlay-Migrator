@@ -16,25 +16,37 @@ public static class WidgetFileImportAndExportService
     private readonly static List<string> _allowedWidgetFileExtensions = new() { ".html", ".js", ".css", ".json" };
     private readonly static TimeSpan     _defaultRegexTimeout = TimeSpan.FromSeconds(1);
 
-    public static IEnumerable<WidgetFile> FetchWidgetFiles(string[] filePaths)
+    public static IEnumerable<WidgetFile> FetchWidgetFiles(IEnumerable<string> filePaths)
         => filePaths
-        .Where(filePath => _allowedImportFileExtensions.Contains(Path.GetExtension(filePath)))
+        .Where(filePath => _allowedImportFileExtensions.Contains(Path.GetExtension(filePath)) || File.GetAttributes(filePath).HasFlag(FileAttributes.Directory))
         .SelectMany
         (
-            filePath => Path.GetExtension(filePath).Equals(".zip", StringComparison.OrdinalIgnoreCase)
-                ? UnZipAndExtractWidgetFiles(filePath)
-                : new[] { new WidgetFile(Path.GetFileName(filePath), File.ReadAllText(filePath)) }
+            filePath =>
+            {
+                bool isDirectory = File.GetAttributes(filePath).HasFlag(FileAttributes.Directory);
+
+                return isDirectory
+                    ? FetchWidgetFiles(Directory.EnumerateFiles(filePath, "*.*", SearchOption.AllDirectories))
+                    : Path.GetExtension(filePath).Equals(".zip", StringComparison.OrdinalIgnoreCase)
+                        ? UnZipAndExtractWidgetFiles(filePath)
+                        : new[] { new WidgetFile(Path.GetFileName(filePath), File.ReadAllText(filePath)) };
+            }
         );
 
     private static IEnumerable<WidgetFile> UnZipAndExtractWidgetFiles(string filePath)
     {
-        using (var file = File.OpenRead(filePath))
-        using (var zip = new ZipArchive(file, ZipArchiveMode.Read))
-        {
-            foreach (var entry in zip.Entries.Where(entry => _allowedWidgetFileExtensions.Contains(Path.GetExtension(entry.Name))))
-                using (var stream = entry.Open())
-                    yield return new WidgetFile(entry.Name, new StreamReader(stream).ReadToEnd());
-        }
+        using var file = File.OpenRead(filePath);
+        using var zip = new ZipArchive(file, ZipArchiveMode.Read);
+
+        return zip
+            .Entries
+            .Where(entry => _allowedWidgetFileExtensions.Contains(Path.GetExtension(entry.Name)))
+            .Select(entry =>
+            {
+                using var stream = entry.Open();
+                return new WidgetFile(entry.Name, new StreamReader(stream).ReadToEnd());
+            })
+            .ToList();
     }
 
     public static bool CheckIsValidFileSet(this IEnumerable<WidgetFile> widgetFiles, out string validationError)
