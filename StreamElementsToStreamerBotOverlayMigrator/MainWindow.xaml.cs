@@ -209,7 +209,7 @@ public partial class MainWindow: Window
             return;
 
         _selectedWidget.Files.Remove(file);
-        OnFilesChanged();
+        OnChanged();
     }
 
     private void CopyPath_Click(object sender, RoutedEventArgs e)
@@ -230,6 +230,8 @@ public partial class MainWindow: Window
             SetStatus(errorMessage, success: true);
         else
             SetStatus(errorMessage, error: true);
+
+        _selectedWidget.NotifyStatusChanges();
     }
 
     private void DropZone_DragOver(object sender, DragEventArgs e)
@@ -306,8 +308,7 @@ public partial class MainWindow: Window
         DetailContentPanel.Visibility = Visibility.Visible;
         SaveChangesBtn.IsEnabled      = true;
 
-        OnFilesChanged();
-        SetStatus("Import your widget files.");
+        OnChanged();
     }
 
     private void AddWidgetFilesToFromPaths(Widget widget, IEnumerable<string> paths)
@@ -320,7 +321,7 @@ public partial class MainWindow: Window
             widget.Files.Add(widgetFile);
         }
 
-        OnFilesChanged();
+        OnChanged();
     }
 
     private void UpdateEmptyState()
@@ -345,12 +346,12 @@ public partial class MainWindow: Window
         UpdateEmptyState();
     }
 
-    private void OnFilesChanged()
+    private void OnChanged()
     {
         if (_selectedWidget is null)
             return;
 
-        bool hasFiles = _selectedWidget.Files.Count > 0;
+        bool hasFiles = _selectedWidget.Files.Any();
 
         FilesEmptyLabel.Visibility = hasFiles
             ? Visibility.Collapsed
@@ -370,6 +371,8 @@ public partial class MainWindow: Window
             .Files
             .Any(file => file.WidgetFileType == Common.WidgetFileType.FieldJson);
 
+        _selectedWidget.NotifyStatusChanges();
+
         if (!hasFiles)
         {
             HideWarning();
@@ -387,7 +390,12 @@ public partial class MainWindow: Window
         {
             HideWarning();
             GenerateBtn.IsEnabled = true;
-            SetStatus("Ready to generate.");
+            SetStatus
+            (
+                _selectedWidget.IsGenerated
+                    ? "Up-to-date!"
+                    : "Ready to generate."
+            );
         }
     }
 

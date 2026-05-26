@@ -315,15 +315,17 @@
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto"/>  <!-- Status dot -->
                                                 <ColumnDefinition Width="*"/>     <!-- Name -->
+                                                <ColumnDefinition Width="Auto"/>  <!-- Edit icon -->
                                                 <ColumnDefinition Width="Auto"/>  <!-- X -->
                                             </Grid.ColumnDefinitions>
 
                                             <!-- Status dot -->
-                                            <Ellipse Grid.Column="0"
+                                            <Ellipse x:Name="WidgetStatusDot"
+                                                     Grid.Column="0"
                                                      Width="6" Height="6"
                                                      Margin="0,0,8,0"
                                                      VerticalAlignment="Center"
-                                                     Fill="Green"/>
+                                                     Fill="{Binding StatusColor}" />
 
                                             <!-- Widget name display + edit toggle -->
                                             <Grid Grid.Column="1">
@@ -338,14 +340,6 @@
                                                                VerticalAlignment="Center"
                                                                TextTrimming="CharacterEllipsis"
                                                                MaxWidth="100"/>
-                                                    <TextBlock x:Name="EditIcon"
-                                                               Text=" ✎"
-                                                               FontSize="11"
-                                                               Foreground="#5a6280"
-                                                               VerticalAlignment="Center"
-                                                               Opacity="0"
-                                                               Cursor="Hand"
-                                                               MouseLeftButtonUp="EditWidgetName_MouseUp"/>
                                                 </StackPanel>
 
                                                 <!-- Edit mode -->
@@ -357,8 +351,20 @@
                                                          LostFocus="WidgetNameBox_LostFocus"/>
                                             </Grid>
 
+                                            <!-- Edit icon (hidden, shown on row hover) -->
+                                            <TextBlock x:Name="EditIcon"
+                                                       Grid.Column="2"
+                                                       Text="✎"
+                                                       FontSize="11"
+                                                       Foreground="#5a6280"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,2,0"
+                                                       Opacity="0"
+                                                       Cursor="Hand"
+                                                       MouseLeftButtonUp="EditWidgetName_MouseUp"/>
+
                                             <!-- Remove X (hidden, shown on row hover) -->
-                                            <Button Grid.Column="2"
+                                            <Button Grid.Column="3"
                                                     x:Name="RemoveBtn"
                                                     Content="✕"
                                                     Tag="{Binding}"

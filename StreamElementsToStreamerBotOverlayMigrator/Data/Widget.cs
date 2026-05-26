@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using StreamElementsToStreamerBotOverlayMigrator.Services;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 
@@ -24,6 +25,9 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Data
                 _name = value;
                 OnPropertyChanged(nameof(Name));
                 OnPropertyChanged(nameof(FolderLocation));
+                OnPropertyChanged(nameof(HtmlFilePath));
+                OnPropertyChanged(nameof(IsGenerated));
+                OnPropertyChanged(nameof(StatusColor));
             }
         }
 
@@ -38,7 +42,9 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Data
                 _rootFolderLocation = value;
                 OnPropertyChanged(nameof(RootFolderLocation));
                 OnPropertyChanged(nameof(FolderLocation));
-                OnPropertyChanged(nameof(DeployedLocation));
+                OnPropertyChanged(nameof(HtmlFilePath));
+                OnPropertyChanged(nameof(IsGenerated));
+                OnPropertyChanged(nameof(StatusColor));
             }
         }
 
@@ -68,7 +74,29 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Data
         public string HtmlFilePath
             => Path.Combine(FolderLocation, "index.html");
 
-        protected void OnPropertyChanged(string propertyName)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        public bool HasValidFileSet
+            => Files.Any() && WidgetFileImportAndExportService.CheckIsValidFileSet(Files, out _);
+
+        public bool IsGenerated
+            => File.Exists(HtmlFilePath);
+
+        public System.Windows.Media.SolidColorBrush StatusColor
+            => new System.Windows.Media.SolidColorBrush
+            (
+                HasValidFileSet
+                    ? IsGenerated
+                        ? System.Windows.Media.Color.FromArgb(255, 60, 179, 113)
+                        : System.Windows.Media.Color.FromArgb(255, 245, 166, 35)
+                    : System.Windows.Media.Color.FromArgb(255, 220, 20, 60)
+            );
+
+        public void NotifyStatusChanges()
+        {
+            OnPropertyChanged(nameof(FolderLocation));
+            OnPropertyChanged(nameof(HtmlFilePath));
+            OnPropertyChanged(nameof(HasValidFileSet));
+            OnPropertyChanged(nameof(IsGenerated));
+            OnPropertyChanged(nameof(StatusColor));
+        }
     }
 }
