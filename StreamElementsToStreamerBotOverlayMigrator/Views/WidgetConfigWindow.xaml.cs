@@ -137,7 +137,7 @@ public partial class WidgetConfigWindow: Window
 
                 var comboBox = new StyledDropdown
                 {
-                    Tag   = field.Key
+                    Tag = field.Key
                 };
 
                 foreach ((string key, string label) in field.Options)

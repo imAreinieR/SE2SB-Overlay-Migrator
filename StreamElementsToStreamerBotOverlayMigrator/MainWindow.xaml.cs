@@ -24,8 +24,8 @@ public partial class MainWindow: Window
         InitializeComponent();
 
         Version? version = GetType().Assembly.GetName().Version;
-        if (version != null)
-            VersionLabel.Text = $"v{version.Major}.{version.Minor}.{version.MajorRevision}";
+        if (version != null && VersionLabel.Content is TextBlock versionText)
+            versionText.Text = $"v{version.Major}.{version.Minor}.{version.Build}";
 
         WidgetList.ItemsSource = _widgets = new ObservableCollection<Widget>(WidgetManager.GetAll());
 
@@ -289,6 +289,17 @@ public partial class MainWindow: Window
             Owner = this
         };
         configWindow.ShowDialog();
+    }
+
+    private async void VersionLabel_Click(object sender, RoutedEventArgs e)
+    {
+        VersionLabel.IsEnabled = false;
+        SetStatus("Checking for updates...");
+
+        string? message = await UpdaterService.CheckForLatestAsync();
+
+        SetStatus(message ?? "You're up to date.");
+        VersionLabel.IsEnabled = true;
     }
 
     #endregion Event Handlers

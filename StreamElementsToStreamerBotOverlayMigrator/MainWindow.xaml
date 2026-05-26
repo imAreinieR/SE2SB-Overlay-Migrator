@@ -249,12 +249,19 @@
                                        Margin="0"
                                        HorizontalAlignment="Left"
                                        VerticalAlignment="Center"/>
-                            <TextBlock x:Name="VersionLabel"
-                                       Text="v0.1.0"
-                                       Style="{StaticResource SectionLabel}"
-                                       Margin="0"
-                                       HorizontalAlignment="Right"
-                                       VerticalAlignment="Center"/>
+                            <Button x:Name="VersionLabel"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Padding="0"
+                                    Cursor="Hand"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    ToolTip="Check for updates"
+                                    Click="VersionLabel_Click">
+                                <TextBlock Text="v0.1.0"
+                                           Style="{StaticResource SectionLabel}"
+                                           Margin="0"/>
+                            </Button>
                         </Grid>
                         <Button Style="{StaticResource NewWidgetBtn}"
                                 Click="NewWidget_Click">
