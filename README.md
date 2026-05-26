@@ -64,7 +64,8 @@ flowchart TB
 ## Features
 
 ### SE to StreamerBot Migration
-- Takes your existing StreamElements overlay widget and converts them into a locally-hosted overlay widget that StreamerBot can drive with events. No manual code changes needed.
+- Takes your existing StreamElements overlay widget and converts them into a locally-hosted overlay widget that StreamerBot can drive with events.
+- No manual code changes needed.
 
 ### Widget Management
 - Create and configure multiple widgets.
@@ -74,7 +75,7 @@ flowchart TB
 - A `streamerBotEvents.js` file is generated automatically alongside your widget files. This bridges StreamerBot's event system to your overlay so it can respond to stream events (follows, subs, etc.) without any manual wiring.
 
 ### Simple File Imports
-- Import `.html`, `.js`, `.css`, and `.json` files or even a `.zip` file.
+- Import `.html`, `.js`, `.css`, `.json` files or even an entire folder or `.zip` file.
 - Warns if the required files are missing or if duplicate files exist.
 
 ### One-Click!
