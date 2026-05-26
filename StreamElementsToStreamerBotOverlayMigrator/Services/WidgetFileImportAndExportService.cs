@@ -108,6 +108,15 @@ public static class WidgetFileImportAndExportService
 
     private static string SearchAndReplaceDataVariables(string content, string jsonData)
     {
+        if (!RequiresVariableReplacement(content))
+        {
+            return content;
+        }
+        else if (string.IsNullOrEmpty(jsonData))
+        {
+            throw new ArgumentException("Missing fields.json file.");
+        }
+
         using JsonDocument jsonDocument = JsonDocument.Parse(jsonData);
 
         foreach (JsonProperty jsonProperty in jsonDocument.RootElement.EnumerateObject())
@@ -157,6 +166,14 @@ public static class WidgetFileImportAndExportService
         }
         return content;
     }
+
+    private static bool RequiresVariableReplacement(string content)
+        => Regex.IsMatch(
+            content,
+            @"(?<!\$)\{\{[\w]+\}\}|(?<!\$)(?<!\{)\{[\w]+\}(?!\})",
+            RegexOptions.None,
+            _defaultRegexTimeout
+        );
 
     private static string FixProtocolRelativeUrls(string htmlContent)
         => Regex.Replace
