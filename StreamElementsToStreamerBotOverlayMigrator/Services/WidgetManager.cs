@@ -114,7 +114,7 @@ public static class WidgetManager
 
         try
         {
-            Directory.Delete(widget.DeployedLocation, true);
+            Directory.Delete(widget.FolderLocation, true);
         }
         catch (Exception)
         {}

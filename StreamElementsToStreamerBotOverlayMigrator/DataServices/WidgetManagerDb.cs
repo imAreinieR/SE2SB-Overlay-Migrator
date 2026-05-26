@@ -63,7 +63,7 @@ public static class WidgetManagerDb
             SELECT last_insert_rowid();";
 
         command.Parameters.AddWithValue("$name",           widget.Name);
-        command.Parameters.AddWithValue("$folderLocation", widget.FolderLocation);
+        command.Parameters.AddWithValue("$folderLocation", widget.RootFolderLocation);
 
         widget.Id = Convert.ToInt32(command.ExecuteScalar());
     }
@@ -79,7 +79,7 @@ public static class WidgetManagerDb
 
         command.Parameters.AddWithValue("$id",             widget.Id);
         command.Parameters.AddWithValue("$name",           widget.Name);
-        command.Parameters.AddWithValue("$folderLocation", widget.FolderLocation);
+        command.Parameters.AddWithValue("$folderLocation", widget.RootFolderLocation);
 
         command.ExecuteNonQuery();
     }

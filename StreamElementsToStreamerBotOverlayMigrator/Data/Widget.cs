@@ -7,7 +7,7 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Data
     public class Widget: INotifyPropertyChanged
     {
         private string _name;
-        private string _folderLocation;
+        private string _rootFolderLocation;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -23,19 +23,20 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Data
 
                 _name = value;
                 OnPropertyChanged(nameof(Name));
-                OnPropertyChanged(nameof(DeployedLocation));
+                OnPropertyChanged(nameof(FolderLocation));
             }
         }
 
-        public string FolderLocation
+        public string RootFolderLocation
         {
-            get => _folderLocation;
+            get => _rootFolderLocation;
             set
             {
-                if (_folderLocation == value)
+                if (_rootFolderLocation == value)
                     return;
 
-                _folderLocation = value;
+                _rootFolderLocation = value;
+                OnPropertyChanged(nameof(RootFolderLocation));
                 OnPropertyChanged(nameof(FolderLocation));
                 OnPropertyChanged(nameof(DeployedLocation));
             }
@@ -45,24 +46,27 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Data
 
         public Widget(string name, string folderLocation)
         {
-            _name           = name;
-            _folderLocation = folderLocation;
-            Files           = new ObservableCollection<WidgetFile>();
+            _name               = name;
+            _rootFolderLocation = folderLocation;
+            Files               = new ObservableCollection<WidgetFile>();
         }
 
         public Widget(int id, string name, string folderLocation, List<WidgetFile> files)
         {
-            Id              = id;
-            _name           = name;
-            _folderLocation = folderLocation;
-            Files           = new ObservableCollection<WidgetFile>(files);
+            Id                  = id;
+            _name               = name;
+            _rootFolderLocation = folderLocation;
+            Files               = new ObservableCollection<WidgetFile>(files);
         }
 
-        public string DeployedLocation
-            => Path.Combine(FolderLocation, Name.Replace(" ", "-"));
+        protected void OnPropertyChanged(string propertyName)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        public string FolderLocation
+            => Path.Combine(RootFolderLocation, Name.Replace(" ", "-"));
 
         public string HtmlFilePath
-            => Path.Combine(DeployedLocation, "index.html");
+            => Path.Combine(FolderLocation, "index.html");
 
         protected void OnPropertyChanged(string propertyName)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

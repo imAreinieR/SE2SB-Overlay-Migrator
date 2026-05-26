@@ -53,7 +53,7 @@ public partial class MainWindow: Window
             WidgetManager.Save(widget);
 
             if (_selectedWidget == widget)
-                DeployPathBox.Text = widget.FolderLocation;
+                DeployPathBox.Text = widget.RootFolderLocation;
 
             SetStatus($"Renamed to '{newName}'.");
         }
@@ -296,7 +296,7 @@ public partial class MainWindow: Window
     private void SelectWidget(Widget widget)
     {
         _selectedWidget      = widget;
-        DeployPathBox.Text   = widget.DeployedLocation;
+        DeployPathBox.Text   = widget.FolderLocation;
         FileList.ItemsSource = widget.Files;
 
         if (WidgetList.SelectedItem != widget)

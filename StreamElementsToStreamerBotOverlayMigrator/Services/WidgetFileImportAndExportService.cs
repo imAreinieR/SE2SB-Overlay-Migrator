@@ -69,14 +69,14 @@ public static class WidgetFileImportAndExportService
     {
         try
         {
-            Directory.CreateDirectory(widget.DeployedLocation);
+            Directory.CreateDirectory(widget.FolderLocation);
 
             string jsonData = widget.Files.FirstOrDefault(file => file.WidgetFileType == WidgetFileType.DataJson)?.Content ?? string.Empty;
 
             foreach (WidgetFile file in widget.Files)
             {
                 string fileName    = file.GetFileNameForWidgetFileType();
-                string destination = Path.Combine(widget.DeployedLocation, fileName);
+                string destination = Path.Combine(widget.FolderLocation, fileName);
                 string content     = file.WidgetFileType == WidgetFileType.Html || file.WidgetFileType == WidgetFileType.Css || file.WidgetFileType == WidgetFileType.Javascript
                     ? SearchAndReplaceDataVariables(file.Content, jsonData)
                     : file.Content;
@@ -93,9 +93,9 @@ public static class WidgetFileImportAndExportService
                 File.WriteAllText(destination, content);
             }
 
-            File.WriteAllText(Path.Combine(widget.DeployedLocation, "streamerBotEvents.js"), TemplateFiles.StreamerBotEventHandlersFile);
+            File.WriteAllText(Path.Combine(widget.FolderLocation, "streamerBotEvents.js"), TemplateFiles.StreamerBotEventHandlersFile);
 
-            errorMessage = $"Generated to '{widget.DeployedLocation}'";
+            errorMessage = $"Generated to '{widget.FolderLocation}'";
             return true;
         }
         catch (Exception exception)
