@@ -93,6 +93,8 @@ public static class WidgetFileManagerDb
         while (reader.Read())
             widgetFiles.Add(ReadWidgetFile(reader));
 
+        widgetFiles.Sort(WidgetFileComparer.Instance);
+
         return widgetFiles;
     }
 

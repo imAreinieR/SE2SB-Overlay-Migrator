@@ -1,4 +1,6 @@
-﻿using StreamElementsToStreamerBotOverlayMigrator.Services;
+﻿using StreamElementsToStreamerBotOverlayMigrator.Common;
+using StreamElementsToStreamerBotOverlayMigrator.Common.ExtensionMethods;
+using StreamElementsToStreamerBotOverlayMigrator.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -89,6 +91,9 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Data
                         : System.Windows.Media.Color.FromArgb(255, 245, 166, 35)
                     : System.Windows.Media.Color.FromArgb(255, 220, 20, 60)
             );
+
+        public void AddWidgetFile(WidgetFile widgetFile)
+            => Files.AddSorted(widgetFile, WidgetFileComparer.Instance);
 
         public void NotifyStatusChanges()
         {

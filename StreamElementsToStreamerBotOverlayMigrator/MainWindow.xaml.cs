@@ -329,7 +329,7 @@ public partial class MainWindow: Window
             if (widget.Files.Any(file => file.FileName == widgetFile.FileName))
                 continue;
 
-            widget.Files.Add(widgetFile);
+            widget.AddWidgetFile(widgetFile);
         }
 
         OnChanged();

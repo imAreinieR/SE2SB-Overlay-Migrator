@@ -225,7 +225,7 @@ public partial class WidgetConfigWindow: Window
             if (dataFile is not null)
                 dataFile.Content = json;
             else
-                _widget.Files.Add(new WidgetFile("data.json", json));
+                _widget.AddWidgetFile(new WidgetFile("data.json", json));
 
             WidgetManager.Save(_widget);
 
