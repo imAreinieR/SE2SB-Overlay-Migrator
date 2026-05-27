@@ -626,8 +626,8 @@
 
                     </Grid>
 
-                    <!-- Deploy path section -->
-                    <TextBlock Text="DEPLOY LOCATION" Style="{StaticResource SectionLabel}"/>
+                    <!-- Folder path section -->
+                    <TextBlock Text="FOLDER LOCATION" Style="{StaticResource SectionLabel}"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -636,7 +636,7 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBox Grid.Column="0"
-                                 x:Name="DeployPathBox"
+                                 x:Name="FolderPathBox"
                                  Style="{StaticResource PathBox}"
                                  Height="34"/>
 

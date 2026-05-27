@@ -15,7 +15,7 @@ namespace StreamElementsToStreamerBotOverlayMigrator;
 
 public partial class MainWindow: Window
 {
-    private static readonly string                       DefaultDeployPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "imA-SB-Widgets");
+    private static readonly string                       DefaultRootFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "imA-SB-Widgets");
     private        readonly ObservableCollection<Widget> _widgets;
     private                 Widget?                      _selectedWidget;
 
@@ -53,7 +53,7 @@ public partial class MainWindow: Window
             WidgetManager.Save(widget);
 
             if (_selectedWidget == widget)
-                DeployPathBox.Text = widget.RootFolderLocation;
+                FolderPathBox.Text = widget.RootFolderLocation;
 
             SetStatus($"Renamed to '{newName}'.");
         }
@@ -93,7 +93,7 @@ public partial class MainWindow: Window
             .DefaultIfEmpty(0)
             .Max();
 
-        var widget = new Widget($"Widget {maxNumber + 1}", DefaultDeployPath);
+        var widget = new Widget($"Widget {maxNumber + 1}", DefaultRootFolderPath);
 
         _widgets.Add(widget);
         WidgetList.SelectedItem = widget;
@@ -309,7 +309,7 @@ public partial class MainWindow: Window
     private void SelectWidget(Widget widget)
     {
         _selectedWidget      = widget;
-        DeployPathBox.Text   = widget.FolderLocation;
+        FolderPathBox.Text   = widget.FolderLocation;
         FileList.ItemsSource = widget.Files;
 
         if (WidgetList.SelectedItem != widget)
@@ -349,7 +349,7 @@ public partial class MainWindow: Window
 
     private void ClearDetail()
     {
-        DeployPathBox.Text       = string.Empty;
+        FolderPathBox.Text       = string.Empty;
         GenerateBtn.IsEnabled    = false;
         SaveChangesBtn.IsEnabled = false;
         HideWarning();

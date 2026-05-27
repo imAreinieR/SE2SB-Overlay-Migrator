@@ -164,7 +164,7 @@ Click **Edit Configuration**. Configure the widget settings as needed.
 Click **Generate**. The tool writes the processed files to the path shown under **Deploy Location**.
 
 ### Step 8 — Add to OBS
-Copy the deploy URL and create a browser source in OBS pointing to it.
+Copy the URL and create a local browser source in OBS pointing to it.
 ![OBS Browser Source Settings](Images/obs_browser_source.png)
 
 ---
