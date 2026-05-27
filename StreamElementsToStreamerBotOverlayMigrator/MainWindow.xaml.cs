@@ -298,7 +298,7 @@ public partial class MainWindow: Window
 
         string? message = await UpdaterService.CheckForLatestAsync();
 
-        SetStatus(message ?? "You're up to date.");
+        SetStatus(message ?? "Application is up-to-date!");
         VersionLabel.IsEnabled = true;
     }
 
@@ -404,7 +404,7 @@ public partial class MainWindow: Window
             SetStatus
             (
                 _selectedWidget.IsGenerated
-                    ? "Up-to-date!"
+                    ? "Widget is up-to-date!"
                     : "Ready to generate."
             );
         }
