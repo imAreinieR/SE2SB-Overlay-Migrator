@@ -8,8 +8,9 @@ public partial class App: Application
     {
         base.OnStartup(e);
 
-        string? url    = GetArg(e.Args, "--url");
-        string? target = GetArg(e.Args, "--target");
+        string? url      = GetArg(e.Args, "--url");
+        string? target   = GetArg(e.Args, "--target");
+        string? checksum = GetArg(e.Args, "--checksum");
 
         if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(target))
         {
@@ -24,7 +25,7 @@ public partial class App: Application
             return;
         }
 
-        var window = new UpdaterWindow(url, target);
+        var window = new UpdaterWindow(url, target, checksum);
         window.Show();
     }
 

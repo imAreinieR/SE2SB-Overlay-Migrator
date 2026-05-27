@@ -294,11 +294,32 @@ public partial class MainWindow: Window
     private async void VersionLabel_Click(object sender, RoutedEventArgs e)
     {
         VersionLabel.IsEnabled = false;
-        SetStatus("Checking for updates...");
 
         string? message = await UpdaterService.CheckForLatestAsync();
 
-        SetStatus(message ?? "Application is up-to-date!");
+        if (string.IsNullOrEmpty(message))
+        {
+            MessageBox.Show
+            (
+                "Up-to-date!",
+                "Check for updates",
+                MessageBoxButton.OK
+            );
+        }
+        else
+        {
+            MessageBoxResult messageBoxResult = MessageBox.Show
+            (
+                message,
+                "Check for updates",
+                MessageBoxButton.OKCancel,
+                MessageBoxImage.Information
+            );
+
+            if (messageBoxResult == MessageBoxResult.OK)
+                await UpdaterService.CheckAndUpdateToLatestAsync();
+        }
+
         VersionLabel.IsEnabled = true;
     }
 

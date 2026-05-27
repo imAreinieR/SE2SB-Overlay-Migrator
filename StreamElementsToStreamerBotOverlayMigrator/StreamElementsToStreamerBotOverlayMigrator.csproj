@@ -20,7 +20,17 @@
   <ItemGroup>
   	<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.8" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Behaviors\" />
-  </ItemGroup>
+  <Target Name="ZipPublishOutput" AfterTargets="Publish">
+    <PropertyGroup>
+      <ZipName>$(AssemblyName)-v$(Version)</ZipName>
+      <ZipTempPath>$(MSBuildProjectDirectory)\bin\Release\$(ZipName).zip</ZipTempPath>
+      <ZipFinalPath>$(PublishDir)$(ZipName).zip</ZipFinalPath>
+    </PropertyGroup>
+    <Delete Files="$(ZipTempPath);$(ZipFinalPath);$(PublishDir)$(ZipName).zip.sha256"/>
+    <ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(ZipTempPath)" Overwrite="true"/>
+    <Move SourceFiles="$(ZipTempPath)" DestinationFiles="$(ZipFinalPath)"/>
+  </Target>
+  <Target Name="GenerateZipChecksum" AfterTargets="ZipPublishOutput">
+    <Exec Command="powershell -Command &quot;$h = Get-FileHash '$(PublishDir)$(ZipName).zip' -Algorithm SHA256; $h.Hash.ToLower() + '  $(ZipName).zip' | Out-File -Encoding utf8 '$(PublishDir)$(ZipName).zip.sha256'&quot;"/>
+  </Target>
 </Project>

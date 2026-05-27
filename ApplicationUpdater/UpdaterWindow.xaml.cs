@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
@@ -11,12 +12,14 @@ public partial class UpdaterWindow: Window
 {
     private readonly string                  _downloadUrl;
     private readonly string                  _targetPath;
+    private readonly string?                 _checksumUrl;
     private readonly CancellationTokenSource _cts = new();
 
-    public UpdaterWindow(string downloadUrl, string targetPath)
+    public UpdaterWindow(string downloadUrl, string targetPath, string? checksumUrl)
     {
         _downloadUrl = downloadUrl;
         _targetPath  = targetPath;
+        _checksumUrl = checksumUrl;
         InitializeComponent();
     }
 
@@ -34,14 +37,14 @@ public partial class UpdaterWindow: Window
 
     private async Task RunUpdateAsync(CancellationToken cancellationToken)
     {
-        string tempPath = _targetPath + ".new.exe";
+        string tempZipPath = _targetPath + ".new.zip";
 
         try
         {
             SetStatus("Waiting for app to close...", 0);
             await Task.Delay(1500, cancellationToken);
 
-            SetStatus("Downloading update...", 0);
+            SetStatus("Downloading update...", 10);
 
             using var client = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
             client
@@ -52,14 +55,14 @@ public partial class UpdaterWindow: Window
             using var response = await client.GetAsync(_downloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             response.EnsureSuccessStatusCode();
 
-            long totalBytes = response.Content.Headers.ContentLength ?? -1L;
-            byte[] buffer   = new byte[8192];
-            long received   = 0L;
+            long   totalBytes = response.Content.Headers.ContentLength ?? -1L;
+            byte[] buffer     = new byte[8192];
+            long   received   = 0L;
 
             await using var stream     = await response.Content.ReadAsStreamAsync(cancellationToken);
-            await using var fileStream = File.Create(tempPath);
+            await using var fileStream = File.Create(tempZipPath);
 
-            using var sha256 = SHA256.Create();
+            using var sha256       = SHA256.Create();
             using var cryptoStream = new CryptoStream(fileStream, sha256, CryptoStreamMode.Write);
 
             int read;
@@ -70,8 +73,8 @@ public partial class UpdaterWindow: Window
 
                 if (totalBytes > 0)
                 {
-                    int pct = (int) (received * 100 / totalBytes);
-                    SetStatus($"Downloading... {pct}%", pct);
+                    decimal percentDownloaded = received / totalBytes;
+                    SetStatus($"Downloading... {(int) (percentDownloaded * 100)}%", 10 + (int)(percentDownloaded * 50));
                 }
             }
 
@@ -79,20 +82,48 @@ public partial class UpdaterWindow: Window
             string actualHash = Convert.ToHexString(sha256.Hash!).ToLowerInvariant();
             Debug.WriteLine($"[Updater] Downloaded SHA-256: {actualHash}");
 
-            // TODO: publish a .sha256 file alongside each release and download and compare it here before calling File.Move.
+            if (_checksumUrl is not null)
+            {
+                SetStatus("Verifying checksum...", 80);
 
-            SetStatus("Installing update...", 100);
+                string checksumContent = await client.GetStringAsync(_checksumUrl, cancellationToken);
+                string expectedHash    = checksumContent.Split(' ')[0].Trim().ToLowerInvariant();
+
+                if (actualHash != expectedHash)
+                    throw new Exception("Checksum mismatch — the download may be corrupted or tampered with.");
+            }
+            else
+            {
+                Debug.WriteLine("[Updater] No checksum URL provided, skipping verification.");
+            }
+
+            SetStatus("Installing update...", 70);
             await Task.Delay(300, cancellationToken);
 
-            fileStream.Close();
-            File.Move(tempPath, _targetPath, overwrite: true);
+            await fileStream.DisposeAsync();
 
-            SetStatus("Restarting...", 100);
+            string exeName    = Path.GetFileName(_targetPath);
+            string extractDir = Path.Combine(Path.GetTempPath(), "SE2SB_Update");
+
+            if (Directory.Exists(extractDir))
+                Directory.Delete(extractDir, recursive: true);
+
+            ZipFile.ExtractToDirectory(tempZipPath, extractDir);
+
+            string extractedExe = Directory
+                .GetFiles(extractDir, exeName, SearchOption.AllDirectories)
+                .FirstOrDefault()
+                    ?? throw new Exception($"Could not find '{exeName}' inside the update archive.");
+
+            File.Move(extractedExe, _targetPath, true);
+
+            SetStatus("Restarting...", 90);
             Process.Start(new ProcessStartInfo(_targetPath)
             {
                 UseShellExecute = true
             });
 
+            SetStatus("Complete!", 100);
             Application.Current.Shutdown();
         }
         catch (OperationCanceledException)
@@ -113,15 +144,28 @@ public partial class UpdaterWindow: Window
         }
         finally
         {
-            if (File.Exists(tempPath))
+            if (File.Exists(tempZipPath))
             {
                 try
                 {
-                    File.Delete(tempPath);
+                    File.Delete(tempZipPath);
                 }
                 catch (Exception exception)
                 {
-                    Debug.WriteLine($"[Updater] Failed to delete temp file: {exception.Message}");
+                    Debug.WriteLine($"[Updater] Failed to delete temp zip: {exception.Message}");
+                }
+            }
+
+            string extractDir = Path.Combine(Path.GetTempPath(), "SE2SB_Update");
+            if (Directory.Exists(extractDir))
+            {
+                try
+                {
+                    Directory.Delete(extractDir, true);
+                }
+                catch (Exception exception)
+                {
+                    Debug.WriteLine($"[Updater] Failed to delete extract dir: {exception.Message}");
                 }
             }
         }

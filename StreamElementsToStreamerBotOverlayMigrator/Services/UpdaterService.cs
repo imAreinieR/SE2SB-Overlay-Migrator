@@ -77,16 +77,18 @@ public static class UpdaterService
             )
                 return;
 
-            // Find the .exe asset
+            // Find the .zip and .sha256 assets
             string? downloadUrl = null;
+            string? checksumUrl = null;
+
             foreach (JsonElement asset in release.GetProperty("assets").EnumerateArray())
             {
                 string name = asset.GetProperty("name").GetString() ?? string.Empty;
-                if (name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
-                {
+
+                if (name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
                     downloadUrl = asset.GetProperty("browser_download_url").GetString();
-                    break;
-                }
+                else if (name.EndsWith(".sha256", StringComparison.OrdinalIgnoreCase))
+                    checksumUrl = asset.GetProperty("browser_download_url").GetString();
             }
 
             if (downloadUrl is null)
@@ -104,7 +106,7 @@ public static class UpdaterService
             );
 
             if (result == MessageBoxResult.Yes)
-                LaunchUpdaterAndExit(downloadUrl);
+                LaunchUpdaterAndExit(downloadUrl, checksumUrl);
         }
         catch (OperationCanceledException)
         {
@@ -138,7 +140,7 @@ public static class UpdaterService
         return Version.TryParse(normalized, out version);
     }
 
-    private static void LaunchUpdaterAndExit(string downloadUrl)
+    private static void LaunchUpdaterAndExit(string downloadUrl, string? checksumUrl)
     {
         string updaterPath = Path.Combine(AppContext.BaseDirectory, "ApplicationUpdater.exe");
 
@@ -156,12 +158,17 @@ public static class UpdaterService
             return;
         }
 
+        string arguments = $"--url \"{downloadUrl}\" --target \"{targetPath}\"";
+
+        if (checksumUrl is not null)
+            arguments += $" --checksum \"{checksumUrl}\"";
+
         Process.Start
         (
             new ProcessStartInfo
             {
                 FileName        = updaterPath,
-                Arguments       = $"--url \"{downloadUrl}\" --target \"{targetPath}\"",
+                Arguments       = arguments,
                 UseShellExecute = true
             }
         );
