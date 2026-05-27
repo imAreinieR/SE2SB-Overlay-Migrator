@@ -381,6 +381,7 @@ public partial class MainWindow: Window
         ConfigureBtn.IsEnabled = _selectedWidget
             .Files
             .Any(file => file.WidgetFileType == Common.WidgetFileType.FieldJson);
+        SaveChangesBtn.IsEnabled = _selectedWidget.IsDirty;
 
         _selectedWidget.NotifyStatusChanges();
 
@@ -389,10 +390,8 @@ public partial class MainWindow: Window
             HideWarning();
             GenerateBtn.IsEnabled = false;
             SetStatus("Import your widget files to begin.");
-            return;
         }
-
-        if (!_selectedWidget.Files.CheckIsValidFileSet(out string warning))
+        else if (!_selectedWidget.Files.CheckIsValidFileSet(out string warning))
         {
             ShowWarning(warning);
             GenerateBtn.IsEnabled = false;

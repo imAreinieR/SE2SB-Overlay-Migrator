@@ -14,4 +14,10 @@ public static partial class ExtensionMethods
 
         collection.Insert(i, item);
     }
+
+    public static void AddRangeSorted<T>(this ObservableCollection<T> collection, IEnumerable<T> items, IComparer<T>? comparer = null)
+    {
+        foreach (T item in items)
+            collection.AddSorted(item, comparer);
+    }
 }

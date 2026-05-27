@@ -28,10 +28,10 @@ public static class WidgetManager
         List<Widget> widgets = WidgetManagerDb.GetAll(connection);
 
         foreach (Widget widget in widgets)
-            widget.Files = new ObservableCollection<WidgetFile>
-            (
-                WidgetFileManagerDb.GetByWidgetId(connection, widget.Id)
-            );
+        {
+            widget.AddWidgetFiles(WidgetFileManagerDb.GetByWidgetId(connection, widget.Id));
+            widget.AcceptChanges();
+        }
 
         return widgets;
     }
@@ -41,13 +41,13 @@ public static class WidgetManager
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
-        var widget = WidgetManagerDb.GetByName(connection, name);
+        Widget? widget = WidgetManagerDb.GetByName(connection, name);
 
         if (widget != null)
-            widget.Files = new ObservableCollection<WidgetFile>
-            (
-                WidgetFileManagerDb.GetByWidgetId(connection, widget.Id)
-            );
+        {
+            widget.AddWidgetFiles(WidgetFileManagerDb.GetByWidgetId(connection, widget.Id));
+            widget.AcceptChanges();
+        }
 
         return widget;
     }

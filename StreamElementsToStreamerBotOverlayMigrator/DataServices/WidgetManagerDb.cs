@@ -66,6 +66,7 @@ public static class WidgetManagerDb
         command.Parameters.AddWithValue("$folderLocation", widget.RootFolderLocation);
 
         widget.Id = Convert.ToInt32(command.ExecuteScalar());
+        widget.AcceptChanges();
     }
 
     public static void Update(SqliteConnection connection, Widget widget)
@@ -82,6 +83,7 @@ public static class WidgetManagerDb
         command.Parameters.AddWithValue("$folderLocation", widget.RootFolderLocation);
 
         command.ExecuteNonQuery();
+        widget.AcceptChanges();
     }
 
     public static void Delete(SqliteConnection connection, Widget widget)
