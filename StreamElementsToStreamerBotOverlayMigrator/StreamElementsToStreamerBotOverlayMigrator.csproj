@@ -20,6 +20,9 @@
   <ItemGroup>
   	<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.8" />
   </ItemGroup>
+  <Target Name="CopyUpdater" AfterTargets="Publish">
+    <Exec Command="dotnet publish ..\ApplicationUpdater\ApplicationUpdater.csproj -c Release -o $(PublishDir) --nologo -v quiet"/>
+  </Target>
   <Target Name="ZipPublishOutput" AfterTargets="Publish">
     <PropertyGroup>
       <ZipName>$(AssemblyName)-v$(Version)</ZipName>
