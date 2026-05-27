@@ -194,7 +194,7 @@ public partial class WidgetConfigWindow: Window
 
     #region Event Handlers
 
-    private void OnControlChanged(object sender, EventArgs e)
+    private void OnControlChanged(object? sender, EventArgs e)
     {
         if (_isDirty)
             return;
