@@ -39,24 +39,24 @@ public partial class MainWindow: Window
 
     private void CommitWidgetRename(TextBox textBox)
     {
+        if (textBox.DataContext is not Widget widget)
+            return;
+
         string newName = textBox.Text.Trim();
 
-        if (string.IsNullOrEmpty(newName))
+        if (string.IsNullOrEmpty(newName) || widget.Name == newName)
         {
             CancelWidgetRename(textBox);
             return;
         }
 
-        if (textBox.DataContext is Widget widget)
-        {
-            widget.Name = newName;
-            WidgetManager.Save(widget);
+        widget.Name = newName;
+        WidgetManager.Save(widget);
 
-            if (_selectedWidget == widget)
-                FolderPathBox.Text = widget.RootFolderLocation;
+        if (_selectedWidget == widget)
+            FolderPathBox.Text = widget.RootFolderLocation;
 
-            SetStatus($"Renamed to '{newName}'.");
-        }
+        SetStatus($"Renamed to '{newName}'.");
 
         ExitInlineEdit(textBox);
     }
