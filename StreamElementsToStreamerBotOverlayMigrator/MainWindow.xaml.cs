@@ -403,7 +403,7 @@ public partial class MainWindow: Window
             SetStatus
             (
                 _selectedWidget.IsGenerated
-                    ? "Widget is up-to-date!"
+                    ? $"Last generated: {_selectedWidget.FolderLocation.GetLatestFileTimestamp()}"
                     : "Ready to generate."
             );
         }
