@@ -23,6 +23,14 @@ public partial class MainWindow: Window
     {
         InitializeComponent();
 
+        Loaded += (_, _) =>
+        {
+            Activate();
+            Topmost = true;
+            Topmost = false;
+            Focus();
+        };
+
         Version? version = GetType().Assembly.GetName().Version;
         if (version != null && VersionLabel.Content is TextBlock versionText)
             versionText.Text = $"v{version.Major}.{version.Minor}.{version.Build}";
@@ -295,30 +303,7 @@ public partial class MainWindow: Window
     {
         VersionLabel.IsEnabled = false;
 
-        string? message = await UpdaterService.CheckForLatestAsync();
-
-        if (string.IsNullOrEmpty(message))
-        {
-            MessageBox.Show
-            (
-                "Up-to-date!",
-                "Check for updates",
-                MessageBoxButton.OK
-            );
-        }
-        else
-        {
-            MessageBoxResult messageBoxResult = MessageBox.Show
-            (
-                message,
-                "Check for updates",
-                MessageBoxButton.OKCancel,
-                MessageBoxImage.Information
-            );
-
-            if (messageBoxResult == MessageBoxResult.OK)
-                await UpdaterService.CheckAndUpdateToLatestAsync();
-        }
+        await UpdaterService.CheckAndUpdateToLatestAsync();
 
         VersionLabel.IsEnabled = true;
     }

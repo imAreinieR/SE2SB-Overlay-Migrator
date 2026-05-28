@@ -12,6 +12,7 @@ public static class UpdaterService
     private static readonly TimeSpan DefaultTimeOut = TimeSpan.FromSeconds(60);
     private const           string   Repo           = "imAreinieR/SE2SB-Overlay-Migrator";
     private const           string   ReleasesPage   = $"https://github.com/{Repo}/releases";
+    private const           string   UserAgent      = "SE2SB-Overlay-Migrator";
 
     public static async Task<string?> CheckForLatestAsync()
     {
@@ -23,12 +24,11 @@ public static class UpdaterService
             client
                 .DefaultRequestHeaders
                 .UserAgent
-                .Add(new ProductInfoHeaderValue("SE2SB Overlay Migrator", currentVersion));
+                .Add(new ProductInfoHeaderValue(UserAgent, currentVersion));
 
-            string json = await client.GetStringAsync($"https://api.github.com/repos/{Repo}/releases/latest");
-
-            JsonElement release   = JsonDocument.Parse(json).RootElement;
-            string?     latestTag = release.GetProperty("tag_name").GetString();
+            string      json      = await client.GetStringAsync($"https://api.github.com/repos/{Repo}/releases");
+            JsonElement releases  = JsonDocument.Parse(json).RootElement;
+            string?     latestTag = releases[0].GetProperty("tag_name").GetString();
 
             if (latestTag is null)
                 return null;
@@ -61,11 +61,11 @@ public static class UpdaterService
             client
                 .DefaultRequestHeaders
                 .UserAgent
-                .Add(new ProductInfoHeaderValue("SE2SB Overlay Migrator", currentVersion));
+                .Add(new ProductInfoHeaderValue(UserAgent, currentVersion));
 
-            string? json = await client.GetStringAsync($"https://api.github.com/repos/{Repo}/releases/latest");
-
-            JsonElement release   = JsonDocument.Parse(json).RootElement;
+            string      json      = await client.GetStringAsync($"https://api.github.com/repos/{Repo}/releases");
+            JsonElement releases  = JsonDocument.Parse(json).RootElement;
+            JsonElement release   = releases[0];
             string?     latestTag = release.GetProperty("tag_name").GetString();
 
             if
@@ -75,9 +75,17 @@ public static class UpdaterService
                     && TryParseGitTag(currentVersion, out Version? currentParsed)
                     && latestVersion <= currentParsed
             )
-                return;
+            {
+                MessageBox.Show
+                (
+                    $"Application is up-to-date!",
+                    "Up-to-date",
+                    MessageBoxButton.OK
+                );
 
-            // Find the .zip and .sha256 assets
+                return;
+            }
+
             string? downloadUrl = null;
             string? checksumUrl = null;
 
@@ -93,7 +101,7 @@ public static class UpdaterService
 
             if (downloadUrl is null)
             {
-                PromptManual(latestTag!);
+                PromptForManualUpdate(latestTag!);
                 return;
             }
 
@@ -112,9 +120,9 @@ public static class UpdaterService
         {
             throw;
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            Debug.WriteLine($"[{nameof(UpdaterService)}] Update check failed: {ex}");
+            Debug.WriteLine($"[{nameof(UpdaterService)}] Update check failed: {exception}");
         }
     }
 
@@ -146,7 +154,7 @@ public static class UpdaterService
 
         if (!File.Exists(updaterPath))
         {
-            PromptManual(null);
+            PromptForManualUpdate(null);
             return;
         }
 
@@ -154,7 +162,7 @@ public static class UpdaterService
 
         if (targetPath is null)
         {
-            PromptManual(null);
+            PromptForManualUpdate(null);
             return;
         }
 
@@ -176,7 +184,7 @@ public static class UpdaterService
         Application.Current.Shutdown();
     }
 
-    private static void PromptManual(string? latestTag)
+    private static void PromptForManualUpdate(string? latestTag)
     {
         string message = latestTag is not null
             ? $"Version {latestTag} is available but the updater couldn't run automatically.\n\nOpen the Releases page?"

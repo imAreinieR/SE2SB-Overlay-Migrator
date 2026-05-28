@@ -50,7 +50,7 @@ public partial class UpdaterWindow: Window
             client
                 .DefaultRequestHeaders
                 .UserAgent
-                .Add(new ProductInfoHeaderValue("Application Updater", "1.0"));
+                .Add(new ProductInfoHeaderValue("ApplicationUpdater", "1.0"));
 
             using var response = await client.GetAsync(_downloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             response.EnsureSuccessStatusCode();
@@ -117,18 +117,11 @@ public partial class UpdaterWindow: Window
 
             File.Move(extractedExe, _targetPath, true);
 
-            SetStatus("Restarting...", 90);
-            Process.Start(new ProcessStartInfo(_targetPath)
-            {
-                UseShellExecute = true
-            });
-
             SetStatus("Complete!", 100);
-            Application.Current.Shutdown();
         }
         catch (OperationCanceledException)
         {
-            Application.Current.Shutdown();
+            // Window was closed mid-update; fall through to finally.
         }
         catch (Exception exception)
         {
@@ -139,8 +132,6 @@ public partial class UpdaterWindow: Window
                 MessageBoxButton.OK,
                 MessageBoxImage.Error
             );
-
-            Application.Current.Shutdown();
         }
         finally
         {
@@ -168,6 +159,25 @@ public partial class UpdaterWindow: Window
                     Debug.WriteLine($"[Updater] Failed to delete extract dir: {exception.Message}");
                 }
             }
+
+            SetStatus("Restarting app...", 100);
+            TryRestartApp();
+            Application.Current.Shutdown();
+        }
+    }
+
+    private void TryRestartApp()
+    {
+        try
+        {
+            if (File.Exists(_targetPath))
+                Process.Start(new ProcessStartInfo(_targetPath) { UseShellExecute = true });
+            else
+                Debug.WriteLine($"[Updater] Cannot restart — '{_targetPath}' not found.");
+        }
+        catch (Exception exception)
+        {
+            Debug.WriteLine($"[Updater] Failed to restart app: {exception.Message}");
         }
     }
 
