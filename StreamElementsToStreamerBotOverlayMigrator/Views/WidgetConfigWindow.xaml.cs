@@ -195,9 +195,14 @@ public partial class WidgetConfigWindow: Window
             case "image-input":
             case "video-input":
             case "sound-input":
-                Debug.WriteLine($"Input field '{field.Key}' is not yet supported in the config UI.");
-                return null;
-            case "googleFont":
+                var unsupportedLabel = new TextBlock
+                {
+                    Text      = $"'{field.Type}' is not yet supported in the config UI.",
+                    Style     = (Style) FindResource("FieldLabel"),
+                    FontStyle = FontStyles.Italic,
+                    Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x6B))
+                };
+                return unsupportedLabel;
             case "googlefont":
                 if (!GoogleFonts.AvailableFonts.Contains(valueStr))
                     valueStr = GoogleFonts.AvailableFonts.First();
