@@ -129,7 +129,14 @@ public static class WidgetFileImportAndExportService
             throw new ArgumentException("Missing fields.json file.");
         }
 
-        using JsonDocument jsonDocument = JsonDocument.Parse(jsonData);
+        using JsonDocument jsonDocument = JsonDocument.Parse
+        (
+            jsonData,
+            new JsonDocumentOptions
+            {
+                AllowTrailingCommas = true
+            }
+        );
 
         foreach (JsonProperty jsonProperty in jsonDocument.RootElement.EnumerateObject())
         {

@@ -198,6 +198,7 @@ public partial class WidgetConfigWindow: Window
                 Debug.WriteLine($"Input field '{field.Key}' is not yet supported in the config UI.");
                 return null;
             case "googleFont":
+            case "googlefont":
                 if (!GoogleFonts.AvailableFonts.Contains(valueStr))
                     valueStr = GoogleFonts.AvailableFonts.First();
 
@@ -299,14 +300,21 @@ public partial class WidgetConfigWindow: Window
     {
         WidgetFile? dataFile = _widget
             .Files
-            .FirstOrDefault(file => file.WidgetFileType == Common.WidgetFileType.DataJson);
+            .FirstOrDefault(file => file.WidgetFileType == WidgetFileType.DataJson);
 
         if (dataFile is null)
             return;
 
         try
         {
-            using JsonDocument jsonDocument = JsonDocument.Parse(dataFile.Content);
+            using JsonDocument jsonDocument = JsonDocument.Parse
+            (
+                dataFile.Content,
+                new JsonDocumentOptions
+                {
+                    AllowTrailingCommas = true
+                }
+            );
 
             _dataValues = jsonDocument
                 .RootElement
@@ -327,7 +335,7 @@ public partial class WidgetConfigWindow: Window
     {
         WidgetFile? fieldsFile = _widget
             .Files
-            .FirstOrDefault(file => file.WidgetFileType == Common.WidgetFileType.FieldJson);
+            .FirstOrDefault(file => file.WidgetFileType == WidgetFileType.FieldJson);
 
         if (fieldsFile is null)
         {
@@ -358,12 +366,22 @@ public partial class WidgetConfigWindow: Window
 
     private List<WidgetDataFieldGroup> ParseFieldGroups(string json)
     {
-        JsonDocument? jsonDocument = JsonDocument.Parse(json);
+        var jsonDocumentOptions = new JsonDocumentOptions
+        {
+            AllowTrailingCommas = true
+        };
+
+        var jsonSerializerOptions = new JsonSerializerOptions
+        {
+            AllowTrailingCommas = true
+        };
+
         var widgetDataFields = new List<WidgetDataField>();
+        using JsonDocument jsonDocument = JsonDocument.Parse(json, jsonDocumentOptions);
 
         foreach (JsonProperty jsonProperty in jsonDocument.RootElement.EnumerateObject())
         {
-            WidgetDataField? widgetDataField = JsonSerializer.Deserialize<WidgetDataField>(jsonProperty.Value.GetRawText());
+            WidgetDataField? widgetDataField = JsonSerializer.Deserialize<WidgetDataField>(jsonProperty.Value.GetRawText(), jsonSerializerOptions);
 
             if (widgetDataField is null || widgetDataField.Type.Equals("hidden", StringComparison.OrdinalIgnoreCase))
                 continue;
