@@ -1,6 +1,14 @@
+using Microsoft.Web.WebView2.Core;
+using StreamElementsToStreamerBotOverlayMigrator.Common;
+using StreamElementsToStreamerBotOverlayMigrator.Common.ExtensionMethods;
 using StreamElementsToStreamerBotOverlayMigrator.Controls;
 using StreamElementsToStreamerBotOverlayMigrator.Data;
 using StreamElementsToStreamerBotOverlayMigrator.Managers;
+using StreamElementsToStreamerBotOverlayMigrator.Services;
+using StreamElementsToStreamerBotOverlayMigrator.Templates;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Windows;
@@ -13,10 +21,15 @@ namespace StreamElementsToStreamerBotOverlayMigrator;
 public partial class WidgetConfigWindow: Window
 {
     private readonly Widget                               _widget;
-    private readonly Dictionary<string, FrameworkElement> _fieldControls = new ();
-    private readonly List<WidgetDataField>                _allFields     = new ();
+    private readonly Dictionary<string, FrameworkElement> _fieldControls       = new ();
+    private readonly List<WidgetDataField>                _allFields           = new ();
+    private readonly Dictionary<string, string>           _fileNameAndContents = new();
     private          Dictionary<string, JsonElement>?     _dataValues;
     private          bool                                 _isDirty;
+    private          bool                                 _webViewReady        = false;
+
+    private record LogEntryEvent(LogEntry entry);
+    private record LogEntry(string source, string level, string text, double timestamp, string? url, int? lineNumber);
 
     public WidgetConfigWindow(Widget widget)
     {
@@ -27,7 +40,128 @@ public partial class WidgetConfigWindow: Window
 
         LoadDataJson();
         LoadFields();
+        InitWebViewAsync();
     }
+
+    private async void InitWebViewAsync()
+    {
+        try
+        {
+            await PreviewWebView.EnsureCoreWebView2Async();
+            _webViewReady = true;
+
+            PreviewWebView.Visibility     = Visibility.Visible;
+            PreviewPlaceholder.Visibility = Visibility.Collapsed;
+
+            await PreviewWebView.CoreWebView2.CallDevToolsProtocolMethodAsync("Log.enable", "{}");
+
+            CoreWebView2DevToolsProtocolEventReceiver receiver = PreviewWebView.CoreWebView2.GetDevToolsProtocolEventReceiver("Log.entryAdded");
+            receiver.DevToolsProtocolEventReceived += OnReceivedBrowserConsoleLog;
+
+            PreviewWebView.CoreWebView2.AddWebResourceRequestedFilter
+            (
+                "https://app.local/*",
+                CoreWebView2WebResourceContext.All
+            );
+            PreviewWebView.CoreWebView2.WebResourceRequested += OnWebResourceRequested;
+
+            ReloadPreview();
+        }
+        catch (Exception exception)
+        {
+            PreviewPlaceholder.Text = $"WebView2 unavailable: {exception.Message}";
+            SetStatus($"[ERROR] WebView2 init failed: {exception.Message}", error: true);
+        }
+    }
+
+    private void OnReceivedBrowserConsoleLog(object? sender, CoreWebView2DevToolsProtocolEventReceivedEventArgs e)
+    {
+        Debug.WriteLine(e.ParameterObjectAsJson);
+
+        if (string.IsNullOrEmpty(e.ParameterObjectAsJson))
+            return; 
+
+        LogEntryEvent? logEntryEvent = JsonSerializer.Deserialize<LogEntryEvent>(e.ParameterObjectAsJson);
+
+        if (logEntryEvent?.entry is not null)
+            Dispatcher.Invoke(() => AppendLog($"[{logEntryEvent.entry.level}] {logEntryEvent.entry.text}"));
+    }
+
+    private void ReloadPreview()
+    {
+        if (!_webViewReady)
+            return;
+
+        _fileNameAndContents.Clear();
+
+        string dataJson = BuildDataJson();
+        _fileNameAndContents["streamerBotEvents.js"] = TemplateFiles.StreamerBotEventHandlersFile;
+
+        _widget
+            .Files
+            .ToList()
+            .ForEach
+            (
+                widgetFile =>
+                {
+                    string fileContent = WidgetFileImportAndExportService.GenerateFile(widgetFile, dataJson);
+
+                    if (widgetFile.WidgetFileType == WidgetFileType.Html)
+                        fileContent = InjectBaseUrlProxy(fileContent);
+
+                    _fileNameAndContents[widgetFile.GetFileNameForWidgetFileType()] = fileContent;
+                }
+            );
+
+        if (!_fileNameAndContents.TryGetValue("index.html", out string htmlContent))
+        {
+            PreviewWebView.NavigateToString("<body style='background:#0e1017;color:#5a6280;font-family:Consolas;padding:32px'>No HTML file found in widget.</body>");
+            SetStatus("[WARN] No HTML file found – preview unavailable.", error: true);
+            return;
+        }
+
+        PreviewWebView.NavigateToString(htmlContent);
+        SetStatus("[INFO] Preview loaded.");
+    }
+
+    private static string InjectBaseUrlProxy(string html)
+    {
+        string injectedScript = $"<base href=\"https://app.local/\" />\n";
+
+        int index = html.IndexOf("<head>", StringComparison.OrdinalIgnoreCase);
+        return index >= 0
+            ? html.Insert(index, injectedScript)
+            : injectedScript + html;
+    }
+
+    private void OnWebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
+    {
+        var    uri               = new Uri(e.Request.Uri);
+        string filePath          = Path.Combine("wwwroot", uri.AbsolutePath.TrimStart('/'));
+        string requestedFileName = Path.GetFileName(filePath);
+
+        if (!_fileNameAndContents.TryGetValue(requestedFileName, out string? content))
+            return;
+
+        // NOTE: Do NOT dispose the stream here — WebView2 reads it asynchronously after this handler returns.
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+        e.Response = PreviewWebView.CoreWebView2.Environment.CreateWebResourceResponse
+        (
+            stream,
+            200, "OK",
+            $"Content-Type: {GetMimeType(filePath)}"
+        );
+    }
+
+    private static string GetMimeType(string path) => Path.GetExtension(path) switch
+    {
+        ".css"  => "text/css",
+        ".js"   => "application/javascript",
+        ".html" => "text/html",
+        ".png"  => "image/png",
+        ".svg"  => "image/svg+xml",
+        _       => "application/octet-stream"
+    };
 
     #region UI Elements
 
@@ -196,20 +330,30 @@ public partial class WidgetConfigWindow: Window
 
     private void OnControlChanged(object? sender, EventArgs e)
     {
-        if (_isDirty)
-            return;
-
-        _isDirty = true;
-
-        if (SaveBtn is not null)
+        if (!_isDirty)
+        {
+            _isDirty          = true;
             SaveBtn.IsEnabled = true;
+            SetStatus("Unsaved changes.");
+        }
 
-        SetStatus("Unsaved changes.");
+        RefreshPreviewData();
     }
 
-    private void FieldButton_Click(object sender, RoutedEventArgs e)
+    private async void FieldButton_Click(object sender, RoutedEventArgs e)
     {
-        // TODO: fire test event through StreamerBot bridge in Live Preview
+        string fieldName = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
+
+        await PreviewWebView.ExecuteScriptAsync($@"
+            window.dispatchEvent(new CustomEvent('onEventReceived', {{
+                detail: {{
+                    event: {{
+                        listener: 'widget-button',
+                        field: '{fieldName}'
+                    }}
+                }}
+            }}));
+        ");
     }
 
     private void Save_Click(object sender, RoutedEventArgs e)
@@ -240,7 +384,56 @@ public partial class WidgetConfigWindow: Window
         }
     }
 
+    private void TabPreview_Checked(object sender, RoutedEventArgs e)
+    {
+        if (TabLogs is null || PreviewPanel is null || LogsPanel is null)
+            return;
+
+        TabLogs.IsChecked       = false;
+        PreviewPanel.Visibility = Visibility.Visible;
+        LogsPanel.Visibility    = Visibility.Collapsed;
+    }
+
+    private void TabLogs_Checked(object sender, RoutedEventArgs e)
+    {
+        if (TabPreview is null || LogsPanel is null || PreviewPanel is null)
+            return;
+
+        TabPreview.IsChecked    = false;
+        LogsPanel.Visibility    = Visibility.Visible;
+        PreviewPanel.Visibility = Visibility.Collapsed;
+    }
+
     #endregion Event Handlers
+
+    private async void RefreshPreviewData()
+    {
+        if (!_webViewReady)
+            return;
+
+        try
+        {
+            string dataJson = BuildDataJson();
+            string script   = $"if(typeof window.__updateWidgetData === 'function') {{ window.__updateWidgetData({dataJson}); }}";
+            await PreviewWebView.CoreWebView2.ExecuteScriptAsync(script);
+        }
+        catch (Exception exception)
+        {
+            SetStatus($"[WARN] Could not refresh preview data: {exception.Message}", error: true);
+        }
+    }
+
+    public void AppendLog(string message)
+    {
+        string line = $"[{DateTime.Now:HH:mm:ss}] {message}";
+
+        if (LogsText.Text == "No log entries yet.")
+            LogsText.Text = line;
+        else
+            LogsText.Text += $"\n{line}";
+
+        LogsScrollViewer.ScrollToEnd();
+    }
 
     #region Helpers
 
@@ -307,7 +500,7 @@ public partial class WidgetConfigWindow: Window
 
     private List<WidgetDataFieldGroup> ParseFieldGroups(string json)
     {
-        JsonDocument? jsonDocument = JsonDocument.Parse(json);
+        using JsonDocument? jsonDocument = JsonDocument.Parse(json);
         var widgetDataFields = new List<WidgetDataField>();
 
         foreach (JsonProperty jsonProperty in jsonDocument.RootElement.EnumerateObject())
@@ -395,12 +588,12 @@ public partial class WidgetConfigWindow: Window
         (
             new TextBlock
             {
-                Text = message,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x5a, 0x62, 0x80)),
-                FontFamily = new FontFamily("Segoe UI"),
-                FontSize = 13,
+                Text                = message,
+                Foreground          = new SolidColorBrush(Color.FromRgb(0x5a, 0x62, 0x80)),
+                FontFamily          = new FontFamily("Segoe UI"),
+                FontSize            = 13,
                 HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 40, 0, 0)
+                Margin              = new Thickness(0, 40, 0, 0)
             }
         );
 
@@ -410,8 +603,8 @@ public partial class WidgetConfigWindow: Window
         {
             if (value.StartsWith("rgb(") || value.StartsWith("rgba("))
             {
-                int       start = value.IndexOf('(') + 1;
-                string[]? parts = value[start..^1].Split(',');
+                int      start = value.IndexOf('(') + 1;
+                string[] parts = value[start..^1].Split(',');
 
                 if (parts.Length >= 3)
                 {
@@ -425,7 +618,7 @@ public partial class WidgetConfigWindow: Window
                 }
             }
 
-            return (Color)ColorConverter.ConvertFromString(value);
+            return (Color) ColorConverter.ConvertFromString(value);
         }
         catch
         {

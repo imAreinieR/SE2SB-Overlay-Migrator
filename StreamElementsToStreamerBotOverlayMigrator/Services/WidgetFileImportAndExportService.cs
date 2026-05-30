@@ -85,24 +85,12 @@ public static class WidgetFileImportAndExportService
 
             string jsonData = widget.Files.FirstOrDefault(file => file.WidgetFileType == WidgetFileType.DataJson)?.Content ?? string.Empty;
 
-            foreach (WidgetFile file in widget.Files)
+            foreach (WidgetFile widgetFile in widget.Files)
             {
-                string fileName    = file.GetFileNameForWidgetFileType();
+                string fileName    = widgetFile.GetFileNameForWidgetFileType();
                 string destination = Path.Combine(widget.FolderLocation, fileName);
-                string content     = file.WidgetFileType == WidgetFileType.Html || file.WidgetFileType == WidgetFileType.Css || file.WidgetFileType == WidgetFileType.Javascript
-                    ? SearchAndReplaceDataVariables(file.Content, jsonData)
-                    : file.Content;
 
-                if (file.WidgetFileType == WidgetFileType.Html)
-                {
-                    content = string.Format(TemplateFiles.HtmlFile, FixProtocolRelativeUrls(file.Content));
-                }
-                else if (file.WidgetFileType == WidgetFileType.DataJson)
-                {
-                    content = string.Format(TemplateFiles.JavascriptDataFile, file.Content);
-                }
-
-                File.WriteAllText(destination, content);
+                File.WriteAllText(destination, GenerateFile(widgetFile, jsonData));
             }
 
             File.WriteAllText(Path.Combine(widget.FolderLocation, "streamerBotEvents.js"), TemplateFiles.StreamerBotEventHandlersFile);
@@ -116,6 +104,24 @@ public static class WidgetFileImportAndExportService
             Debug.WriteLine(exception);
             return false;
         }
+    }
+
+    public static string GenerateFile(WidgetFile widgetFile, string jsonData)
+    {
+        string content = widgetFile.WidgetFileType == WidgetFileType.Html || widgetFile.WidgetFileType == WidgetFileType.Css || widgetFile.WidgetFileType == WidgetFileType.Javascript
+            ? SearchAndReplaceDataVariables(widgetFile.Content, jsonData)
+            : widgetFile.Content;
+
+        if (widgetFile.WidgetFileType == WidgetFileType.Html)
+        {
+            content = string.Format(TemplateFiles.HtmlFile, FixProtocolRelativeUrls(widgetFile.Content));
+        }
+        else if (widgetFile.WidgetFileType == WidgetFileType.DataJson)
+        {
+            content = string.Format(TemplateFiles.JavascriptDataFile, widgetFile.Content);
+        }
+
+        return content;
     }
 
     private static string SearchAndReplaceDataVariables(string content, string jsonData)
@@ -179,9 +185,9 @@ public static class WidgetFileImportAndExportService
         return content;
     }
 
-    private static bool RequiresVariableReplacement(string content)
+    private static bool RequiresVariableReplacement(string fileContent)
         => Regex.IsMatch(
-            content,
+            fileContent,
             @"(?<!\$)\{\{[\w]+\}\}|(?<!\$)(?<!\{)\{[\w]+\}(?!\})",
             RegexOptions.None,
             _defaultRegexTimeout

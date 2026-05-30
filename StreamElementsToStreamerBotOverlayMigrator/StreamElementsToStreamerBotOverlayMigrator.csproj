@@ -11,7 +11,7 @@
 	<Product>SE To SB Migration Tool</Product>
 	<Company>imACompany</Company>
 	<Copyright>Copyright © Ami Reinier 2026</Copyright>
-	<Version>0.2.0</Version>
+	<Version>0.3.0</Version>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
   	<DebugType>none</DebugType>
@@ -19,9 +19,10 @@
   </PropertyGroup>
   <ItemGroup>
   	<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.8" />
+  	<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3967.48" />
   </ItemGroup>
   <Target Name="CopyUpdater" AfterTargets="Publish">
-    <Exec Command="dotnet publish ..\ApplicationUpdater\ApplicationUpdater.csproj -c Release -o $(PublishDir) --nologo -v quiet"/>
+    <Exec Command="dotnet publish ..\ApplicationUpdater\ApplicationUpdater.csproj -c Release -o $(PublishDir) --nologo -v quiet" />
   </Target>
   <Target Name="ZipPublishOutput" AfterTargets="Publish">
     <PropertyGroup>
@@ -29,11 +30,11 @@
       <ZipTempPath>$(MSBuildProjectDirectory)\bin\Release\$(ZipName).zip</ZipTempPath>
       <ZipFinalPath>$(PublishDir)$(ZipName).zip</ZipFinalPath>
     </PropertyGroup>
-    <Delete Files="$(ZipTempPath);$(ZipFinalPath);$(PublishDir)$(ZipName).zip.sha256"/>
-    <ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(ZipTempPath)" Overwrite="true"/>
-    <Move SourceFiles="$(ZipTempPath)" DestinationFiles="$(ZipFinalPath)"/>
+    <Delete Files="$(ZipTempPath);$(ZipFinalPath);$(PublishDir)$(ZipName).zip.sha256" />
+    <ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(ZipTempPath)" Overwrite="true" />
+    <Move SourceFiles="$(ZipTempPath)" DestinationFiles="$(ZipFinalPath)" />
   </Target>
   <Target Name="GenerateZipChecksum" AfterTargets="ZipPublishOutput">
-    <Exec Command="powershell -Command &quot;$h = Get-FileHash '$(PublishDir)$(ZipName).zip' -Algorithm SHA256; $h.Hash.ToLower() + '  $(ZipName).zip' | Out-File -Encoding utf8 '$(PublishDir)$(ZipName).zip.sha256'&quot;"/>
+    <Exec Command="powershell -Command &quot;$h = Get-FileHash '$(PublishDir)$(ZipName).zip' -Algorithm SHA256; $h.Hash.ToLower() + '  $(ZipName).zip' | Out-File -Encoding utf8 '$(PublishDir)$(ZipName).zip.sha256'&quot;" />
   </Target>
 </Project>
