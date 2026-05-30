@@ -12,6 +12,14 @@ public class WidgetDataField
 
     [JsonPropertyName("value")]
     public object?                     Value   { get; set; }
+    [JsonPropertyName("min")]
+    public double?                     Min     { get; set; }
+
+    [JsonPropertyName("max")]
+    public double?                     Max     { get; set; }
+
+    [JsonPropertyName("step")]
+    public double?                     Step    { get; set; }
 
     [JsonPropertyName("group")]
     public string?                     Group   { get; set; }

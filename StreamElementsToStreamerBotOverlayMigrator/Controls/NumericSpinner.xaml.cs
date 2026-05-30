@@ -18,14 +18,11 @@ public partial class NumericSpinner: UserControl
         )
     );
 
-    public static readonly DependencyProperty StepProperty =
-        DependencyProperty.Register(nameof(Step), typeof(double), typeof(NumericSpinner), new PropertyMetadata(1d));
+    public static readonly DependencyProperty StepProperty    = DependencyProperty.Register(nameof(Step),    typeof(double), typeof(NumericSpinner), new PropertyMetadata(1d));
 
-    public static readonly DependencyProperty MinimumProperty =
-        DependencyProperty.Register(nameof(Minimum), typeof(double), typeof(NumericSpinner), new PropertyMetadata(double.MinValue));
+    public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register(nameof(Minimum), typeof(double), typeof(NumericSpinner), new PropertyMetadata(double.MinValue));
 
-    public static readonly DependencyProperty MaximumProperty =
-        DependencyProperty.Register(nameof(Maximum), typeof(double), typeof(NumericSpinner), new PropertyMetadata(double.MaxValue));
+    public static readonly DependencyProperty MaximumProperty = DependencyProperty.Register(nameof(Maximum), typeof(double), typeof(NumericSpinner), new PropertyMetadata(double.MaxValue));
 
     public double Value
     {

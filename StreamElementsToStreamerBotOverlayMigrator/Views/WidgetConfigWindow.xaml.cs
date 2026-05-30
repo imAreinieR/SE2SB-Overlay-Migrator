@@ -1,6 +1,8 @@
+using StreamElementsToStreamerBotOverlayMigrator.Common;
 using StreamElementsToStreamerBotOverlayMigrator.Controls;
 using StreamElementsToStreamerBotOverlayMigrator.Data;
 using StreamElementsToStreamerBotOverlayMigrator.Managers;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Windows;
@@ -108,7 +110,6 @@ public partial class WidgetConfigWindow: Window
         switch (field.Type.ToLowerInvariant())
         {
             case "text":
-            {
                 var textBox = new TextBox
                 {
                     Style = (Style) FindResource("FieldInput"),
@@ -117,65 +118,116 @@ public partial class WidgetConfigWindow: Window
                 };
                 textBox.TextChanged += OnControlChanged;
                 return textBox;
-            }
+            case "checkbox":
+                bool isChecked = valueStr.Equals("true", StringComparison.OrdinalIgnoreCase)
+                    || valueStr == "1";
+                var checkBox = new CheckBox
+                {
+                    Style     = (Style) FindResource("FieldToggle"),
+                    IsChecked = isChecked,
+                    Tag       = field.Key
+                };
+                checkBox.Checked   += OnControlChanged;
+                checkBox.Unchecked += OnControlChanged;
+                return checkBox;
+            case "colorpicker":
+                var picker = new ColorSwatchPicker
+                {
+                    Color = ParseColor(valueStr),
+                    Tag = field.Key
+                };
+                picker.ColorChanged += OnControlChanged;
+                return picker;
             case "number":
-            {
-                double.TryParse(valueStr, out double initial);
-
                 var spinner = new NumericSpinner
                 {
-                    Value = initial,
+                    Value = double.TryParse(valueStr, out double initialNumber)
+                        ? initialNumber
+                        : 1,
                     Tag   = field.Key
                 };
                 spinner.ValueChanged += OnControlChanged;
                 return spinner;
-            }
+            case "slider":
+                var sliderField = new SliderField
+                {
+                    Minimum = field.Min  ?? 0,
+                    Maximum = field.Max  ?? 100,
+                    Step    = field.Step ?? 1,
+                    Value   = double.TryParse(valueStr, out double initialSlider)
+                        ? initialSlider
+                        : field.Min ?? 0,
+                    Tag = field.Key
+                };
+                sliderField.ValueChanged += OnControlChanged;
+                return sliderField;
             case "dropdown":
-            {
-                if (field.Options is null)
-                    return null;
-
                 var comboBox = new StyledDropdown
                 {
                     Tag = field.Key
                 };
 
-                foreach ((string key, string label) in field.Options)
-                    comboBox.Items.Add
+                if (field.Options is not null)
+                {
+                    foreach ((string key, string label) in field.Options)
+                        comboBox.Items.Add
+                        (
+                            new ComboBoxItem
+                            {
+                                Content = label,
+                                Tag = key
+                            }
+                        );
+
+                    foreach (ComboBoxItem item in comboBox.Items)
+                    {
+                        if (item.Tag?.ToString() == valueStr)
+                        {
+                            comboBox.SelectedItem = item;
+                            break;
+                        }
+                    }
+
+                    comboBox.SelectionChanged += OnControlChanged;
+                }
+
+                return comboBox;
+            case "image-input":
+            case "video-input":
+            case "sound-input":
+                Debug.WriteLine($"Input field '{field.Key}' is not yet supported in the config UI.");
+                return null;
+            case "googleFont":
+                if (!GoogleFonts.AvailableFonts.Contains(valueStr))
+                    valueStr = GoogleFonts.AvailableFonts.First();
+
+                var fontComboBox = new StyledDropdown
+                {
+                    Tag = field.Key
+                };
+
+                foreach (string fontName in GoogleFonts.AvailableFonts)
+                    fontComboBox.Items.Add
                     (
                         new ComboBoxItem
                         {
-                            Content = label,
-                            Tag     = key
+                            Content = fontName,
+                            Tag     = fontName
                         }
                     );
 
-                foreach (ComboBoxItem item in comboBox.Items)
+                foreach (ComboBoxItem item in fontComboBox.Items)
                 {
                     if (item.Tag?.ToString() == valueStr)
                     {
-                        comboBox.SelectedItem = item;
+                        fontComboBox.SelectedItem = item;
                         break;
                     }
                 }
 
-                comboBox.SelectionChanged += OnControlChanged;
-                return comboBox;
-            }
-            case "colorpicker":
-            {
-                Color initial = ParseColor(valueStr);
-
-                var picker = new ColorSwatchPicker
-                {
-                    Color = initial,
-                    Tag   = field.Key
-                };
-                picker.ColorChanged += OnControlChanged;
-                return picker;
-            }
+                fontComboBox.SelectionChanged += OnControlChanged;
+                return fontComboBox;
             case "button":
-            {
                 var button = new Button
                 {
                     Style   = (Style) FindResource("FieldButton"),
@@ -184,7 +236,6 @@ public partial class WidgetConfigWindow: Window
                 };
                 button.Click += FieldButton_Click;
                 return button;
-            }
             default:
                 return null;
         }
@@ -384,6 +435,12 @@ public partial class WidgetConfigWindow: Window
                 case StyledDropdown comboBox:
                     output[field.Key] = (comboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
                     break;
+                case CheckBox checkBox:
+                    output[field.Key] = checkBox.IsChecked == true;
+                    break;
+                case SliderField sliderField:
+                    output[field.Key] = sliderField.Value;
+                    break;
             }
         }
 
@@ -425,7 +482,7 @@ public partial class WidgetConfigWindow: Window
                 }
             }
 
-            return (Color)ColorConverter.ConvertFromString(value);
+            return (Color) ColorConverter.ConvertFromString(value);
         }
         catch
         {
