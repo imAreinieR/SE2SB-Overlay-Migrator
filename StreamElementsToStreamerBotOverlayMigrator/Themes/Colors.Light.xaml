@@ -1,0 +1,135 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         APP COLOR PALETTE — LIGHT THEME
+         Drop-in replacement for Colors.xaml (dark).
+         Every key is identical; only the values differ.
+         Swap at runtime by replacing the merged dictionary entry in App.xaml.
+    ══════════════════════════════════════════════════════════════════════════ -->
+
+    <!-- ── Backgrounds ──────────────────────────────────────────────────── -->
+    <!-- Deepest background; main window root, footer bars -->
+    <Color x:Key="AppBgColor">#F0F2F8</Color>
+    <!-- Sidebar and secondary panel backgrounds -->
+    <Color x:Key="SidebarBgColor">#E6E9F2</Color>
+    <!-- Right / detail panel background -->
+    <Color x:Key="PanelBgColor">#F5F6FA</Color>
+    <!-- Primary raised surface (file list, path box, field inputs) -->
+    <Color x:Key="SurfaceColor">#FFFFFF</Color>
+    <!-- Secondary raised surface (buttons, list item selected, inline edit) -->
+    <Color x:Key="SurfaceAltColor">#EDF0F7</Color>
+    <!-- Deepest control background (dropdown, field input) -->
+    <Color x:Key="SurfaceDeepColor">#FFFFFF</Color>
+
+    <!-- ── Borders ───────────────────────────────────────────────────────── -->
+    <!-- Standard border used on panels, inputs, splitters -->
+    <Color x:Key="BorderColor">#D0D5E8</Color>
+    <!-- Subtle border used on the new-widget button outline -->
+    <Color x:Key="BorderAccentColor">#A8B4D8</Color>
+    <!-- Drop zone dashed outline (idle) -->
+    <Color x:Key="DropZoneBorderColor">#9AAAD0</Color>
+    <!-- Hovered border (dropdown, toggle track) -->
+    <Color x:Key="BorderHoverColor">#A0AACC</Color>
+    <!-- Toggle track checked border -->
+    <Color x:Key="ToggleBorderCheckedColor">#A0B0D0</Color>
+    <!-- Toggle checked background -->
+    <Color x:Key="ToggleTrackCheckedColor">#C8DCEF</Color>
+    <!-- ComboBox item highlighted background -->
+    <Color x:Key="ComboItemHighlightColor">#E8EBF5</Color>
+    <!-- ComboBox item selected background -->
+    <Color x:Key="ComboItemSelectedColor">#D4DCEF</Color>
+
+    <!-- ── Accent ─────────────────────────────────────────────────────────── -->
+    <!-- Primary blue accent: buttons, caret, focus rings, active indicators -->
+    <Color x:Key="AccentBlueColor">#3D6FFF</Color>
+    <!-- Lighter blue used for the slider thumb border -->
+    <Color x:Key="AccentBlueLightColor">#6D96FF</Color>
+    <!-- Generate / save-success green -->
+    <Color x:Key="AccentGreenColor">#28A870</Color>
+    <!-- Foreground on green accent backgrounds -->
+    <Color x:Key="AccentGreenFgColor">#FFFFFF</Color>
+
+    <!-- ── Text ───────────────────────────────────────────────────────────── -->
+    <!-- Primary readable text (widget names, file names, input values) -->
+    <Color x:Key="TextPrimaryColor">#1A1E30</Color>
+    <!-- Secondary / label text (section headers, copy button icon) -->
+    <Color x:Key="TextSecondaryColor">#5A6280</Color>
+    <!-- Field label text -->
+    <Color x:Key="TextFieldLabelColor">#4A5480</Color>
+    <!-- Muted text (drop zone icon) -->
+    <Color x:Key="TextMutedColor">#8890B0</Color>
+    <!-- Drop zone subtitle text -->
+    <Color x:Key="TextSubtleColor">#9098B8</Color>
+    <!-- Drop zone main label -->
+    <Color x:Key="TextDropZoneColor">#6A74A0</Color>
+    <!-- Dimmed status text (idle state) -->
+    <Color x:Key="TextDimColor">#9AA0BC</Color>
+    <!-- Hover foreground for tab buttons -->
+    <Color x:Key="TextHoverColor">#2A3060</Color>
+
+    <!-- ── Scrollbar ──────────────────────────────────────────────────────── -->
+    <Color x:Key="ScrollThumbColor">#C0C8DC</Color>
+    <!-- ScrollThumbHoverColor reuses DropZoneBorderColor (#9AAAD0) -->
+
+    <!-- ── Semantic: Danger ───────────────────────────────────────────────── -->
+    <!-- Error status text, unsupported-field label -->
+    <Color x:Key="DangerColor">#D93636</Color>
+    <!-- Remove / delete X buttons -->
+    <Color x:Key="DangerAltColor">#C42C2C</Color>
+
+    <!-- ── Semantic: Warning ──────────────────────────────────────────────── -->
+    <Color x:Key="WarningBgColor">#FFF8EC</Color>
+    <Color x:Key="WarningBorderColor">#E8A030</Color>
+    <Color x:Key="WarningIconColor">#C07010</Color>
+    <Color x:Key="WarningTextColor">#7A4800</Color>
+
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SOLID COLOR BRUSHES
+         Identical keys to Colors.xaml — only values differ.
+    ══════════════════════════════════════════════════════════════════════════ -->
+
+    <SolidColorBrush x:Key="AppBgBrush"              Color="{StaticResource AppBgColor}"/>
+    <SolidColorBrush x:Key="SidebarBgBrush"          Color="{StaticResource SidebarBgColor}"/>
+    <SolidColorBrush x:Key="PanelBgBrush"            Color="{StaticResource PanelBgColor}"/>
+    <SolidColorBrush x:Key="SurfaceBrush"            Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="SurfaceAltBrush"         Color="{StaticResource SurfaceAltColor}"/>
+    <SolidColorBrush x:Key="SurfaceDeepBrush"        Color="{StaticResource SurfaceDeepColor}"/>
+
+    <SolidColorBrush x:Key="BorderBrush"             Color="{StaticResource BorderColor}"/>
+    <SolidColorBrush x:Key="BorderAccentBrush"       Color="{StaticResource BorderAccentColor}"/>
+    <SolidColorBrush x:Key="DropZoneBorderBrush"     Color="{StaticResource DropZoneBorderColor}"/>
+    <SolidColorBrush x:Key="BorderHoverBrush"        Color="{StaticResource BorderHoverColor}"/>
+
+    <SolidColorBrush x:Key="AccentBlueBrush"         Color="{StaticResource AccentBlueColor}"/>
+    <SolidColorBrush x:Key="AccentBlueLightBrush"    Color="{StaticResource AccentBlueLightColor}"/>
+    <SolidColorBrush x:Key="AccentGreenBrush"        Color="{StaticResource AccentGreenColor}"/>
+    <SolidColorBrush x:Key="AccentGreenFgBrush"      Color="{StaticResource AccentGreenFgColor}"/>
+
+    <SolidColorBrush x:Key="ComboItemHighlightBrush"  Color="{StaticResource ComboItemHighlightColor}"/>
+    <SolidColorBrush x:Key="ComboItemSelectedBrush"   Color="{StaticResource ComboItemSelectedColor}"/>
+    <SolidColorBrush x:Key="ToggleBorderCheckedBrush" Color="{StaticResource ToggleBorderCheckedColor}"/>
+    <SolidColorBrush x:Key="ToggleTrackCheckedBrush"  Color="{StaticResource ToggleTrackCheckedColor}"/>
+
+    <SolidColorBrush x:Key="TextPrimaryBrush"        Color="{StaticResource TextPrimaryColor}"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush"      Color="{StaticResource TextSecondaryColor}"/>
+    <SolidColorBrush x:Key="TextFieldLabelBrush"     Color="{StaticResource TextFieldLabelColor}"/>
+    <SolidColorBrush x:Key="TextMutedBrush"          Color="{StaticResource TextMutedColor}"/>
+    <SolidColorBrush x:Key="TextSubtleBrush"         Color="{StaticResource TextSubtleColor}"/>
+    <SolidColorBrush x:Key="TextDropZoneBrush"       Color="{StaticResource TextDropZoneColor}"/>
+    <SolidColorBrush x:Key="TextDimBrush"            Color="{StaticResource TextDimColor}"/>
+    <SolidColorBrush x:Key="TextHoverBrush"          Color="{StaticResource TextHoverColor}"/>
+
+    <SolidColorBrush x:Key="ScrollThumbBrush"        Color="{StaticResource ScrollThumbColor}"/>
+    <SolidColorBrush x:Key="ScrollThumbHoverBrush"   Color="{StaticResource DropZoneBorderColor}"/>
+
+    <SolidColorBrush x:Key="DangerBrush"             Color="{StaticResource DangerColor}"/>
+    <SolidColorBrush x:Key="DangerAltBrush"          Color="{StaticResource DangerAltColor}"/>
+
+    <SolidColorBrush x:Key="WarningBgBrush"          Color="{StaticResource WarningBgColor}"/>
+    <SolidColorBrush x:Key="WarningBorderBrush"      Color="{StaticResource WarningBorderColor}"/>
+    <SolidColorBrush x:Key="WarningIconBrush"        Color="{StaticResource WarningIconColor}"/>
+    <SolidColorBrush x:Key="WarningTextBrush"        Color="{StaticResource WarningTextColor}"/>
+
+</ResourceDictionary>

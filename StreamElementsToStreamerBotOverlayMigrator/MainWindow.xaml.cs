@@ -1,16 +1,15 @@
 using Microsoft.Win32;
 using StreamElementsToStreamerBotOverlayMigrator.Common.ExtensionMethods;
-using StreamElementsToStreamerBotOverlayMigrator.Themes;
 using StreamElementsToStreamerBotOverlayMigrator.Data;
 using StreamElementsToStreamerBotOverlayMigrator.Managers;
 using StreamElementsToStreamerBotOverlayMigrator.Services;
+using StreamElementsToStreamerBotOverlayMigrator.Themes;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace StreamElementsToStreamerBotOverlayMigrator;
 
@@ -30,6 +29,7 @@ public partial class MainWindow: Window
             Topmost = true;
             Topmost = false;
             Focus();
+            SyncThemeIcon();
         };
 
         Version? version = GetType().Assembly.GetName().Version;
@@ -290,6 +290,23 @@ public partial class MainWindow: Window
         configWindow.ShowDialog();
     }
 
+    private void ThemeToggle_Click(object sender, RoutedEventArgs e)
+    {
+        ThemeManager.Toggle();
+
+        var newWindow = new MainWindow();
+        newWindow.Show();
+        Close();
+    }
+
+    private void SyncThemeIcon()
+    {
+        ThemeToggleIcon.Text    = ThemeManager.Current == Theme.Dark ? "☀" : "☾";
+        ThemeToggleBtn.ToolTip  = ThemeManager.Current == Theme.Dark
+            ? "Switch to light mode"
+            : "Switch to dark mode";
+    }
+
     private async void VersionLabel_Click(object sender, RoutedEventArgs e)
     {
         VersionLabel.IsEnabled = false;
@@ -415,9 +432,11 @@ public partial class MainWindow: Window
     private void SetStatus(string message, bool error = false, bool success = false)
     {
         StatusText.Text       = message;
-        StatusText.Foreground = error   ? AppColors.StatusError
-                              : success ? AppColors.StatusSuccess
-                                        : AppColors.StatusDefault;
+        StatusText.Foreground = error
+            ? AppColors.StatusError
+            : success
+                ? AppColors.StatusSuccess
+                : AppColors.StatusDefault;
     }
 
     #endregion Helpers

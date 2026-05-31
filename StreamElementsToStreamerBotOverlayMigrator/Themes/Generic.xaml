@@ -4,9 +4,9 @@
 
     <!-- ── StyledDropdown default style ───────────────────────────────────── -->
     <Style TargetType="{x:Type controls:StyledDropdown}">
-        <Setter Property="Background" Value="#0f111a"/>
-        <Setter Property="Foreground" Value="#d0d6f0"/>
-        <Setter Property="BorderBrush" Value="#252c40"/>
+        <Setter Property="Background" Value="{StaticResource SurfaceDeepBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
         <Setter Property="FontSize" Value="12"/>
@@ -16,8 +16,8 @@
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
                 <Style TargetType="ComboBoxItem">
-                    <Setter Property="Background" Value="#0f111a"/>
-                    <Setter Property="Foreground" Value="#d0d6f0"/>
+                    <Setter Property="Background" Value="{StaticResource SurfaceDeepBrush}"/>
+                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                     <Setter Property="FontFamily" Value="Segoe UI"/>
                     <Setter Property="FontSize" Value="12"/>
                     <Setter Property="Padding" Value="10,6"/>
@@ -31,11 +31,11 @@
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsHighlighted" Value="True">
-                                        <Setter TargetName="Bg" Property="Background" Value="#1e2538"/>
+                                        <Setter TargetName="Bg" Property="Background" Value="{StaticResource ComboItemHighlightBrush}"/>
                                     </Trigger>
                                     <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="Bg" Property="Background" Value="#1a2a4a"/>
-                                        <Setter Property="Foreground" Value="#4f7eff"/>
+                                        <Setter TargetName="Bg" Property="Background" Value="{StaticResource ComboItemSelectedBrush}"/>
+                                        <Setter Property="Foreground" Value="{StaticResource AccentBlueBrush}"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -66,7 +66,7 @@
                                                   IsHitTestVisible="False"/>
                                 <TextBlock Grid.Column="1"
                                            Text="&#9662;"
-                                           Foreground="#5a6280"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
                                            FontSize="12"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
@@ -87,8 +87,8 @@
                                PlacementTarget="{Binding ElementName=Border}">
                             <Border MinWidth="{Binding ActualWidth, ElementName=Border}"
                                     MaxHeight="{TemplateBinding MaxDropDownHeight}"
-                                    Background="#0f111a"
-                                    BorderBrush="#252c40"
+                                    Background="{StaticResource SurfaceDeepBrush}"
+                                    BorderBrush="{StaticResource BorderBrush}"
                                     BorderThickness="1"
                                     CornerRadius="4"
                                     Margin="0,2,0,0">
@@ -101,10 +101,10 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Border" Property="BorderBrush" Value="#3a4060"/>
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource BorderHoverBrush}"/>
                         </Trigger>
                         <Trigger Property="IsDropDownOpen" Value="True">
-                            <Setter TargetName="Border" Property="BorderBrush" Value="#4f7eff"/>
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
                             <Setter TargetName="Border" Property="CornerRadius" Value="4,4,0,0"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -124,14 +124,14 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
                     <Border x:Name="ThumbBorder"
-                            Background="#2e3650"
+                            Background="{StaticResource ScrollThumbBrush}"
                             CornerRadius="3"/>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="ThumbBorder" Property="Background" Value="#3d4a6e"/>
+                            <Setter TargetName="ThumbBorder" Property="Background" Value="{StaticResource ScrollThumbHoverBrush}"/>
                         </Trigger>
                         <Trigger Property="IsDragging" Value="True">
-                            <Setter TargetName="ThumbBorder" Property="Background" Value="#4f7eff"/>
+                            <Setter TargetName="ThumbBorder" Property="Background" Value="{StaticResource AccentBlueBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -198,7 +198,7 @@
 
     <!-- ── FieldToggle (CheckBox as pill toggle) ────────────────────────────── -->
     <Style x:Key="FieldToggle" TargetType="CheckBox">
-        <Setter Property="Foreground" Value="#d0d6f0"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -210,13 +210,13 @@
                         <Border x:Name="Track"
                                 Width="38" Height="20"
                                 CornerRadius="10"
-                                Background="#252c40"
-                                BorderBrush="#3a4260"
+                                Background="{StaticResource BorderBrush}"
+                                BorderBrush="{StaticResource ToggleBorderCheckedBrush}"
                                 BorderThickness="1">
                             <Border x:Name="Thumb"
                                     Width="14" Height="14"
                                     CornerRadius="7"
-                                    Background="#5a6280"
+                                    Background="{StaticResource TextSecondaryBrush}"
                                     HorizontalAlignment="Left"
                                     Margin="2,0"/>
                         </Border>
@@ -224,13 +224,13 @@
                     </StackPanel>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Track" Property="Background"  Value="#1a3a52"/>
-                            <Setter TargetName="Track" Property="BorderBrush" Value="#4f7eff"/>
-                            <Setter TargetName="Thumb" Property="Background"  Value="#4f7eff"/>
+                            <Setter TargetName="Track" Property="Background"  Value="{StaticResource ToggleTrackCheckedBrush}"/>
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
+                            <Setter TargetName="Thumb" Property="Background"  Value="{StaticResource AccentBlueBrush}"/>
                             <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Track" Property="BorderBrush" Value="#4f7eff"/>
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
