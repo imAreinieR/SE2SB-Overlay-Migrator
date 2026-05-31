@@ -7,7 +7,6 @@ using StreamElementsToStreamerBotOverlayMigrator.Managers;
 using StreamElementsToStreamerBotOverlayMigrator.Services;
 using StreamElementsToStreamerBotOverlayMigrator.Templates;
 using StreamElementsToStreamerBotOverlayMigrator.Themes;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -304,7 +303,7 @@ public partial class WidgetConfigWindow: Window
                 var picker = new ColorSwatchPicker
                 {
                     Color = ParseColor(valueStr),
-                    Tag = field.Key
+                    Tag   = field.Key
                 };
                 picker.ColorChanged += OnControlChanged;
                 return picker;
@@ -327,7 +326,7 @@ public partial class WidgetConfigWindow: Window
                     Value   = double.TryParse(valueStr, out double initialSlider)
                         ? initialSlider
                         : field.Min ?? 0,
-                    Tag = field.Key
+                    Tag     = field.Key
                 };
                 sliderField.ValueChanged += OnControlChanged;
                 return sliderField;
@@ -367,9 +366,9 @@ public partial class WidgetConfigWindow: Window
             case "sound-input":
                 var unsupportedLabel = new TextBlock
                 {
-                    Text      = $"'{field.Type}' is not yet supported in the config UI.",
-                    Style     = (Style) FindResource("FieldLabel"),
-                    FontStyle = FontStyles.Italic,
+                    Text       = $"'{field.Type}' is not yet supported in the config UI.",
+                    Style      = (Style) FindResource("FieldLabel"),
+                    FontStyle  = FontStyles.Italic,
                     Foreground = AppColors.StatusError
                 };
                 return unsupportedLabel;
@@ -728,9 +727,11 @@ public partial class WidgetConfigWindow: Window
     private void SetStatus(string message, bool error = false, bool success = false)
     {
         StatusText.Text       = message;
-        StatusText.Foreground = error   ? AppColors.StatusError
-                              : success ? AppColors.StatusSuccess
-                                        : AppColors.StatusDefault;
+        StatusText.Foreground = error
+            ? AppColors.StatusError
+            : success
+                ? AppColors.StatusSuccess
+                : AppColors.StatusDefault;
     }
 
     #endregion Helpers
