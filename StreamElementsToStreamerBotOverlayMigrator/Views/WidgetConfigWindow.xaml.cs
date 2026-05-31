@@ -54,9 +54,13 @@ public partial class WidgetConfigWindow: Window
             PreviewPlaceholder.Visibility = Visibility.Collapsed;
 
             await PreviewWebView.CoreWebView2.CallDevToolsProtocolMethodAsync("Log.enable", "{}");
+            await PreviewWebView.CoreWebView2.CallDevToolsProtocolMethodAsync("Runtime.enable", "{}");
 
-            CoreWebView2DevToolsProtocolEventReceiver receiver = PreviewWebView.CoreWebView2.GetDevToolsProtocolEventReceiver("Log.entryAdded");
+            var receiver = PreviewWebView.CoreWebView2.GetDevToolsProtocolEventReceiver("Log.entryAdded");
             receiver.DevToolsProtocolEventReceived += OnReceivedBrowserConsoleLog;
+
+            var consoleReceiver = PreviewWebView.CoreWebView2.GetDevToolsProtocolEventReceiver("Runtime.consoleAPICalled");
+            consoleReceiver.DevToolsProtocolEventReceived += OnReceivedConsoleApiCall;
 
             PreviewWebView.CoreWebView2.AddWebResourceRequestedFilter
             (
@@ -76,8 +80,6 @@ public partial class WidgetConfigWindow: Window
 
     private void OnReceivedBrowserConsoleLog(object? sender, CoreWebView2DevToolsProtocolEventReceivedEventArgs e)
     {
-        Debug.WriteLine(e.ParameterObjectAsJson);
-
         if (string.IsNullOrEmpty(e.ParameterObjectAsJson))
             return; 
 
@@ -85,6 +87,41 @@ public partial class WidgetConfigWindow: Window
 
         if (logEntryEvent?.entry is not null)
             Dispatcher.Invoke(() => AppendLog($"[{logEntryEvent.entry.level}] {logEntryEvent.entry.text}"));
+    }
+
+    private void OnReceivedConsoleApiCall(object? sender, CoreWebView2DevToolsProtocolEventReceivedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(e.ParameterObjectAsJson))
+            return;
+
+        using JsonDocument doc = JsonDocument.Parse(e.ParameterObjectAsJson);
+        JsonElement root = doc.RootElement;
+
+        string type = root.TryGetProperty("type", out JsonElement type_) ? type_.GetString() ?? "log" : "log";
+
+        string message = string.Empty;
+        if (root.TryGetProperty("args", out JsonElement args))
+        {
+            message = string.Join
+            (
+                " ",
+                args
+                    .EnumerateArray()
+                    .Select
+                    (
+                        arg =>
+                        {
+                            if (arg.TryGetProperty("value", out JsonElement value))
+                                return value.ToString();
+                            if (arg.TryGetProperty("description", out JsonElement description))
+                                return description.GetString() ?? string.Empty;
+                            return string.Empty;
+                        }
+                    )
+            );
+        }
+
+        Dispatcher.Invoke(() => AppendLog($"[{type.ToUpper()}] {message}"));
     }
 
     private void ReloadPreview()
@@ -392,7 +429,7 @@ public partial class WidgetConfigWindow: Window
             SetStatus("Unsaved changes.");
         }
 
-        RefreshPreviewData();
+        ReloadPreview();
     }
 
     private async void FieldButton_Click(object sender, RoutedEventArgs e)
@@ -460,23 +497,6 @@ public partial class WidgetConfigWindow: Window
     }
 
     #endregion Event Handlers
-
-    private async void RefreshPreviewData()
-    {
-        if (!_webViewReady)
-            return;
-
-        try
-        {
-            string dataJson = BuildDataJson();
-            string script   = $"if(typeof window.__updateWidgetData === 'function') {{ window.__updateWidgetData({dataJson}); }}";
-            await PreviewWebView.CoreWebView2.ExecuteScriptAsync(script);
-        }
-        catch (Exception exception)
-        {
-            SetStatus($"[WARN] Could not refresh preview data: {exception.Message}", error: true);
-        }
-    }
 
     public void AppendLog(string message)
     {
