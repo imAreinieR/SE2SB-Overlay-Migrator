@@ -5,8 +5,8 @@
     <UserControl.Resources>
 
         <Style x:Key="SliderTrack" TargetType="Slider">
-            <Setter Property="Foreground" Value="#4f7eff"/>
-            <Setter Property="Background" Value="#252c40"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentBlueBrush}"/>
+            <Setter Property="Background" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -40,8 +40,8 @@
                                             <ControlTemplate TargetType="Thumb">
                                                 <Border Width="16" Height="16"
                                                         CornerRadius="8"
-                                                        Background="#4f7eff"
-                                                        BorderBrush="#7fa8ff"
+                                                        Background="{StaticResource AccentBlueBrush}"
+                                                        BorderBrush="{StaticResource AccentBlueLightBrush}"
                                                         BorderThickness="1.5"/>
                                             </ControlTemplate>
                                         </Thumb.Template>
@@ -55,7 +55,7 @@
         </Style>
 
         <Style x:Key="ReadoutText" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#8b94bd"/>
+            <Setter Property="Foreground" Value="{StaticResource TextFieldLabelBrush}"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Margin" Value="0,4,0,0"/>

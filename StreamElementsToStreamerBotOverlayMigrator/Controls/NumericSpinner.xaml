@@ -6,10 +6,10 @@
     <UserControl.Resources>
 
         <Style x:Key="SpinnerInput" TargetType="TextBox">
-            <Setter Property="Background" Value="#0f111a"/>
-            <Setter Property="Foreground" Value="#d0d6f0"/>
-            <Setter Property="CaretBrush" Value="#4f7eff"/>
-            <Setter Property="BorderBrush" Value="#252c40"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceDeepBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="CaretBrush" Value="{StaticResource AccentBlueBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="12"/>
@@ -30,7 +30,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="#4f7eff"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -40,7 +40,7 @@
 
         <Style x:Key="SpinBtn" TargetType="RepeatButton">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#5a6280"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -53,11 +53,11 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bg" Property="Background" Value="#252c40"/>
-                                <Setter Property="Foreground" Value="#d0d6f0"/>
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource BorderBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bg" Property="Background" Value="#2e3650"/>
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource ScrollThumbBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -82,8 +82,8 @@
         <!-- Spin buttons — right cap of the composite control -->
         <Border Grid.Column="1"
                 Width="22"
-                Background="#1a1e2b"
-                BorderBrush="#252c40"
+                Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="1,1,1,1"
                 CornerRadius="0,4,4,0"
                 ClipToBounds="True">
@@ -102,7 +102,7 @@
                 </RepeatButton>
 
                 <!-- Divider -->
-                <Border Grid.Row="1" Background="#252c40"/>
+                <Border Grid.Row="1" Background="{StaticResource BorderBrush}"/>
 
                 <RepeatButton x:Name="DownBtn"
                               Grid.Row="2"

@@ -1,5 +1,6 @@
 using Microsoft.Win32;
 using StreamElementsToStreamerBotOverlayMigrator.Common.ExtensionMethods;
+using StreamElementsToStreamerBotOverlayMigrator.Themes;
 using StreamElementsToStreamerBotOverlayMigrator.Data;
 using StreamElementsToStreamerBotOverlayMigrator.Managers;
 using StreamElementsToStreamerBotOverlayMigrator.Services;
@@ -273,18 +274,8 @@ public partial class MainWindow: Window
         if (FilesEmptyLabel.FindName("DropZoneDash") is not System.Windows.Shapes.Rectangle dash)
             return;
 
-        dash.Stroke = new SolidColorBrush
-        (
-            active
-                ? Color.FromRgb(0x4F, 0x7E, 0xFF)
-                : Color.FromRgb(0x3D, 0x4A, 0x6E)
-        );
-        dash.Fill = new SolidColorBrush
-        (
-            active
-                ? Color.FromArgb(0x1A, 0x4F, 0x7E, 0xFF)
-                : Colors.Transparent
-        );
+        dash.Stroke = active ? AppColors.DropZoneBorderActive : AppColors.DropZoneBorderIdle;
+        dash.Fill   = active ? AppColors.DropZoneFillActive   : AppColors.DropZoneFillIdle;
     }
 
     private void Configure_Click(object sender, RoutedEventArgs e)
@@ -377,12 +368,9 @@ public partial class MainWindow: Window
         FileListBorder.BorderThickness = hasFiles
             ? new Thickness(1)
             : new Thickness(0);
-        FileListBorder.Background = new SolidColorBrush
-        (
-            hasFiles
-                ? Color.FromRgb(0x1A, 0x1E, 0x2B)
-                : Colors.Transparent
-        );
+        FileListBorder.Background = hasFiles
+            ? AppColors.FileListBgFilled
+            : AppColors.FileListBgEmpty;
 
         ConfigureBtn.IsEnabled = _selectedWidget
             .Files
@@ -427,14 +415,9 @@ public partial class MainWindow: Window
     private void SetStatus(string message, bool error = false, bool success = false)
     {
         StatusText.Text       = message;
-        StatusText.Foreground = new SolidColorBrush
-        (
-            error
-                ? Color.FromRgb(0xFF, 0x6B, 0x6B)
-                : success
-                    ? Color.FromRgb(0x3E, 0xCF, 0x8E)
-                    : Color.FromRgb(0x58, 0x60, 0x80)
-        );
+        StatusText.Foreground = error   ? AppColors.StatusError
+                              : success ? AppColors.StatusSuccess
+                                        : AppColors.StatusDefault;
     }
 
     #endregion Helpers

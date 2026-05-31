@@ -5,7 +5,7 @@
         Width="320" Height="460"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
-        Background="#0e1017"
+        Background="{StaticResource AppBgBrush}"
         ShowInTaskbar="False">
 
     <Window.Resources>
@@ -21,7 +21,7 @@
                                     Height="14"
                                     VerticalAlignment="Center"
                                     CornerRadius="7"
-                                    BorderBrush="#252c40"
+                                    BorderBrush="{StaticResource BorderBrush}"
                                     BorderThickness="1"
                                     Background="{TemplateBinding Background}"/>
                             <Track x:Name="PART_Track">
@@ -34,7 +34,7 @@
                                             <ControlTemplate TargetType="Thumb">
                                                 <Ellipse Width="18" Height="18"
                                                          Fill="White"
-                                                         Stroke="#252c40"
+                                                         Stroke="{StaticResource BorderBrush}"
                                                          StrokeThickness="1.5"
                                                          Effect="{x:Null}"/>
                                             </ControlTemplate>
@@ -52,10 +52,10 @@
         </Style>
 
         <Style x:Key="HexInput" TargetType="TextBox">
-            <Setter Property="Background" Value="#0f111a"/>
-            <Setter Property="Foreground" Value="#d0d6f0"/>
-            <Setter Property="CaretBrush" Value="#4f7eff"/>
-            <Setter Property="BorderBrush" Value="#252c40"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceDeepBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="CaretBrush" Value="{StaticResource AccentBlueBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontFamily" Value="Consolas"/>
             <Setter Property="FontSize" Value="12"/>
@@ -74,7 +74,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="#4f7eff"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -88,8 +88,8 @@
         </Style>
 
         <Style x:Key="ConfirmBtn" TargetType="Button">
-            <Setter Property="Background" Value="#3ecf8e"/>
-            <Setter Property="Foreground" Value="#07200f"/>
+            <Setter Property="Background" Value="{StaticResource AccentGreenBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentGreenFgBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="13"/>
@@ -117,8 +117,8 @@
         </Style>
 
         <Style x:Key="CancelBtn" TargetType="Button" BasedOn="{StaticResource ConfirmBtn}">
-            <Setter Property="Background" Value="#21263a"/>
-            <Setter Property="Foreground" Value="#d0d6f0"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
         </Style>
 
     </Window.Resources>
@@ -127,7 +127,7 @@
 
         <!-- SV square picker -->
         <Border CornerRadius="6" ClipToBounds="True"
-                BorderBrush="#252c40" BorderThickness="1"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                 Margin="0,0,0,8">
             <Grid Width="280" Height="160">
                 <!-- White-to-transparent (left→right) over hue background -->
@@ -163,7 +163,7 @@
         </Border>
 
         <!-- Hue slider -->
-        <TextBlock Text="HUE" Foreground="#5a6280" FontFamily="IBM Plex Mono, Consolas"
+        <TextBlock Text="HUE" Foreground="{StaticResource TextSecondaryBrush}" FontFamily="IBM Plex Mono, Consolas"
                    FontSize="9" Margin="0,0,0,3"/>
         <Slider x:Name="HueSlider"
                 IsMoveToPointEnabled="True"
@@ -185,7 +185,7 @@
         </Slider>
 
         <!-- Alpha slider -->
-        <TextBlock Text="ALPHA" Foreground="#5a6280" FontFamily="IBM Plex Mono, Consolas"
+        <TextBlock Text="ALPHA" Foreground="{StaticResource TextSecondaryBrush}" FontFamily="IBM Plex Mono, Consolas"
                    FontSize="9" Margin="0,0,0,4"/>
         <Slider x:Name="AlphaSlider"
                 IsMoveToPointEnabled="True"
@@ -205,7 +205,7 @@
 
             <!-- Swatch preview (checkerboard for alpha, colour on top) -->
             <Border Grid.Column="0" CornerRadius="4"
-                    BorderBrush="#252c40" BorderThickness="1"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                     ClipToBounds="True" Height="48">
                 <Grid>
                     <Border x:Name="CheckerBoard">
@@ -234,19 +234,19 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <StackPanel Margin="0,0,4,0">
                         <TextBox x:Name="RBox" Style="{StaticResource ChannelInput}" TextChanged="RgbaBox_TextChanged" MaxLength="3"/>
-                        <TextBlock Text="R" Foreground="#5a6280" FontSize="9" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                        <TextBlock Text="R" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                     </StackPanel>
                     <StackPanel Margin="0,0,4,0">
                         <TextBox x:Name="GBox" Style="{StaticResource ChannelInput}" TextChanged="RgbaBox_TextChanged" MaxLength="3"/>
-                        <TextBlock Text="G" Foreground="#5a6280" FontSize="9" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                        <TextBlock Text="G" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                     </StackPanel>
                     <StackPanel Margin="0,0,4,0">
                         <TextBox x:Name="BBox" Style="{StaticResource ChannelInput}" TextChanged="RgbaBox_TextChanged" MaxLength="3"/>
-                        <TextBlock Text="B" Foreground="#5a6280" FontSize="9" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                        <TextBlock Text="B" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                     </StackPanel>
                     <StackPanel>
                         <TextBox x:Name="ABox" Style="{StaticResource ChannelInput}" TextChanged="RgbaBox_TextChanged" MaxLength="3"/>
-                        <TextBlock Text="A" Foreground="#5a6280" FontSize="9" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                        <TextBlock Text="A" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                     </StackPanel>
                 </StackPanel>
             </StackPanel>

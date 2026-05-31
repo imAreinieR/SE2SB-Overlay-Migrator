@@ -6,16 +6,16 @@
         Width="960" Height="640"
         MinWidth="700" MinHeight="440"
         WindowStartupLocation="CenterOwner"
-        Background="#0e1017"
+        Background="{StaticResource AppBgBrush}"
         ResizeMode="CanResizeWithGrip">
 
     <Window.Resources>
 
         <!-- Group header toggle button -->
         <Style x:Key="GroupHeaderBtn" TargetType="ToggleButton">
-            <Setter Property="Background" Value="#13161f"/>
-            <Setter Property="Foreground" Value="#d0d6f0"/>
-            <Setter Property="BorderBrush" Value="#252c40"/>
+            <Setter Property="Background" Value="{StaticResource PanelBgBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="Padding" Value="14,10"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -36,14 +36,14 @@
                                 <TextBlock x:Name="Chevron"
                                            Grid.Column="1"
                                            Text="▾"
-                                           Foreground="#5a6280"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
                                            FontSize="12"
                                            VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#1a1e2b"/>
+                                <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="Chevron" Property="Text" Value="▸"/>
@@ -56,7 +56,7 @@
 
         <!-- Field label -->
         <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#8b94bd"/>
+            <Setter Property="Foreground" Value="{StaticResource TextFieldLabelBrush}"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Margin" Value="0,0,0,4"/>
@@ -65,10 +65,10 @@
 
         <!-- Text / Number input -->
         <Style x:Key="FieldInput" TargetType="TextBox">
-            <Setter Property="Background" Value="#0f111a"/>
-            <Setter Property="Foreground" Value="#d0d6f0"/>
-            <Setter Property="CaretBrush" Value="#4f7eff"/>
-            <Setter Property="BorderBrush" Value="#252c40"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceDeepBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="CaretBrush" Value="{StaticResource AccentBlueBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="12"/>
@@ -88,7 +88,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="#4f7eff"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -98,9 +98,9 @@
 
         <!-- Field button -->
         <Style x:Key="FieldButton" TargetType="Button">
-            <Setter Property="Background" Value="#21263a"/>
-            <Setter Property="Foreground" Value="#d0d6f0"/>
-            <Setter Property="BorderBrush" Value="#252c40"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="12"/>
@@ -134,7 +134,7 @@
         <Style x:Key="ColorSwatchBtn" TargetType="Button">
             <Setter Property="Width" Value="30"/>
             <Setter Property="Height" Value="30"/>
-            <Setter Property="BorderBrush" Value="#252c40"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Padding" Value="0"/>
@@ -147,7 +147,7 @@
                                 CornerRadius="4"/>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="BorderBrush" Value="#4f7eff"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -157,8 +157,8 @@
 
         <!-- Footer save button -->
         <Style x:Key="SaveBtn" TargetType="Button">
-            <Setter Property="Background" Value="#3ecf8e"/>
-            <Setter Property="Foreground" Value="#07200f"/>
+            <Setter Property="Background" Value="{StaticResource AccentGreenBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentGreenFgBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="13"/>
@@ -193,7 +193,7 @@
         <!-- Preview/Logs tab button -->
         <Style x:Key="PreviewTabBtn" TargetType="ToggleButton">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#5a6280"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="12"/>
@@ -212,17 +212,17 @@
                             <!-- Active indicator bar -->
                             <Border x:Name="ActiveBar"
                                     Height="2"
-                                    Background="#4f7eff"
+                                    Background="{StaticResource AccentBlueBrush}"
                                     VerticalAlignment="Bottom"
                                     Visibility="Collapsed"/>
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Foreground" Value="#d0d6f0"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                                 <Setter TargetName="ActiveBar" Property="Visibility" Value="Visible"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="#a0aad0"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextHoverBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -261,8 +261,8 @@
 
             <!-- Footer -->
             <Border Grid.Row="1"
-                    Background="#0a0c14"
-                    BorderBrush="#252c40"
+                    Background="{StaticResource SidebarBgBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="0,1,0,0"
                     Padding="20,12">
                 <Grid>
@@ -273,7 +273,7 @@
 
                     <TextBlock x:Name="StatusText"
                                Grid.Column="0"
-                               Foreground="#3a4060"
+                               Foreground="{StaticResource TextDimBrush}"
                                FontFamily="Consolas"
                                FontSize="11"
                                VerticalAlignment="Center"
@@ -295,7 +295,7 @@
                       Width="1"
                       HorizontalAlignment="Stretch"
                       VerticalAlignment="Stretch"
-                      Background="#252c40"
+                      Background="{StaticResource BorderBrush}"
                       ResizeBehavior="PreviousAndNext"
                       ResizeDirection="Columns"/>
 
@@ -312,8 +312,8 @@
 
             <!-- Tab bar -->
             <Border Grid.Row="0"
-                    Background="#0a0c14"
-                    BorderBrush="#252c40"
+                    Background="{StaticResource SidebarBgBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="0,0,0,1">
                 <StackPanel Orientation="Horizontal">
                     <ToggleButton x:Name="TabPreview"
@@ -368,7 +368,7 @@
                 <!-- Shown while WebView2 is initialising -->
                 <TextBlock x:Name="PreviewPlaceholder"
                            Text="Initialising preview…"
-                           Foreground="#3a4060"
+                           Foreground="{StaticResource TextDimBrush}"
                            FontFamily="Consolas"
                            FontSize="12"
                            HorizontalAlignment="Center"
@@ -381,7 +381,7 @@
                               VerticalScrollBarVisibility="Auto"
                               Padding="12">
                     <TextBlock x:Name="LogsText"
-                               Foreground="#5a6280"
+                               Foreground="{StaticResource TextSecondaryBrush}"
                                FontFamily="Consolas"
                                FontSize="11"
                                TextWrapping="Wrap"

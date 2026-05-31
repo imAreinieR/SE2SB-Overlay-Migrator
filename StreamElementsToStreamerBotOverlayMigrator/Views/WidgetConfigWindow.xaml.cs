@@ -6,6 +6,7 @@ using StreamElementsToStreamerBotOverlayMigrator.Data;
 using StreamElementsToStreamerBotOverlayMigrator.Managers;
 using StreamElementsToStreamerBotOverlayMigrator.Services;
 using StreamElementsToStreamerBotOverlayMigrator.Templates;
+using StreamElementsToStreamerBotOverlayMigrator.Themes;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -214,14 +215,14 @@ public partial class WidgetConfigWindow: Window
                 Text       = widgetDataFieldGroup.Name.ToUpper(),
                 FontFamily = new FontFamily("IBM Plex Mono, Consolas"),
                 FontSize   = 10,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x5a, 0x62, 0x80))
+                Foreground = AppColors.Brush(AppColors.TextSecondary)
             },
             IsChecked = false
         };
 
         var fieldsPanel = new StackPanel
         {
-            Background = new SolidColorBrush(Color.FromRgb(0x13, 0x16, 0x1f)),
+            Background = AppColors.Brush(AppColors.PanelBg),
             Margin     = new Thickness(0, 0, 0, 4)
         };
 
@@ -267,7 +268,7 @@ public partial class WidgetConfigWindow: Window
         return new Border
         {
             Child           = row,
-            BorderBrush     = new SolidColorBrush(Color.FromRgb(0x25, 0x2c, 0x40)),
+            BorderBrush     = AppColors.Brush(AppColors.Border),
             BorderThickness = new Thickness(0, 0, 0, 1)
         };
     }
@@ -369,7 +370,7 @@ public partial class WidgetConfigWindow: Window
                     Text      = $"'{field.Type}' is not yet supported in the config UI.",
                     Style     = (Style) FindResource("FieldLabel"),
                     FontStyle = FontStyles.Italic,
-                    Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x6B))
+                    Foreground = AppColors.StatusError
                 };
                 return unsupportedLabel;
             case "googlefont":
@@ -687,7 +688,7 @@ public partial class WidgetConfigWindow: Window
             new TextBlock
             {
                 Text                = message,
-                Foreground          = new SolidColorBrush(Color.FromRgb(0x5a, 0x62, 0x80)),
+                Foreground          = AppColors.StatusDefault,
                 FontFamily          = new FontFamily("Segoe UI"),
                 FontSize            = 13,
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -727,14 +728,9 @@ public partial class WidgetConfigWindow: Window
     private void SetStatus(string message, bool error = false, bool success = false)
     {
         StatusText.Text       = message;
-        StatusText.Foreground = new SolidColorBrush
-        (
-            error
-                ? Color.FromRgb(0xFF, 0x6B, 0x6B)
-                : success
-                    ? Color.FromRgb(0x3E, 0xCF, 0x8E)
-                    : Color.FromRgb(0x58, 0x60, 0x80)
-        );
+        StatusText.Foreground = error   ? AppColors.StatusError
+                              : success ? AppColors.StatusSuccess
+                                        : AppColors.StatusDefault;
     }
 
     #endregion Helpers

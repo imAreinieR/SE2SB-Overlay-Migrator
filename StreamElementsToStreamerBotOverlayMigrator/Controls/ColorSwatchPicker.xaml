@@ -15,13 +15,13 @@
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Bg"
                                 CornerRadius="4"
-                                BorderBrush="#252c40"
+                                BorderBrush="{StaticResource BorderBrush}"
                                 BorderThickness="1"
                                 Background="{TemplateBinding Background}"
                                 ClipToBounds="True"/>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bg" Property="BorderBrush" Value="#4f7eff"/>
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Bg" Property="Opacity" Value="0.8"/>
@@ -67,9 +67,9 @@
                  Height="30"
                  VerticalContentAlignment="Center"
                  Padding="6,0"
-                 Background="#0f111a"
-                 Foreground="#5a6280"
-                 BorderBrush="#252c40"
+                 Background="{StaticResource SurfaceDeepBrush}"
+                 Foreground="{StaticResource TextSecondaryBrush}"
+                 BorderBrush="{StaticResource BorderBrush}"
                  BorderThickness="1"
                  MinWidth="140"/>
 

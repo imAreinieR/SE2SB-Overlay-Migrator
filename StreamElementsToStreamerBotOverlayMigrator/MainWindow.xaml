@@ -7,7 +7,7 @@
         MinWidth="680" MinHeight="460"
         ResizeMode="CanMinimize"
         WindowStartupLocation="CenterScreen"
-        Background="#0e1017">
+        Background="{StaticResource AppBgBrush}">
 
     <Window.Resources>
 
@@ -46,48 +46,48 @@
         </Style>
 
         <Style x:Key="SaveBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
-            <Setter Property="Background" Value="#4f7eff"/>
+            <Setter Property="Background" Value="{StaticResource AccentBlueBrush}"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Padding" Value="14,6"/>
         </Style>
 
         <Style x:Key="ImportBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
-            <Setter Property="Background" Value="#21263a"/>
-            <Setter Property="Foreground" Value="#d0d6f0"/>
-            <Setter Property="BorderBrush" Value="#252c40"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="14,6"/>
         </Style>
 
         <Style x:Key="SmallImportBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
-            <Setter Property="Background" Value="#21263a"/>
-            <Setter Property="Foreground" Value="#d0d6f0"/>
-            <Setter Property="BorderBrush" Value="#252c40"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="8,3"/>
             <Setter Property="FontSize" Value="11"/>
         </Style>
 
         <Style x:Key="SaveChangesBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
-            <Setter Property="Background" Value="#21263a"/>
-            <Setter Property="Foreground" Value="#d0d6f0"/>
-            <Setter Property="BorderBrush" Value="#252c40"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="14,0"/>
         </Style>
 
         <Style x:Key="GenerateBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
-            <Setter Property="Background" Value="#3ecf8e"/>
-            <Setter Property="Foreground" Value="#07200f"/>
+            <Setter Property="Background" Value="{StaticResource AccentGreenBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentGreenFgBrush}"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Padding" Value="22,9"/>
         </Style>
 
         <Style x:Key="CopyBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
-            <Setter Property="Background" Value="#21263a"/>
-            <Setter Property="Foreground" Value="#5a6280"/>
-            <Setter Property="BorderBrush" Value="#252c40"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Width" Value="34"/>
             <Setter Property="Padding" Value="0"/>
@@ -95,8 +95,8 @@
 
         <Style x:Key="NewWidgetBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#4f7eff"/>
-            <Setter Property="BorderBrush" Value="#2a3560"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentBlueBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderAccentBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="0,7"/>
         </Style>
@@ -104,7 +104,7 @@
         <!-- Remove X button — transparent, shown via trigger on parent -->
         <Style x:Key="RemoveWidgetBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#ff5f5f"/>
+            <Setter Property="Foreground" Value="{StaticResource DangerAltBrush}"/>
             <Setter Property="Padding" Value="4,2"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Opacity" Value="0"/>
@@ -114,7 +114,7 @@
         <!-- File remove X -->
         <Style x:Key="FileRemoveBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#ff5f5f"/>
+            <Setter Property="Foreground" Value="{StaticResource DangerAltBrush}"/>
             <Setter Property="Padding" Value="4,2"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Opacity" Value="0"/>
@@ -123,9 +123,9 @@
 
         <!-- Read-only path TextBox -->
         <Style x:Key="PathBox" TargetType="TextBox">
-            <Setter Property="Background" Value="#1a1e2b"/>
-            <Setter Property="Foreground" Value="#5a6280"/>
-            <Setter Property="BorderBrush" Value="#252c40"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="IsReadOnly" Value="True"/>
             <Setter Property="FontFamily" Value="Consolas"/>
@@ -150,10 +150,10 @@
 
         <!-- Editable name TextBox -->
         <Style x:Key="NameBox" TargetType="TextBox">
-            <Setter Property="Background" Value="#1a1e2b"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CaretBrush" Value="#4f7eff"/>
-            <Setter Property="BorderBrush" Value="#252c40"/>
+            <Setter Property="CaretBrush" Value="{StaticResource AccentBlueBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="13"/>
@@ -172,7 +172,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="#4f7eff"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -182,10 +182,10 @@
 
         <!-- Inline widget name edit TextBox -->
         <Style x:Key="InlineNameBox" TargetType="TextBox">
-            <Setter Property="Background" Value="#21263a"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CaretBrush" Value="#4f7eff"/>
-            <Setter Property="BorderBrush" Value="#4f7eff"/>
+            <Setter Property="CaretBrush" Value="{StaticResource AccentBlueBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="12"/>
@@ -210,7 +210,7 @@
 
         <!-- Section label -->
         <Style x:Key="SectionLabel" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#5a6280"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
             <Setter Property="FontFamily" Value="Consolas"/>
             <Setter Property="FontSize" Value="10"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
@@ -229,8 +229,8 @@
 
         <!-- ── LEFT SIDEBAR ── -->
         <Border Grid.Column="0"
-                Background="#0a0c14"
-                BorderBrush="#252c40"
+                Background="{StaticResource SidebarBgBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="0,0,1,0">
             <Grid>
                 <Grid.RowDefinitions>
@@ -240,7 +240,7 @@
 
                 <!-- Sidebar header -->
                 <Border Grid.Row="0"
-                        BorderBrush="#252c40"
+                        BorderBrush="{StaticResource BorderBrush}"
                         BorderThickness="0,0,0,1"
                         Padding="14,14,14,12">
                     <StackPanel>
@@ -300,11 +300,11 @@
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="RowBorder" Property="Background" Value="#1a1e2b"/>
+                                                    <Setter TargetName="RowBorder" Property="Background" Value="{StaticResource SurfaceBrush}"/>
                                                 </Trigger>
                                                 <Trigger Property="IsSelected" Value="True">
-                                                    <Setter TargetName="RowBorder" Property="Background" Value="#21263a"/>
-                                                    <Setter TargetName="RowBorder" Property="BorderBrush" Value="#252c40"/>
+                                                    <Setter TargetName="RowBorder" Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+                                                    <Setter TargetName="RowBorder" Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -345,7 +345,7 @@
                                                     <TextBlock Text="{Binding Name}"
                                                                FontFamily="Segoe UI"
                                                                FontSize="12"
-                                                               Foreground="#d0d6f0"
+                                                               Foreground="{StaticResource TextPrimaryBrush}"
                                                                VerticalAlignment="Center"
                                                                TextTrimming="CharacterEllipsis"
                                                                MaxWidth="100"/>
@@ -365,7 +365,7 @@
                                                        Grid.Column="2"
                                                        Text="✎"
                                                        FontSize="11"
-                                                       Foreground="#5a6280"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
                                                        VerticalAlignment="Center"
                                                        Margin="0,0,2,0"
                                                        Opacity="0"
@@ -419,7 +419,7 @@
         </Border>
 
         <!-- ── RIGHT DETAIL PANEL ── -->
-        <Grid Grid.Column="1" Background="#13161f">
+        <Grid Grid.Column="1" Background="{StaticResource PanelBgBrush}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>     <!-- Detail content / empty state -->
                 <RowDefinition Height="Auto"/>  <!-- Detail footer -->
@@ -434,7 +434,7 @@
                                Opacity="0.2"
                                Margin="0,0,0,12"/>
                     <TextBlock Text="No widgets yet."
-                               Foreground="#3a4060"
+                               Foreground="{StaticResource TextDimBrush}"
                                FontFamily="Segoe UI"
                                FontSize="13"
                                HorizontalAlignment="Center"
@@ -459,8 +459,8 @@
 
                     <!-- Warning banner -->
                     <Border x:Name="WarningBanner"
-                            Background="#221a0a"
-                            BorderBrush="#7a4a10"
+                            Background="{StaticResource WarningBgBrush}"
+                            BorderBrush="{StaticResource WarningBorderBrush}"
                             BorderThickness="1"
                             CornerRadius="5"
                             Padding="12,8"
@@ -468,11 +468,11 @@
                             Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="⚠  "
-                                       Foreground="#f0a04b"
+                                       Foreground="{StaticResource WarningIconBrush}"
                                        FontSize="12"
                                        VerticalAlignment="Center"/>
                             <TextBlock x:Name="WarningText"
-                                       Foreground="#e8b87a"
+                                       Foreground="{StaticResource WarningTextBrush}"
                                        FontFamily="Segoe UI"
                                        FontSize="12"
                                        VerticalAlignment="Center"
@@ -505,8 +505,8 @@
                         <!-- File list -->
                         <Border x:Name="FileListBorder"
                                 Grid.Column="0"
-                                Background="#1a1e2b"
-                                BorderBrush="#252c40"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="5"
                                 MinHeight="40">
@@ -515,7 +515,7 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Grid>
-                                                <Border BorderBrush="#252c40"
+                                                <Border BorderBrush="{StaticResource BorderBrush}"
                                                         BorderThickness="0,0,0,1"
                                                         Padding="10,7">
                                                     <Grid>
@@ -544,7 +544,7 @@
                                                         <!-- Filename -->
                                                         <TextBlock Grid.Column="1"
                                                                    Text="{Binding FileName}"
-                                                                   Foreground="#d0d6f0"
+                                                                   Foreground="{StaticResource TextPrimaryBrush}"
                                                                    FontFamily="Consolas"
                                                                    FontSize="11"
                                                                    VerticalAlignment="Center"
@@ -595,7 +595,7 @@
                                       Drop="DropZone_Drop">
                                     <!-- Dashed border drawn as a Rectangle -->
                                     <Rectangle x:Name="DropZoneDash"
-                                               Stroke="#3d4a6e"
+                                               Stroke="{StaticResource DropZoneBorderBrush}"
                                                StrokeThickness="1.5"
                                                StrokeDashArray="4 3"
                                                RadiusX="4" RadiusY="4"
@@ -607,17 +607,17 @@
                                                    Text="⬆"
                                                    FontSize="20"
                                                    HorizontalAlignment="Center"
-                                                   Foreground="#4a5680"
+                                                   Foreground="{StaticResource TextMutedBrush}"
                                                    Margin="0,0,0,6"/>
                                         <TextBlock x:Name="DropZoneText"
                                                    Text="Drop files here"
-                                                   Foreground="#7a86aa"
+                                                   Foreground="{StaticResource TextDropZoneBrush}"
                                                    FontFamily="Segoe UI"
                                                    FontSize="12"
                                                    HorizontalAlignment="Center"
                                                    Margin="0,0,0,2"/>
                                         <TextBlock Text="or use ＋ Import above"
-                                                   Foreground="#4a5275"
+                                                   Foreground="{StaticResource TextSubtleBrush}"
                                                    FontFamily="Segoe UI"
                                                    FontSize="10"
                                                    HorizontalAlignment="Center"/>
@@ -647,7 +647,7 @@
                                 Height="34"
                                 ToolTip="Copy path to clipboard"
                                 Click="CopyPath_Click">
-                            <TextBlock Text="⧉" FontSize="14" Foreground="#5a6280"/>
+                            <TextBlock Text="⧉" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
                         </Button>
                     </Grid>
 
@@ -668,8 +668,8 @@
 
             <!-- Detail footer: status + generate -->
             <Border Grid.Row="1"
-                    Background="#0e1017"
-                    BorderBrush="#252c40"
+                    Background="{StaticResource AppBgBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="0,1,0,0"
                     Padding="20,12">
                 <Grid>
@@ -681,7 +681,7 @@
 
                     <TextBlock x:Name="StatusText"
                                Grid.Column="0"
-                               Foreground="#3a4060"
+                               Foreground="{StaticResource TextDimBrush}"
                                FontFamily="Consolas"
                                FontSize="11"
                                VerticalAlignment="Center"
