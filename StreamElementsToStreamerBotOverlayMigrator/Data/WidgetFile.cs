@@ -46,7 +46,14 @@ public class WidgetFile
     {
         try
         {
-            using var jsonDocument = JsonDocument.Parse(fileContent);
+            using JsonDocument jsonDocument = JsonDocument.Parse
+            (
+                fileContent,
+                new JsonDocumentOptions
+                {
+                    AllowTrailingCommas = true
+                }
+            );
             JsonElement jsonRootElement = jsonDocument.RootElement;
 
             if (jsonRootElement.ValueKind != JsonValueKind.Object)

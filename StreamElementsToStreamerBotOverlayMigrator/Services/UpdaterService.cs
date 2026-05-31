@@ -26,8 +26,18 @@ public static class UpdaterService
                 .UserAgent
                 .Add(new ProductInfoHeaderValue(UserAgent, currentVersion));
 
-            string      json      = await client.GetStringAsync($"https://api.github.com/repos/{Repo}/releases");
-            JsonElement releases  = JsonDocument.Parse(json).RootElement;
+            string json = await client.GetStringAsync($"https://api.github.com/repos/{Repo}/releases");
+
+            using JsonDocument jsonDocument = JsonDocument.Parse
+            (
+                json,
+                new JsonDocumentOptions
+                {
+                    AllowTrailingCommas = true
+                }
+            );
+
+            JsonElement releases = jsonDocument.RootElement;
             string?     latestTag = releases[0].GetProperty("tag_name").GetString();
 
             if (latestTag is null)
@@ -63,9 +73,18 @@ public static class UpdaterService
                 .UserAgent
                 .Add(new ProductInfoHeaderValue(UserAgent, currentVersion));
 
-            string      json      = await client.GetStringAsync($"https://api.github.com/repos/{Repo}/releases");
-            JsonElement releases  = JsonDocument.Parse(json).RootElement;
-            JsonElement release   = releases[0];
+            string json = await client.GetStringAsync($"https://api.github.com/repos/{Repo}/releases");
+
+            using JsonDocument jsonDocument = JsonDocument.Parse
+            (
+                json,
+                new JsonDocumentOptions
+                {
+                    AllowTrailingCommas = true
+                }
+            );
+
+            JsonElement release   = jsonDocument.RootElement[0];
             string?     latestTag = release.GetProperty("tag_name").GetString();
 
             if
