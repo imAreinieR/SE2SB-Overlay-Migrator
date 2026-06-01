@@ -24,6 +24,11 @@
   <Target Name="CopyUpdater" AfterTargets="Publish">
     <Exec Command="dotnet publish ..\ApplicationUpdater\ApplicationUpdater.csproj -c Release -o $(PublishDir) --nologo -v quiet" />
   </Target>
+  <Target Name="RemoveWebView2XmlFiles" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Web.WebView2')) and '%(Extension)' == '.xml'" />
+    </ItemGroup>
+  </Target>
   <Target Name="ZipPublishOutput" AfterTargets="Publish">
     <PropertyGroup>
       <ZipName>$(AssemblyName)-v$(Version)</ZipName>
