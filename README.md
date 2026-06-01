@@ -10,7 +10,9 @@ StreamElements hosts overlays and services them with stream events out of the bo
 
 This tool migrates your existing SE overlays so they live locally on your machine and can be served by StreamerBot instead — keeping your overlays working without rebuilding them from scratch.
 
-![Application UI](Images/application_ui_1.png)
+![Application UI - Main Screen](Images/application_ui_1.png)
+
+![Application UI - Edit Configuration](Images/application_ui_2.png)
 
 ---
 
@@ -70,6 +72,7 @@ flowchart TB
 ### Widget Management
 - Create and configure multiple widgets.
 - Each widget tracks its own files and configurations independently.
+- Tweak configuration settings and see your changes in the live preview.
 
 ### StreamerBot Event Bridge
 - A `streamerBotEvents.js` file is generated automatically alongside your widget files. This bridges StreamerBot's event system to your overlay so it can respond to stream events (follows, subs, etc.) without any manual wiring.
@@ -80,6 +83,10 @@ flowchart TB
 
 ### One-Click!
 - Just one click to copy URL and add to OBS as a browser source.
+
+### Misc
+- Easily check for newer version and update!
+- Switch between light and dark themes.
 
 ---
 
