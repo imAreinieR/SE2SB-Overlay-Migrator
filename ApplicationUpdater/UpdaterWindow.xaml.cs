@@ -102,17 +102,19 @@ public partial class UpdaterWindow: Window
 
             await fileStream.DisposeAsync();
 
-            string exeName    = Path.GetFileName(_targetPath);
-            string extractDir = Path.Combine(Path.GetTempPath(), "SE2SB_Update");
+            string exeName                   = Path.GetFileName(_targetPath);
+            string extractDirectory          = Path.Combine(Path.GetTempPath(), "SE2SB_Update");
+            string canonicalExtractDirectory = Path.GetFullPath(extractDirectory) + Path.DirectorySeparatorChar;
 
-            if (Directory.Exists(extractDir))
-                Directory.Delete(extractDir, recursive: true);
+            if (Directory.Exists(extractDirectory))
+                Directory.Delete(extractDirectory, recursive: true);
 
-            ZipFile.ExtractToDirectory(tempZipPath, extractDir);
+            ZipFile.ExtractToDirectory(tempZipPath, extractDirectory);
 
             string extractedExe = Directory
-                .GetFiles(extractDir, exeName, SearchOption.AllDirectories)
-                .FirstOrDefault()
+                .GetFiles(extractDirectory, exeName, SearchOption.AllDirectories)
+                .Select(Path.GetFullPath)
+                .FirstOrDefault(path => path.StartsWith(canonicalExtractDirectory, StringComparison.OrdinalIgnoreCase))
                     ?? throw new Exception($"Could not find '{exeName}' inside the update archive.");
 
             File.Move(extractedExe, _targetPath, true);
