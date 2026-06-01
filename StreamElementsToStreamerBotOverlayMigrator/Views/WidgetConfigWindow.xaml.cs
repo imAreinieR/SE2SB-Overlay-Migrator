@@ -150,7 +150,7 @@ public partial class WidgetConfigWindow: Window
                 }
             );
 
-        if (!_fileNameAndContents.TryGetValue("index.html", out string htmlContent))
+        if (!_fileNameAndContents.TryGetValue("index.html", out string? htmlContent))
         {
             PreviewWebView.NavigateToString("<body style='background:#0e1017;color:#5a6280;font-family:Consolas;padding:32px'>No HTML file found in widget.</body>");
             SetStatus("[WARN] No HTML file found – preview unavailable.", error: true);
