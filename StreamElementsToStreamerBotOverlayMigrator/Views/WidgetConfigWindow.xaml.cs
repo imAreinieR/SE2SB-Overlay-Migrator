@@ -20,13 +20,34 @@ namespace StreamElementsToStreamerBotOverlayMigrator;
 
 public partial class WidgetConfigWindow: Window
 {
+    private const    string                               SimulatedUsername       = "Ami.Bot";
+    private const    string                               SimulatedUserId         = "123456";
+    private const    string                               SimulatedGifterUsername = "Cat.God";
+    private const    string                               SimulatedGifterId       = "676767";
+
     private readonly Widget                               _widget;
-    private readonly Dictionary<string, FrameworkElement> _fieldControls       = new ();
-    private readonly List<WidgetDataField>                _allFields           = new ();
-    private readonly Dictionary<string, string>           _fileNameAndContents = new();
+    private readonly Dictionary<string, FrameworkElement> _fieldControls          = new ();
+    private readonly List<WidgetDataField>                _allFields              = new ();
+    private readonly Dictionary<string, string>           _fileNameAndContents    = new ();
     private          Dictionary<string, JsonElement>?     _dataValues;
     private          bool                                 _isDirty;
-    private          bool                                 _webViewReady        = false;
+    private          bool                                 _webViewReady           = false;
+
+    private          StyledDropdown                       _settingsCanvasSize     = null!;
+    private          NumericSpinner                       _settingsWidgetWidth    = null!;
+    private          NumericSpinner                       _settingsWidgetHeight   = null!;
+    private          NumericSpinner                       _settingsWidgetX        = null!;
+    private          NumericSpinner                       _settingsWidgetY        = null!;
+
+    private static readonly (string Label, int Width, int Height)[] CanvasResolutions =
+    [
+        ("640 × 360  (360p)",     640,  360),
+        ("854 × 480  (480p)",     854,  480),
+        ("1280 × 720  (720p)",   1280,  720),
+        ("1920 × 1080  (1080p)", 1920, 1080),
+        ("2560 × 1440  (1440p)", 2560, 1440),
+        ("3840 × 2160  (4K)",    3840, 2160),
+    ];
 
     private record LogEntryEvent(LogEntry entry);
     private record LogEntry(string source, string level, string text, double timestamp, string? url, int? lineNumber);
@@ -38,12 +59,16 @@ public partial class WidgetConfigWindow: Window
         _widget = widget;
         Title   = $"Configure — {widget.Name}";
 
-        LoadDataJson();
-        LoadFields();
-        InitWebViewAsync();
+        LoadConfigurationData();
+        LoadConfigurationFields();
+
+        SetupSimulateGroups();
+        BuildSettingsControls();
+
+        InitializeWebViewAsync();
     }
 
-    private async void InitWebViewAsync()
+    private async void InitializeWebViewAsync()
     {
         try
         {
@@ -76,52 +101,6 @@ public partial class WidgetConfigWindow: Window
             PreviewPlaceholder.Text = $"WebView2 unavailable: {exception.Message}";
             SetStatus($"[ERROR] WebView2 init failed: {exception.Message}", error: true);
         }
-    }
-
-    private void OnReceivedBrowserConsoleLog(object? sender, CoreWebView2DevToolsProtocolEventReceivedEventArgs e)
-    {
-        if (string.IsNullOrEmpty(e.ParameterObjectAsJson))
-            return; 
-
-        LogEntryEvent? logEntryEvent = JsonSerializer.Deserialize<LogEntryEvent>(e.ParameterObjectAsJson);
-
-        if (logEntryEvent?.entry is not null)
-            Dispatcher.Invoke(() => AppendLog($"[{logEntryEvent.entry.level}] {logEntryEvent.entry.text}"));
-    }
-
-    private void OnReceivedConsoleApiCall(object? sender, CoreWebView2DevToolsProtocolEventReceivedEventArgs e)
-    {
-        if (string.IsNullOrEmpty(e.ParameterObjectAsJson))
-            return;
-
-        using JsonDocument doc = JsonDocument.Parse(e.ParameterObjectAsJson);
-        JsonElement root = doc.RootElement;
-
-        string type = root.TryGetProperty("type", out JsonElement type_) ? type_.GetString() ?? "log" : "log";
-
-        string message = string.Empty;
-        if (root.TryGetProperty("args", out JsonElement args))
-        {
-            message = string.Join
-            (
-                " ",
-                args
-                    .EnumerateArray()
-                    .Select
-                    (
-                        arg =>
-                        {
-                            if (arg.TryGetProperty("value", out JsonElement value))
-                                return value.ToString();
-                            if (arg.TryGetProperty("description", out JsonElement description))
-                                return description.GetString() ?? string.Empty;
-                            return string.Empty;
-                        }
-                    )
-            );
-        }
-
-        Dispatcher.Invoke(() => AppendLog($"[{type.ToUpper()}] {message}"));
     }
 
     private void ReloadPreview()
@@ -160,45 +139,6 @@ public partial class WidgetConfigWindow: Window
         PreviewWebView.NavigateToString(htmlContent);
         SetStatus("[INFO] Preview loaded.");
     }
-
-    private static string InjectBaseUrlProxy(string html)
-    {
-        string injectedScript = $"<base href=\"https://app.local/\" />\n";
-
-        int index = html.IndexOf("<head>", StringComparison.OrdinalIgnoreCase);
-        return index >= 0
-            ? html.Insert(index, injectedScript)
-            : injectedScript + html;
-    }
-
-    private void OnWebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
-    {
-        var    uri               = new Uri(e.Request.Uri);
-        string filePath          = Path.Combine("wwwroot", uri.AbsolutePath.TrimStart('/'));
-        string requestedFileName = Path.GetFileName(filePath);
-
-        if (!_fileNameAndContents.TryGetValue(requestedFileName, out string? content))
-            return;
-
-        // NOTE: Do NOT dispose the stream here — WebView2 reads it asynchronously after this handler returns.
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
-        e.Response = PreviewWebView.CoreWebView2.Environment.CreateWebResourceResponse
-        (
-            stream,
-            200, "OK",
-            $"Content-Type: {GetMimeType(filePath)}"
-        );
-    }
-
-    private static string GetMimeType(string path) => Path.GetExtension(path) switch
-    {
-        ".css"  => "text/css",
-        ".js"   => "application/javascript",
-        ".html" => "text/html",
-        ".png"  => "image/png",
-        ".svg"  => "image/svg+xml",
-        _       => "application/octet-stream"
-    };
 
     #region UI Elements
 
@@ -416,6 +356,97 @@ public partial class WidgetConfigWindow: Window
         }
     }
 
+    private void ShowNoFieldsMessage(string message)
+        => GroupsPanel.Children.Add
+        (
+            new TextBlock
+            {
+                Text                = message,
+                Foreground          = AppColors.StatusDefault,
+                FontFamily          = new FontFamily("Segoe UI"),
+                FontSize            = 13,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin              = new Thickness(0, 40, 0, 0)
+            }
+        );
+
+    private void SetupSimulateGroups()
+    {
+        (ToggleButton header, StackPanel fields)[] groups =
+        [
+            (SimGroupChat,    SimGroupChatFields),
+            (SimGroupFollows, SimGroupFollowsFields),
+            (SimGroupSubs,    SimGroupSubsFields),
+            (SimGroupRaids,   SimGroupRaidsFields),
+        ];
+
+        foreach ((ToggleButton header, StackPanel fields) in groups)
+        {
+            header.Checked   += (_, _) => fields.Visibility = Visibility.Collapsed;
+            header.Unchecked += (_, _) => fields.Visibility = Visibility.Visible;
+        }
+    }
+
+    private void BuildSettingsControls()
+    {
+        _settingsCanvasSize = new StyledDropdown();
+
+        foreach ((string label, int width, int height) in CanvasResolutions)
+            _settingsCanvasSize.Items.Add
+            (
+                new ComboBoxItem
+                {
+                    Content = label, Tag = $"{width}x{height}"
+                }
+            );
+
+        _settingsCanvasSize.SelectedIndex     = 2;
+        _settingsCanvasSize.SelectionChanged += SettingsCanvasSize_Changed;
+        SettingsCanvasSizeRow.Child           = MakeSettingsRow("Canvas Size", _settingsCanvasSize);
+
+        _settingsWidgetWidth                  = new NumericSpinner { Value = 800, Minimum = 1 };
+        _settingsWidgetWidth.ValueChanged    += SettingsWidget_Changed;
+        SettingsWidgetWidthRow.Child          = MakeSettingsRow("Widget Width", _settingsWidgetWidth);
+
+        _settingsWidgetHeight                 = new NumericSpinner { Value = 600, Minimum = 1 };
+        _settingsWidgetHeight.ValueChanged   += SettingsWidget_Changed;
+        SettingsWidgetHeightRow.Child         = MakeSettingsRow("Widget Height", _settingsWidgetHeight);
+
+        _settingsWidgetX                      = new NumericSpinner { Value = 0 };
+        _settingsWidgetX.ValueChanged        += SettingsWidget_Changed;
+        SettingsWidgetXRow.Child              = MakeSettingsRow("Widget X Position", _settingsWidgetX);
+
+        _settingsWidgetY                      = new NumericSpinner { Value = 0 };
+        _settingsWidgetY.ValueChanged        += SettingsWidget_Changed;
+        SettingsWidgetYRow.Child              = MakeSettingsRow("Widget Y Position", _settingsWidgetY);
+
+        (ToggleButton header, StackPanel fields)[] groups =
+        [
+            (SettingsGroupCanvas, SettingsGroupCanvasFields),
+            (SettingsGroupWidget, SettingsGroupWidgetFields),
+        ];
+
+        foreach ((ToggleButton header, StackPanel fields) in groups)
+        {
+            header.Checked   += (_, _) => fields.Visibility = Visibility.Collapsed;
+            header.Unchecked += (_, _) => fields.Visibility = Visibility.Visible;
+        }
+    }
+
+    private StackPanel MakeSettingsRow(string label, FrameworkElement control)
+        => new StackPanel
+        {
+            Children =
+            {
+                new TextBlock
+                {
+                    Text  = label,
+                    Style = (Style) FindResource("FieldLabel")
+                },
+                control
+            }
+        };
+
     #endregion UI Elements
 
     #region Event Handlers
@@ -496,7 +527,335 @@ public partial class WidgetConfigWindow: Window
         PreviewPanel.Visibility = Visibility.Collapsed;
     }
 
+    private void LeftTabConfig_Checked(object sender, RoutedEventArgs e)
+    {
+        if (LeftTabSimulate is null || LeftTabSettings is null)
+            return;
+
+        LeftTabSimulate.IsChecked    = false;
+        LeftTabSettings.IsChecked    = false;
+        LeftPanelConfig.Visibility   = Visibility.Visible;
+        LeftPanelSimulate.Visibility = Visibility.Collapsed;
+        LeftPanelSettings.Visibility = Visibility.Collapsed;
+    }
+
+    private void LeftTabSimulate_Checked(object sender, RoutedEventArgs e)
+    {
+        if (LeftTabConfig is null || LeftTabSettings is null)
+            return;
+
+        LeftTabConfig.IsChecked      = false;
+        LeftTabSettings.IsChecked    = false;
+        LeftPanelConfig.Visibility   = Visibility.Collapsed;
+        LeftPanelSimulate.Visibility = Visibility.Visible;
+        LeftPanelSettings.Visibility = Visibility.Collapsed;
+    }
+
+    private void LeftTabSettings_Checked(object sender, RoutedEventArgs e)
+    {
+        if (LeftTabConfig is null || LeftTabSimulate is null)
+            return;
+
+        LeftTabConfig.IsChecked      = false;
+        LeftTabSimulate.IsChecked    = false;
+        LeftPanelConfig.Visibility   = Visibility.Collapsed;
+        LeftPanelSimulate.Visibility = Visibility.Collapsed;
+        LeftPanelSettings.Visibility = Visibility.Visible;
+    }
+
+    private void SettingsCanvasSize_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_settingsCanvasSize.SelectedItem is not ComboBoxItem item)
+            return;
+
+        string tag = item.Tag?.ToString() ?? string.Empty;
+        string[] parts = tag.Split('x');
+
+        if (parts.Length != 2)
+            return;
+
+        if (!int.TryParse(parts[0], out int width) || !int.TryParse(parts[1], out int height))
+            return;
+
+        // TODO: apply canvas dimensions to the preview WebView viewport
+    }
+
+    private void SettingsWidget_Changed(object sender, EventArgs e)
+    {
+        double width  = _settingsWidgetWidth?.Value  ?? 800;
+        double height = _settingsWidgetHeight?.Value ?? 600;
+        double x      = _settingsWidgetX?.Value      ?? 0;
+        double y      = _settingsWidgetY?.Value      ?? 0;
+
+        // TODO: apply widget size and position to the preview WebView
+    }
+
     #endregion Event Handlers
+
+    #region WebView2 EventHandlers
+
+    private void OnReceivedBrowserConsoleLog(object? sender, CoreWebView2DevToolsProtocolEventReceivedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(e.ParameterObjectAsJson))
+            return; 
+
+        LogEntryEvent? logEntryEvent = JsonSerializer.Deserialize<LogEntryEvent>(e.ParameterObjectAsJson);
+
+        if (logEntryEvent?.entry is not null)
+            Dispatcher.Invoke(() => AppendLog($"[{logEntryEvent.entry.level}] {logEntryEvent.entry.text}"));
+    }
+
+    private void OnReceivedConsoleApiCall(object? sender, CoreWebView2DevToolsProtocolEventReceivedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(e.ParameterObjectAsJson))
+            return;
+
+        using JsonDocument doc = JsonDocument.Parse(e.ParameterObjectAsJson);
+        JsonElement root = doc.RootElement;
+
+        string type = root.TryGetProperty("type", out JsonElement type_) ? type_.GetString() ?? "log" : "log";
+
+        string message = string.Empty;
+        if (root.TryGetProperty("args", out JsonElement args))
+        {
+            message = string.Join
+            (
+                " ",
+                args
+                    .EnumerateArray()
+                    .Select
+                    (
+                        arg =>
+                        {
+                            if (arg.TryGetProperty("value", out JsonElement value))
+                                return value.ToString();
+                            if (arg.TryGetProperty("description", out JsonElement description))
+                                return description.GetString() ?? string.Empty;
+                            return string.Empty;
+                        }
+                    )
+            );
+        }
+
+        Dispatcher.Invoke(() => AppendLog($"[{type.ToUpper()}] {message}"));
+    }
+
+    private void OnWebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
+    {
+        var    uri               = new Uri(e.Request.Uri);
+        string filePath          = Path.Combine("wwwroot", uri.AbsolutePath.TrimStart('/'));
+        string requestedFileName = Path.GetFileName(filePath);
+
+        if (!_fileNameAndContents.TryGetValue(requestedFileName, out string? content))
+            return;
+
+        // NOTE: Do NOT dispose the stream here — WebView2 reads it asynchronously after this handler returns.
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+        e.Response = PreviewWebView.CoreWebView2.Environment.CreateWebResourceResponse
+        (
+            stream,
+            200, "OK",
+            $"Content-Type: {GetMimeType(filePath)}"
+        );
+    }
+
+    #endregion WebView2 EventHandlers
+
+    #region SE Event Simulation Event Handlers
+
+    private async void SimulateChatMessage_Click(object sender, RoutedEventArgs e)
+    {
+        await DispatchWidgetEvent
+        (
+            "message",
+            new
+            {
+                listener = "message",
+                event_   = new
+                {
+                    data = new
+                    {
+                        text   = "Hello there!",
+                        userId = SimulatedUserId,
+                        name   = SimulatedUsername,
+                        badges = Array.Empty<object>(),
+                        emotes = Array.Empty<object>(),
+                        tags   = new { },
+                    }
+                }
+            }
+        );
+    }
+
+    private async void SimulateFollow_Click(object sender, RoutedEventArgs e)
+    {
+        await DispatchWidgetEvent
+        (
+            "follower-latest",
+            new
+            {
+                listener = "follower-latest",
+                event_   = new
+                {
+                    avatar      = string.Empty,
+                    displayName = SimulatedUsername,
+                    username    = SimulatedUsername,
+                    name        = SimulatedUsername,
+                    providerId  = SimulatedUserId,
+                }
+            }
+        );
+    }
+
+    private async void SimulateSub_Click(object sender, RoutedEventArgs e)
+    {
+        await DispatchWidgetEvent
+        (
+            "subscriber-latest",
+            new
+            {
+                listener = "subscriber-latest",
+                event_   = new
+                {
+                    amount      = 1,
+                    avatar      = string.Empty,
+                    displayName = SimulatedUsername,
+                    username    = SimulatedUsername,
+                    name        = SimulatedUsername,
+                    providerId  = SimulatedUserId,
+                    tier        = "1000",
+                    gifted      = false,
+                    message     = "Much Sub, Such Wow",
+                }
+            }
+        );
+    }
+
+    private async void SimulateReSub_Click(object sender, RoutedEventArgs e)
+    {
+        await DispatchWidgetEvent
+        (
+            "subscriber-latest",
+            new
+            {
+                listener = "subscriber-latest",
+                event_   = new
+                {
+                    amount      = 67,
+                    avatar      = string.Empty,
+                    displayName = SimulatedUsername,
+                    username    = SimulatedUsername,
+                    name        = SimulatedUsername,
+                    providerId  = SimulatedUserId,
+                    tier        = "1000",
+                    gifted      = false,
+                    message     = "Much Sub, Such Wow",
+                }
+            }
+         );
+    }
+
+    private async void SimulateGiftedSub_Click(object sender, RoutedEventArgs e)
+    {
+        await DispatchWidgetEvent
+        (
+            "subscriber-latest",
+            new
+            {
+                listener = "subscriber-latest",
+                event_   = new
+                {
+                    amount                = 1,
+                    avatar                = string.Empty,
+                    displayName           = SimulatedUsername,
+                    username              = SimulatedUsername,
+                    name                  = SimulatedUsername,
+                    providerId            = SimulatedUserId,
+                    tier                  = "1000",
+                    sender                = SimulatedGifterUsername,
+                    gifted                = true,
+                    message               = "Much Sub, Such Wow",
+                    bulkGifted            = false,
+                    isCommunityGift       = true,
+                    playedAsCommunityGift = false
+                }
+            }
+        );
+    }
+
+    private async void SimulateGiftedSubs_Click(object sender, RoutedEventArgs e)
+    {
+        await DispatchWidgetEvent
+        (
+            "subscriber-latest",
+            new
+            {
+                listener = "subscriber-latest",
+                event_   = new
+                {
+                    amount                = 67,
+                    avatar                = string.Empty,
+                    displayName           = SimulatedUsername,
+                    username              = SimulatedUsername,
+                    name                  = SimulatedUsername,
+                    providerId            = SimulatedUserId,
+                    tier                  = "1000",
+                    sender                = SimulatedGifterUsername,
+                    gifted                = true,
+                    message               = "Much Sub, Such Wow",
+                    bulkGifted            = true,
+                    isCommunityGift       = true,
+                    playedAsCommunityGift = true
+                }
+            }
+        );
+    }
+
+    private async void SimulateRaid_Click(object sender, RoutedEventArgs e)
+    {
+        await DispatchWidgetEvent("raid-latest", new
+        {
+            listener = "raid-latest",
+            event_   = new
+            {
+                amount      = 67,
+                avatar      = string.Empty,
+                displayName = SimulatedUsername,
+                username    = SimulatedUsername,
+                name        = SimulatedUsername,
+                providerId  = SimulatedUserId,
+            }
+        });
+    }
+
+    private async Task DispatchWidgetEvent(string listener, object payload)
+    {
+        if (!_webViewReady)
+            return;
+
+        try
+        {
+            string json = JsonSerializer.Serialize(payload);
+
+            await PreviewWebView.ExecuteScriptAsync
+            (
+                $@"window.dispatchEvent(new CustomEvent('onEventReceived', {{
+                    detail: {{
+                    listener: '{listener}',
+                    event: {json}
+                  }}
+                }}));"
+            );
+        }
+        catch (Exception exception)
+        {
+            SetStatus($"Simulate failed: {exception.Message}", error: true);
+        }
+    }
+
+    #endregion SE Event Simulation Event Handlers
+
+    #region Helpers
 
     public void AppendLog(string message)
     {
@@ -510,9 +869,7 @@ public partial class WidgetConfigWindow: Window
         LogsScrollViewer.ScrollToEnd();
     }
 
-    #region Helpers
-
-    private void LoadDataJson()
+    private void LoadConfigurationData()
     {
         WidgetFile? dataFile = _widget
             .Files
@@ -547,7 +904,7 @@ public partial class WidgetConfigWindow: Window
         }
     }
 
-    private void LoadFields()
+    private void LoadConfigurationFields()
     {
         WidgetFile? fieldsFile = _widget
             .Files
@@ -562,7 +919,7 @@ public partial class WidgetConfigWindow: Window
         List<WidgetDataFieldGroup> groups;
         try
         {
-            groups = ParseFieldGroups(fieldsFile.Content);
+            groups = ParseConfigurationFieldGroups(fieldsFile.Content);
         }
         catch (Exception exception)
         {
@@ -580,7 +937,7 @@ public partial class WidgetConfigWindow: Window
             GroupsPanel.Children.Add(BuildGroupPanel(group));
     }
 
-    private List<WidgetDataFieldGroup> ParseFieldGroups(string json)
+    private List<WidgetDataFieldGroup> ParseConfigurationFieldGroups(string json)
     {
         var jsonDocumentOptions = new JsonDocumentOptions
         {
@@ -681,20 +1038,6 @@ public partial class WidgetConfigWindow: Window
         return output.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
     }
 
-    private void ShowNoFieldsMessage(string message)
-        => GroupsPanel.Children.Add
-        (
-            new TextBlock
-            {
-                Text                = message,
-                Foreground          = AppColors.StatusDefault,
-                FontFamily          = new FontFamily("Segoe UI"),
-                FontSize            = 13,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin              = new Thickness(0, 40, 0, 0)
-            }
-        );
-
     private static Color ParseColor(string value)
     {
         try
@@ -723,6 +1066,27 @@ public partial class WidgetConfigWindow: Window
             return Colors.White;
         }
     }
+
+    private static string InjectBaseUrlProxy(string html)
+    {
+        string injectedScript = $"<base href=\"https://app.local/\" />\n";
+
+        int index = html.IndexOf("<head>", StringComparison.OrdinalIgnoreCase);
+        return index >= 0
+            ? html.Insert(index, injectedScript)
+            : injectedScript + html;
+    }
+
+    private static string GetMimeType(string path)
+        => Path.GetExtension(path) switch
+        {
+            ".css"  => "text/css",
+            ".js"   => "application/javascript",
+            ".html" => "text/html",
+            ".png"  => "image/png",
+            ".svg"  => "image/svg+xml",
+            _       => "application/octet-stream"
+        };
 
     private void SetStatus(string message, bool error = false, bool success = false)
     {

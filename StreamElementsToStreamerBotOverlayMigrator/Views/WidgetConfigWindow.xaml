@@ -230,6 +230,53 @@
             </Setter>
         </Style>
 
+        <!-- Vertical side-tab button -->
+        <Style x:Key="VerticalTabBtn" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid>
+                            <!-- Active left-edge bar -->
+                            <Border x:Name="ActiveBar"
+                                    Width="2"
+                                    Background="{StaticResource AccentBlueBrush}"
+                                    HorizontalAlignment="Left"
+                                    Visibility="Collapsed"/>
+                            <!-- Background highlight -->
+                            <Border x:Name="Bg"
+                                    Background="Transparent"
+                                    Margin="2,0,0,0">
+                                <!-- Rotated label -->
+                                <Viewbox Stretch="Uniform"
+                                         Margin="4,14,4,14">
+                                    <ContentPresenter/>
+                                </Viewbox>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                                <Setter TargetName="ActiveBar" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource SurfaceBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource TextHoverBrush}"/>
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Window.Resources>
 
     <!-- Root: left panel | right panel -->
@@ -244,50 +291,327 @@
         </Grid.ColumnDefinitions>
 
         <!-- ═══════════════════════════════════════════════
-             LEFT PANEL — field groups + footer
+             LEFT PANEL — vertical tab rail + content panels
              ═══════════════════════════════════════════════ -->
         <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <!-- Vertical tab rail -->
+                <ColumnDefinition Width="40"/>
+                <!-- Thin divider -->
+                <ColumnDefinition Width="1"/>
+                <!-- Content area -->
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            <!-- Scrollable field groups -->
-            <ScrollViewer Grid.Row="0"
-                          VerticalScrollBarVisibility="Auto"
-                          Padding="0,8,0,8">
-                <StackPanel x:Name="GroupsPanel"/>
-            </ScrollViewer>
-
-            <!-- Footer -->
-            <Border Grid.Row="1"
+            <!-- ── Vertical tab rail ── -->
+            <Border Grid.Column="0"
                     Background="{StaticResource SidebarBgBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="0,1,0,0"
-                    Padding="20,12">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                    BorderThickness="0,0,0,0">
+                <StackPanel Orientation="Vertical"
+                            Margin="0,8,0,0">
 
-                    <TextBlock x:Name="StatusText"
-                               Grid.Column="0"
-                               Foreground="{StaticResource TextDimBrush}"
-                               FontFamily="Consolas"
-                               FontSize="11"
-                               VerticalAlignment="Center"
-                               Text="Adjust settings then save."/>
+                    <ToggleButton x:Name="LeftTabConfig"
+                                  Style="{StaticResource VerticalTabBtn}"
+                                  IsChecked="True"
+                                  Height="80"
+                                  Checked="LeftTabConfig_Checked"
+                                  ToolTip="Widget Configuration">
+                        <TextBlock Text="Config"
+                                   FontFamily="Segoe UI"
+                                   FontSize="10"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap">
+                            <TextBlock.LayoutTransform>
+                                <RotateTransform Angle="-90"/>
+                            </TextBlock.LayoutTransform>
+                        </TextBlock>
+                    </ToggleButton>
 
-                    <Button x:Name="SaveBtn"
-                            Grid.Column="1"
-                            Style="{StaticResource SaveBtn}"
-                            IsEnabled="False"
-                            Click="Save_Click">
-                        Save
-                    </Button>
-                </Grid>
+                    <ToggleButton x:Name="LeftTabSimulate"
+                                  Style="{StaticResource VerticalTabBtn}"
+                                  IsChecked="False"
+                                  Height="80"
+                                  Checked="LeftTabSimulate_Checked"
+                                  ToolTip="Simulate Events">
+                        <TextBlock Text="Simulate"
+                                   FontFamily="Segoe UI"
+                                   FontSize="10"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap">
+                            <TextBlock.LayoutTransform>
+                                <RotateTransform Angle="-90"/>
+                            </TextBlock.LayoutTransform>
+                        </TextBlock>
+                    </ToggleButton>
+
+                    <ToggleButton x:Name="LeftTabSettings"
+                                  Style="{StaticResource VerticalTabBtn}"
+                                  IsChecked="False"
+                                  Height="80"
+                                  Checked="LeftTabSettings_Checked"
+                                  ToolTip="Settings">
+                        <TextBlock Text="Settings"
+                                   FontFamily="Segoe UI"
+                                   FontSize="10"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap">
+                            <TextBlock.LayoutTransform>
+                                <RotateTransform Angle="-90"/>
+                            </TextBlock.LayoutTransform>
+                        </TextBlock>
+                    </ToggleButton>
+
+                </StackPanel>
             </Border>
+
+            <!-- Vertical divider between rail and content -->
+            <Border Grid.Column="1"
+                    Background="{StaticResource BorderBrush}"/>
+
+            <!-- ── Content area (all three tab panels stacked, only one visible) ── -->
+            <Grid Grid.Column="2">
+
+                <!-- ── Tab: Widget Configuration ── -->
+                <Grid x:Name="LeftPanelConfig" Visibility="Visible">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <ScrollViewer Grid.Row="0"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Padding="0,8,0,8">
+                        <StackPanel x:Name="GroupsPanel"/>
+                    </ScrollViewer>
+
+                    <Border Grid.Row="1"
+                            Background="{StaticResource SidebarBgBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="0,1,0,0"
+                            Padding="20,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock x:Name="StatusText"
+                                       Grid.Column="0"
+                                       Foreground="{StaticResource TextDimBrush}"
+                                       FontFamily="Consolas"
+                                       FontSize="11"
+                                       VerticalAlignment="Center"
+                                       Text="Adjust settings then save."/>
+
+                            <Button x:Name="SaveBtn"
+                                    Grid.Column="1"
+                                    Style="{StaticResource SaveBtn}"
+                                    IsEnabled="False"
+                                    Click="Save_Click">
+                                Save
+                            </Button>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- ── Tab: Simulate Events ── -->
+                <Grid x:Name="LeftPanelSimulate" Visibility="Collapsed">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  Padding="0,8,0,8">
+                        <StackPanel>
+
+                            <!-- ── Group: Chat ── -->
+                            <StackPanel Margin="0,0,0,4">
+                                <ToggleButton Style="{StaticResource GroupHeaderBtn}"
+                                              IsChecked="False"
+                                              x:Name="SimGroupChat">
+                                    <TextBlock Text="CHAT"
+                                               FontFamily="IBM Plex Mono, Consolas"
+                                               FontSize="10"
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </ToggleButton>
+                                <StackPanel x:Name="SimGroupChatFields"
+                                            Background="{StaticResource PanelBgBrush}"
+                                            Margin="0,0,0,0">
+                                    <Border BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="14,10">
+                                        <Button Style="{StaticResource FieldButton}"
+                                                HorizontalAlignment="Stretch"
+                                                Click="SimulateChatMessage_Click">
+                                            Chat Message
+                                        </Button>
+                                    </Border>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- ── Group: Follows ── -->
+                            <StackPanel Margin="0,0,0,4">
+                                <ToggleButton Style="{StaticResource GroupHeaderBtn}"
+                                              IsChecked="False"
+                                              x:Name="SimGroupFollows">
+                                    <TextBlock Text="FOLLOWS"
+                                               FontFamily="IBM Plex Mono, Consolas"
+                                               FontSize="10"
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </ToggleButton>
+                                <StackPanel x:Name="SimGroupFollowsFields"
+                                            Background="{StaticResource PanelBgBrush}">
+                                    <Border BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="14,10">
+                                        <Button Style="{StaticResource FieldButton}"
+                                                HorizontalAlignment="Stretch"
+                                                Click="SimulateFollow_Click">
+                                            Follow
+                                        </Button>
+                                    </Border>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- ── Group: Subscriptions ── -->
+                            <StackPanel Margin="0,0,0,4">
+                                <ToggleButton Style="{StaticResource GroupHeaderBtn}"
+                                              IsChecked="False"
+                                              x:Name="SimGroupSubs">
+                                    <TextBlock Text="SUBSCRIPTIONS"
+                                               FontFamily="IBM Plex Mono, Consolas"
+                                               FontSize="10"
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </ToggleButton>
+                                <StackPanel x:Name="SimGroupSubsFields"
+                                            Background="{StaticResource PanelBgBrush}">
+                                    <Border BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="14,10">
+                                        <Button Style="{StaticResource FieldButton}"
+                                                HorizontalAlignment="Stretch"
+                                                Click="SimulateSub_Click">
+                                            Sub
+                                        </Button>
+                                    </Border>
+                                    <Border BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="14,10">
+                                        <Button Style="{StaticResource FieldButton}"
+                                                HorizontalAlignment="Stretch"
+                                                Click="SimulateReSub_Click">
+                                            ReSub
+                                        </Button>
+                                    </Border>
+                                    <Border BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="14,10">
+                                        <Button Style="{StaticResource FieldButton}"
+                                                HorizontalAlignment="Stretch"
+                                                Click="SimulateGiftedSub_Click">
+                                            Gifted Sub
+                                        </Button>
+                                    </Border>
+                                    <Border BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="14,10">
+                                        <Button Style="{StaticResource FieldButton}"
+                                                HorizontalAlignment="Stretch"
+                                                Click="SimulateGiftedSubs_Click">
+                                            Gifted Subs
+                                        </Button>
+                                    </Border>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- ── Group: Raids ── -->
+                            <StackPanel Margin="0,0,0,4">
+                                <ToggleButton Style="{StaticResource GroupHeaderBtn}"
+                                              IsChecked="False"
+                                              x:Name="SimGroupRaids">
+                                    <TextBlock Text="RAIDS"
+                                               FontFamily="IBM Plex Mono, Consolas"
+                                               FontSize="10"
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </ToggleButton>
+                                <StackPanel x:Name="SimGroupRaidsFields"
+                                            Background="{StaticResource PanelBgBrush}">
+                                    <Border BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="14,10">
+                                        <Button Style="{StaticResource FieldButton}"
+                                                HorizontalAlignment="Stretch"
+                                                Click="SimulateRaid_Click">
+                                            Raid
+                                        </Button>
+                                    </Border>
+                                </StackPanel>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- ── Tab: Settings ── -->
+                <Grid x:Name="LeftPanelSettings" Visibility="Collapsed">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  Padding="0,8,0,8">
+                        <StackPanel>
+
+                            <!-- ── Group: Canvas ── -->
+                            <StackPanel Margin="0,0,0,4">
+                                <ToggleButton Style="{StaticResource GroupHeaderBtn}"
+                                              IsChecked="False"
+                                              x:Name="SettingsGroupCanvas">
+                                    <TextBlock Text="CANVAS"
+                                               FontFamily="IBM Plex Mono, Consolas"
+                                               FontSize="10"
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </ToggleButton>
+                                <StackPanel x:Name="SettingsGroupCanvasFields"
+                                            Background="{StaticResource PanelBgBrush}">
+                                    <!-- Canvas Size row — populated from code-behind -->
+                                    <Border x:Name="SettingsCanvasSizeRow"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="14,10"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- ── Group: Widget ── -->
+                            <StackPanel Margin="0,0,0,4">
+                                <ToggleButton Style="{StaticResource GroupHeaderBtn}"
+                                              IsChecked="False"
+                                              x:Name="SettingsGroupWidget">
+                                    <TextBlock Text="WIDGET"
+                                               FontFamily="IBM Plex Mono, Consolas"
+                                               FontSize="10"
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </ToggleButton>
+                                <StackPanel x:Name="SettingsGroupWidgetFields"
+                                            Background="{StaticResource PanelBgBrush}">
+                                    <!-- Width / Height / X / Y rows — populated from code-behind -->
+                                    <Border x:Name="SettingsWidgetWidthRow"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="14,10"/>
+                                    <Border x:Name="SettingsWidgetHeightRow"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="14,10"/>
+                                    <Border x:Name="SettingsWidgetXRow"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="14,10"/>
+                                    <Border x:Name="SettingsWidgetYRow"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="14,10"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+            </Grid>
         </Grid>
 
         <!-- Drag splitter -->
