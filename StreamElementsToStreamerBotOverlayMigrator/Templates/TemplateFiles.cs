@@ -71,54 +71,50 @@ function dispatchSEEvent(listener, eventData) {
 
 // follower-latest - New Follower
 client.on('Twitch.Follow', ({ event, data }) => {
-  console.log('Twitch.Follow', data);
   dispatchSEEvent('follower-latest', {
     service: 'twitch',
     data: {
-      name: data.user_name ?? data.user_login ?? '',
-      amount: 1,
-      message: '',
-      gifted: 0,
-      sender: '',
-      bulkGifted: false,
-      isCommunityGift: false,
-      playedAsCommunityGift: false
+      avatar:      '',
+      displayName: data.user_name ?? '',
+      username:    data.user_login ?? '',
+      name:        data.user_login ?? '',
+      providerId:  user_id ?? '12345'
     }
   });
 });
 
 // subscriber-latest - New Subscriber (first sub only)
 client.on('Twitch.Sub', ({ event, data }) => {
-  console.log('Twitch.Sub', data);
   dispatchSEEvent('subscriber-latest', {
     service: 'twitch',
     data: {
-      name: data.user?.name ?? '',
-      amount: 1,
-      message: data.systemMessage ?? '',
-      gifted: 0,
-      sender: '',
-      bulkGifted: false,
-      isCommunityGift: false,
-      playedAsCommunityGift: false
+      amount:      1,
+      avatar:      '',
+      displayName: data.user?.name ?? '',
+      username:    data.user?.login ?? '',
+      name:        data.user?.login ?? '',
+      providerId:  data.user?.id ?? '12345',
+      tier:        '1000',
+      gifted:      false,
+      message:     data.systemMessage ?? '',
     }
   });
 });
 
 // subscriber-latest - Resub
 client.on('Twitch.ReSub', ({ event, data }) => {
-  console.log('Twitch.ReSub', data);
   dispatchSEEvent('subscriber-latest', {
     service: 'twitch',
     data: {
-      name: data.user?.name ?? data.user?.login ?? '',
-      amount: data.cumulativeMonths ?? 1,
-      message: data.text ?? data.systemMessage ?? '',
-      gifted: data.isGift ? 1 : 0,
-      sender: data.gifter?.name ?? '',
-      bulkGifted: false,
-      isCommunityGift: data.isGift ?? false,
-      playedAsCommunityGift: false
+      amount:      data.cumulativeMonths ?? 1,
+      avatar:      '',
+      displayName: data.user?.name ?? '',
+      username:    data.user?.login ?? '',
+      name:        data.user?.login ?? '',
+      providerId:  data.user?.id ?? '12345',
+      tier:        '1000',
+      gifted:      data.isGift ? 1 : 0,
+      message:     data.text ?? data.systemMessage ?? ''
     }
   });
 });
@@ -128,13 +124,18 @@ client.on('Twitch.GiftSub', ({ event, data }) => {
   dispatchSEEvent('subscriber-latest', {
     service: 'twitch',
     data: {
-      name: data.recipient?.name ?? '',
-      amount: 1,
-      message: data.systemMessage ?? '',
-      gifted: 1,
-      sender: data.user?.name ?? data.user?.login ?? '',
-      bulkGifted: data.randomCommunitySubGift,
-      isCommunityGift: data.fromCommunitySubGift,
+      amount:                1,
+      avatar:                '',
+      displayName:           data.recipient?.name ?? '',
+      username:              data.recipient?.name ?? '',
+      name:                  data.recipient?.name ?? '',
+      providerId:            data.user?.id ?? '12345',
+      tier:                  '1000',
+      sender:                data.user?.name ?? data.user?.login ?? '',
+      gifted:                true,
+      message:               data.systemMessage ?? ''
+      bulkGifted:            data.randomCommunitySubGift,
+      isCommunityGift:       data.fromCommunitySubGift,
       playedAsCommunityGift: false
     }
   });
@@ -142,36 +143,38 @@ client.on('Twitch.GiftSub', ({ event, data }) => {
 
 // subscriber-latest - Gift Bomb (community mass gift)
 client.on('Twitch.GiftBomb', ({ event, data }) => {
-  console.log('Twitch.GiftBomb', data);
   dispatchSEEvent('subscriber-latest', {
     service: 'twitch',
     data: {
-      name: data.gifterUser?.name ?? data.user?.name ?? '',
-      amount: data.gifts ?? 1,
-      message: '',
-      gifted: 1,
-      sender: data.gifterUser?.name ?? data.user?.name ?? '',
-      bulkGifted: true,
-      isCommunityGift: true,
-      playedAsCommunityGift: false
+      amount:                data.gifts ?? 1,
+      avatar:                '',
+      displayName:           data.recipient?.name ?? '',
+      username:              data.recipient?.name ?? '',
+      name:                  data.recipient?.name ?? '',
+      providerId:            data.user?.id ?? '12345',
+      tier:                  '1000',
+      sender:                data.user?.name ?? data.user?.login ?? '',
+      gifted:                true,
+      message:               data.systemMessage ?? ''
+      bulkGifted:            true,
+      isCommunityGift:       true,
+      playedAsCommunityGift: true
     }
   });
 });
 
 // cheer-latest - Bits cheer
 client.on('Twitch.Cheer', ({ event, data }) => {
-  console.log('Twitch.Cheer', data);
   dispatchSEEvent('cheer-latest', {
     service: 'twitch',
     data: {
-      name: data.anonymous ? 'anonymous' : (data.user?.name ?? data.user?.login ?? ''),
-      amount: data.bits ?? 0,
-      message: data.text ?? '',
-      gifted: 0,
-      sender: '',
-      bulkGifted: false,
-      isCommunityGift: false,
-      playedAsCommunityGift: false
+      amount:      data.bits ?? 0,
+      avatar:      '',
+      displayName: data.anonymous ? 'anonymous' : data.recipient?.name ?? '',
+      username:    data.anonymous ? 'anonymous' : data.recipient?.name ?? '',
+      name:        data.anonymous ? 'anonymous' : data.recipient?.name ?? '',
+      providerId:  data.anonymous ? '12345'     : data.user?.id        ?? '12345',
+      message:     data.text ?? ''
     }
   });
 });
@@ -181,9 +184,12 @@ client.on('Twitch.Raid', ({ event, data }) => {
   dispatchSEEvent('raid-latest', {
     service: 'twitch',
     data: {
-      name: data.from_broadcaster_user_name ?? data.from_broadcaster_user_login ?? '',
-      amount: data.viewers ?? 0,
-      message: ''
+      amount:      data.viewers ?? 0
+      avatar:      '',
+      displayName: data.from_broadcaster_user_name  ?? '',
+      username:    data.from_broadcaster_user_login ?? '',
+      name:        data.from_broadcaster_user_login ?? '',
+      providerId:  data.anonymous ? '12345' : data.user?.id ?? '12345'
     }
   });
 });
