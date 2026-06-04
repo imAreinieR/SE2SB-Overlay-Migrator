@@ -24,22 +24,46 @@ public static class TemplateFiles
     public const string JavascriptDataFile = "const CONFIG = {0}";
 
     public const string StreamerBotEventHandlersFile = @"// StreamerBotEventHandlers - bridges StreamerBot with StreamElements Widget
+
+const seEvent = new CustomEvent('onWidgetLoad', {
+  detail: {
+    session:  {},
+    recents:  {},
+    currency: {},
+    channel: {
+      username:   'Ami.Bot',
+      apiToken:   '',
+      id:         '',
+      providerId: '12345',
+      avatar:     '',
+    },
+    fieldData: CONFIG,
+    overlay: {
+      isEditorMode: false,
+      muted:        false,
+    }
+  }
+});
+
+console.log('Dispatching dummy onWidgetLoadEvent...');
+window.dispatchEvent(seEvent);
+
 const client = new StreamerbotClient({
   autoReconnect: true,
   retries: -1,
-  onConnect: (data) => {
+  onConnect: async (data) => {
     console.log('Streamer.bot Client Connected!');
-
+    const broadcaster = await client.getBroadcaster();
     const seEvent = new CustomEvent('onWidgetLoad', {
       detail: {
         session:  {},
         recents:  {},
         currency: {},
         channel: {
-          username:   data.name,
+          username:   broadcaster.platforms['twitch'].broadcastUser,
           apiToken:   '',
           id:         '', // this is streamelements user id
-          providerId: '12345', // this is twitch user id
+          providerId: broadcaster.platforms['twitch'].broadcastUserId,
           avatar:     '',
         },
         fieldData: CONFIG,
