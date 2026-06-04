@@ -39,7 +39,7 @@ const client = new StreamerbotClient({
           username:   data.name,
           apiToken:   '',
           id:         '', // this is streamelements user id
-          providerId: '12345', //this is twitch user id
+          providerId: '12345', // this is twitch user id
           avatar:     '',
         },
         fieldData: CONFIG,
@@ -96,7 +96,7 @@ client.on('Twitch.Sub', ({ event, data }) => {
       providerId:  data.user?.id ?? '12345',
       tier:        '1000',
       gifted:      false,
-      message:     data.systemMessage ?? '',
+      message:     data.systemMessage ?? ''
     }
   });
 });
@@ -133,7 +133,7 @@ client.on('Twitch.GiftSub', ({ event, data }) => {
       tier:                  '1000',
       sender:                data.user?.name ?? data.user?.login ?? '',
       gifted:                true,
-      message:               data.systemMessage ?? ''
+      message:               data.systemMessage ?? '',
       bulkGifted:            data.randomCommunitySubGift,
       isCommunityGift:       data.fromCommunitySubGift,
       playedAsCommunityGift: false
@@ -155,7 +155,7 @@ client.on('Twitch.GiftBomb', ({ event, data }) => {
       tier:                  '1000',
       sender:                data.user?.name ?? data.user?.login ?? '',
       gifted:                true,
-      message:               data.systemMessage ?? ''
+      message:               data.systemMessage ?? '',
       bulkGifted:            true,
       isCommunityGift:       true,
       playedAsCommunityGift: true
@@ -184,7 +184,7 @@ client.on('Twitch.Raid', ({ event, data }) => {
   dispatchSEEvent('raid-latest', {
     service: 'twitch',
     data: {
-      amount:      data.viewers ?? 0
+      amount:      data.viewers ?? 0,
       avatar:      '',
       displayName: data.from_broadcaster_user_name  ?? '',
       username:    data.from_broadcaster_user_login ?? '',
