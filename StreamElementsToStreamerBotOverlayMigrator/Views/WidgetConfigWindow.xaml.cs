@@ -11,6 +11,7 @@ using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading.Channels;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -670,18 +671,20 @@ public partial class WidgetConfigWindow: Window
             "message",
             new
             {
-                listener = "message",
-                event_   = new
+                data = new
                 {
-                    data = new
-                    {
-                        text   = "Hello there!",
-                        userId = SimulatedUserId,
-                        name   = SimulatedUsername,
-                        badges = Array.Empty<object>(),
-                        emotes = Array.Empty<object>(),
-                        tags   = new { },
-                    }
+                    time         = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                    tags         = new { },
+                    nick         = SimulatedUsername,
+                    userId       = SimulatedUserId,
+                    displayName  = SimulatedUsername,
+                    displayColor = "#7785ff",
+                    badges       = Array.Empty<object>(),
+                    channel      = SimulatedUsername,
+                    text         = "Hello World~",
+                    isAction     = false,
+                    emotes       = Array.Empty<object>(),
+                    msgId        = Guid.NewGuid().ToString(),
                 }
             }
         );
@@ -694,15 +697,11 @@ public partial class WidgetConfigWindow: Window
             "follower-latest",
             new
             {
-                listener = "follower-latest",
-                event_   = new
-                {
-                    avatar      = string.Empty,
-                    displayName = SimulatedUsername,
-                    username    = SimulatedUsername,
-                    name        = SimulatedUsername,
-                    providerId  = SimulatedUserId,
-                }
+                avatar      = string.Empty,
+                displayName = SimulatedUsername,
+                username    = SimulatedUsername,
+                name        = SimulatedUsername,
+                providerId  = SimulatedUserId,
             }
         );
     }
@@ -714,19 +713,15 @@ public partial class WidgetConfigWindow: Window
             "subscriber-latest",
             new
             {
-                listener = "subscriber-latest",
-                event_   = new
-                {
-                    amount      = 1,
-                    avatar      = string.Empty,
-                    displayName = SimulatedUsername,
-                    username    = SimulatedUsername,
-                    name        = SimulatedUsername,
-                    providerId  = SimulatedUserId,
-                    tier        = "1000",
-                    gifted      = false,
-                    message     = "Much Sub, Such Wow",
-                }
+                amount      = 1,
+                avatar      = string.Empty,
+                displayName = SimulatedUsername,
+                username    = SimulatedUsername,
+                name        = SimulatedUsername,
+                providerId  = SimulatedUserId,
+                tier        = "1000",
+                gifted      = false,
+                message     = "Much Sub, Such Wow",
             }
         );
     }
@@ -738,19 +733,15 @@ public partial class WidgetConfigWindow: Window
             "subscriber-latest",
             new
             {
-                listener = "subscriber-latest",
-                event_   = new
-                {
-                    amount      = 67,
-                    avatar      = string.Empty,
-                    displayName = SimulatedUsername,
-                    username    = SimulatedUsername,
-                    name        = SimulatedUsername,
-                    providerId  = SimulatedUserId,
-                    tier        = "1000",
-                    gifted      = false,
-                    message     = "Much Sub, Such Wow",
-                }
+                amount      = 67,
+                avatar      = string.Empty,
+                displayName = SimulatedUsername,
+                username    = SimulatedUsername,
+                name        = SimulatedUsername,
+                providerId  = SimulatedUserId,
+                tier        = "1000",
+                gifted      = false,
+                message     = "Much Sub, Such Wow",
             }
          );
     }
@@ -762,23 +753,19 @@ public partial class WidgetConfigWindow: Window
             "subscriber-latest",
             new
             {
-                listener = "subscriber-latest",
-                event_   = new
-                {
-                    amount                = 1,
-                    avatar                = string.Empty,
-                    displayName           = SimulatedUsername,
-                    username              = SimulatedUsername,
-                    name                  = SimulatedUsername,
-                    providerId            = SimulatedUserId,
-                    tier                  = "1000",
-                    sender                = SimulatedGifterUsername,
-                    gifted                = true,
-                    message               = "Much Sub, Such Wow",
-                    bulkGifted            = false,
-                    isCommunityGift       = true,
-                    playedAsCommunityGift = false
-                }
+                amount                = 1,
+                avatar                = string.Empty,
+                displayName           = SimulatedUsername,
+                username              = SimulatedUsername,
+                name                  = SimulatedUsername,
+                providerId            = SimulatedUserId,
+                tier                  = "1000",
+                sender                = SimulatedGifterUsername,
+                gifted                = true,
+                message               = "Much Sub, Such Wow",
+                bulkGifted            = false,
+                isCommunityGift       = true,
+                playedAsCommunityGift = false
             }
         );
     }
@@ -790,33 +777,29 @@ public partial class WidgetConfigWindow: Window
             "subscriber-latest",
             new
             {
-                listener = "subscriber-latest",
-                event_   = new
-                {
-                    amount                = 67,
-                    avatar                = string.Empty,
-                    displayName           = SimulatedUsername,
-                    username              = SimulatedUsername,
-                    name                  = SimulatedUsername,
-                    providerId            = SimulatedUserId,
-                    tier                  = "1000",
-                    sender                = SimulatedGifterUsername,
-                    gifted                = true,
-                    message               = "Much Sub, Such Wow",
-                    bulkGifted            = true,
-                    isCommunityGift       = true,
-                    playedAsCommunityGift = true
-                }
+                amount                = 67,
+                avatar                = string.Empty,
+                displayName           = SimulatedUsername,
+                username              = SimulatedUsername,
+                name                  = SimulatedUsername,
+                providerId            = SimulatedUserId,
+                tier                  = "1000",
+                sender                = SimulatedGifterUsername,
+                gifted                = true,
+                message               = "Much Sub, Such Wow",
+                bulkGifted            = true,
+                isCommunityGift       = true,
+                playedAsCommunityGift = true
             }
         );
     }
 
     private async void SimulateRaid_Click(object sender, RoutedEventArgs e)
     {
-        await DispatchWidgetEvent("raid-latest", new
-        {
-            listener = "raid-latest",
-            event_   = new
+        await DispatchWidgetEvent
+        (
+            "raid-latest",
+            new
             {
                 amount      = 67,
                 avatar      = string.Empty,
@@ -825,7 +808,7 @@ public partial class WidgetConfigWindow: Window
                 name        = SimulatedUsername,
                 providerId  = SimulatedUserId,
             }
-        });
+        );
     }
 
     private async Task DispatchWidgetEvent(string listener, object payload)
