@@ -14,6 +14,8 @@ This tool migrates your existing SE overlays so they live locally on your machin
 
 ![Application UI - Edit Configuration](Images/application_ui_2.png)
 
+![Application UI - Simulate Events](Images/application_ui_3.png)
+
 ---
 
 ## Architecture
@@ -72,7 +74,8 @@ flowchart TB
 ### Widget Management
 - Create and configure multiple widgets.
 - Each widget tracks its own files and configurations independently.
-- Tweak configuration settings and see your changes in the live preview.
+- Adjust configuration settings and see your changes in the live preview.
+- Test your widget with simulated events without needing to trigger real Twitch events.
 
 ### StreamerBot Event Bridge
 - A `streamerBotEvents.js` file is generated automatically alongside your widget files. This bridges StreamerBot's event system to your overlay so it can respond to stream events (follows, subs, etc.) without any manual wiring.

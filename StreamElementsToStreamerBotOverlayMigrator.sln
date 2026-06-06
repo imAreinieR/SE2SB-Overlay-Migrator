@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{ACF2A7
 	ProjectSection(SolutionItems) = preProject
 		Images\application_ui_1.png = Images\application_ui_1.png
 		Images\application_ui_2.png = Images\application_ui_2.png
+		Images\application_ui_3.png = Images\application_ui_3.png
 		Images\export_streamelements_widget_files_1.png = Images\export_streamelements_widget_files_1.png
 		Images\export_streamelements_widget_files_2.png = Images\export_streamelements_widget_files_2.png
 		Images\obs_browser_source.png = Images\obs_browser_source.png
