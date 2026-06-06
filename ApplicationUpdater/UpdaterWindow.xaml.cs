@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -106,8 +107,7 @@ public partial class UpdaterWindow: Window
             string extractDirectory          = Path.Combine(Path.GetTempPath(), "SE2SB_Update");
             string canonicalExtractDirectory = Path.GetFullPath(extractDirectory) + Path.DirectorySeparatorChar;
 
-            if (Directory.Exists(extractDirectory))
-                Directory.Delete(extractDirectory, recursive: true);
+            TryDeleteDirectory(extractDirectory);
 
             ZipFile.ExtractToDirectory(tempZipPath, extractDirectory);
 
@@ -127,13 +127,7 @@ public partial class UpdaterWindow: Window
         }
         catch (Exception exception)
         {
-            MessageBox.Show
-            (
-                $"Update failed:\n\n{exception.Message}\n\nPlease download the latest version manually from GitHub.",
-                "Update Error",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error
-            );
+            DisplayError($"Update failed:\n\n{exception.Message}\n\nPlease download the latest version manually from GitHub.");
         }
         finally
         {
@@ -145,26 +139,37 @@ public partial class UpdaterWindow: Window
                 }
                 catch (Exception exception)
                 {
-                    Debug.WriteLine($"[Updater] Failed to delete temp zip: {exception.Message}");
+                    DisplayError($"[Updater] Failed to delete temp zip: {exception.Message}");
                 }
             }
 
-            string extractDir = Path.Combine(Path.GetTempPath(), "SE2SB_Update");
-            if (Directory.Exists(extractDir))
-            {
-                try
-                {
-                    Directory.Delete(extractDir, true);
-                }
-                catch (Exception exception)
-                {
-                    Debug.WriteLine($"[Updater] Failed to delete extract dir: {exception.Message}");
-                }
-            }
+            TryDeleteDirectory(Path.Combine(Path.GetTempPath(), "SE2SB_Update"));
 
             SetStatus("Restarting app...", 100);
             TryRestartApp();
             Application.Current.Shutdown();
+        }
+    }
+
+    private static void TryDeleteDirectory(string path)
+    {
+        try
+        {
+            string canonicalPath     = Path.GetFullPath(path);
+            string canonicalTempPath = Path.GetFullPath(Path.GetTempPath());
+
+            if (!canonicalPath.StartsWith(canonicalTempPath, StringComparison.OrdinalIgnoreCase))
+            {
+                DisplayError($"[Updater] Skipping deletion — path outside temp: {canonicalPath}");
+                return;
+            }
+
+            if (Directory.Exists(canonicalPath))
+                Directory.Delete(canonicalPath, true);
+        }
+        catch (Exception exception)
+        {
+            DisplayError($"[Updater] Failed to delete directory: {exception.Message}");
         }
     }
 
@@ -175,13 +180,16 @@ public partial class UpdaterWindow: Window
             if (File.Exists(_targetPath))
                 Process.Start(new ProcessStartInfo(_targetPath) { UseShellExecute = true });
             else
-                Debug.WriteLine($"[Updater] Cannot restart — '{_targetPath}' not found.");
+                DisplayError($"[Updater] Cannot restart — '{_targetPath}' not found.");
         }
         catch (Exception exception)
         {
-            Debug.WriteLine($"[Updater] Failed to restart app: {exception.Message}");
+            DisplayError($"[Updater] Failed to restart app: {exception.Message}");
         }
     }
+
+    private static void DisplayError(string message)
+        => MessageBox.Show(message, "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
     private void SetStatus(string message, int progress)
     {
