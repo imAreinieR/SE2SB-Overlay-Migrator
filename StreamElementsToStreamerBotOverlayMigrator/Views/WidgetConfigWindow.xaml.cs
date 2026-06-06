@@ -581,7 +581,7 @@ public partial class WidgetConfigWindow: Window
         // TODO: apply canvas dimensions to the preview WebView viewport
     }
 
-    private void SettingsWidget_Changed(object sender, EventArgs e)
+    private void SettingsWidget_Changed(object? sender, EventArgs e)
     {
         double width  = _settingsWidgetWidth?.Value  ?? 800;
         double height = _settingsWidgetHeight?.Value ?? 600;
