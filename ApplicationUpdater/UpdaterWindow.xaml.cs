@@ -161,14 +161,7 @@ public partial class UpdaterWindow: Window
             if (!canonicalTempPath.EndsWith(Path.DirectorySeparatorChar))
                 canonicalTempPath += Path.DirectorySeparatorChar;
 
-            bool isTempRoot = string.Equals(
-                canonicalPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
-                canonicalTempPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
-                StringComparison.OrdinalIgnoreCase);
-
-            bool isInsideTemp = canonicalPath.StartsWith(canonicalTempPath, StringComparison.OrdinalIgnoreCase);
-
-            if (!isTempRoot && !isInsideTemp)
+            if (!canonicalPath.StartsWith(canonicalTempPath, StringComparison.OrdinalIgnoreCase))
             {
                 DisplayError($"[Updater] Skipping deletion — path outside temp: {canonicalPath}");
                 return;
