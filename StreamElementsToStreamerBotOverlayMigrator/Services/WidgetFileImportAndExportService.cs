@@ -81,6 +81,7 @@ public static class WidgetFileImportAndExportService
     {
         try
         {
+            TryClearDirectory(widget.FolderLocation);
             Directory.CreateDirectory(widget.FolderLocation);
 
             string jsonData = widget.Files.FirstOrDefault(file => file.WidgetFileType == WidgetFileType.DataJson)?.Content ?? string.Empty;
@@ -122,6 +123,29 @@ public static class WidgetFileImportAndExportService
         }
 
         return content;
+    }
+
+    private static bool TryClearDirectory(string directoryPath)
+    {
+        if (!Directory.Exists(directoryPath))
+            return false;
+
+        try
+        {
+            var directoryInfo = new DirectoryInfo(directoryPath);
+            foreach (FileInfo file in directoryInfo.GetFiles())
+                file.Delete();
+
+            foreach (DirectoryInfo subDirectory in directoryInfo.GetDirectories())
+                subDirectory.Delete(true);
+
+            return true;
+        }
+        catch (Exception exception)
+        {
+            Debug.WriteLine(exception);
+            return false;
+        }
     }
 
     private static string SearchAndReplaceDataVariables(string content, string jsonData)
