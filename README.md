@@ -79,8 +79,8 @@ flowchart TB
 
 ### StreamElements -> StreamerBot API and Event Bridge
 - A `streamerBotApiAndEventBridge.js` file is generated automatically alongside your widget files.
-- This reroutes calls to the SE API to the StreamerBot API and listens for StreamerBot events, re-emitting them as SE events that your widget can understand.
-- It also uses the Decapi API to supplement calls with data from Twitch and caches responses to minimize duplicate calls.
+- This reroutes calls to the [SE API](https://dev.streamelements.com/docs/api-docs) to the [StreamerBot API](https://docs.streamer.bot/api/websocket/requests) and listens for StreamerBot events, re-emitting them as SE events that your widget can understand.
+- It also uses the [Decapi API](https://docs.decapi.me/) to supplement calls with data from Twitch and caches responses to minimize duplicate calls.
 
 ### Simple File Imports
 - Import `.html`, `.js`, `.css`, `.json` files or even an entire folder or `.zip` file.
