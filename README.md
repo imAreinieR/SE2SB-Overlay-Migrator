@@ -77,8 +77,10 @@ flowchart TB
 - Adjust configuration settings and see your changes in the live preview.
 - Test your widget with simulated events without needing to trigger real Twitch events.
 
-### StreamerBot Event Bridge
-- A `streamerBotEvents.js` file is generated automatically alongside your widget files. This bridges StreamerBot's event system to your overlay so it can respond to stream events (follows, subs, etc.) without any manual wiring.
+### StreamElements -> StreamerBot API and Event Bridge
+- A `streamerBotApiAndEventBridge.js` file is generated automatically alongside your widget files.
+- This reroutes calls to the SE API to the StreamerBot API and listens for StreamerBot events, re-emitting them as SE events that your widget can understand.
+- It also uses the Decapi API to supplement calls with data from Twitch and caches responses to minimize duplicate calls.
 
 ### Simple File Imports
 - Import `.html`, `.js`, `.css`, `.json` files or even an entire folder or `.zip` file.
@@ -189,7 +191,7 @@ Documents/
         ├── index.js
         ├── index.css
         ├── config.js
-        └── streamerBotEvents.js
+        └── streamerBotApiAndEventBridge.js
 ```
 
 ---

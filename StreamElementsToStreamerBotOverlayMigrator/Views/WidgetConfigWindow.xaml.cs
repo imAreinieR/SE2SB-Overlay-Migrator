@@ -112,7 +112,7 @@ public partial class WidgetConfigWindow: Window
         _fileNameAndContents.Clear();
 
         string dataJson = BuildDataJson();
-        _fileNameAndContents["streamerBotEvents.js"] = TemplateFiles.StreamerBotEventHandlersFile;
+        _fileNameAndContents["streamerBotApiAndEventBridge.js"] = TemplateFiles.ApiAndEventBridgeFile;
 
         _widget
             .Files

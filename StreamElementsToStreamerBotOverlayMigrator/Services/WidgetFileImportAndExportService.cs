@@ -93,7 +93,7 @@ public static class WidgetFileImportAndExportService
                 File.WriteAllText(destination, GenerateFile(widgetFile, jsonData));
             }
 
-            File.WriteAllText(Path.Combine(widget.FolderLocation, "streamerBotEvents.js"), TemplateFiles.StreamerBotEventHandlersFile);
+            File.WriteAllText(Path.Combine(widget.FolderLocation, "streamerBotApiAndEventBridge.js"), TemplateFiles.ApiAndEventBridgeFile);
 
             errorMessage = $"Generated to '{widget.FolderLocation}'";
             return true;

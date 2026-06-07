@@ -13,7 +13,7 @@ public static class TemplateFiles
   <script src=""https://cdn.jsdelivr.net/npm/@streamerbot/client/dist/streamerbot-client.js""></script>
   <script src=""config.js""></script>
   <script src=""index.js""></script>
-  <script src=""streamerBotEvents.js""></script>
+  <script src=""streamerBotApiAndEventBridge.js""></script>
 </head>
 <body>
   <!-- Widget Body -->
@@ -22,6 +22,12 @@ public static class TemplateFiles
 </html>";
 
     public const string JavascriptDataFile = "const CONFIG = {0}";
+
+    public const string ApiAndEventBridgeFile = @"// EventAndApiBridge - bridges StreamElements Widget with StreamerBot for both events and API calls"
+        + "\n\n" + ApiInterceptorsFile
+        + "\n\n" + DecapiApiInterceptorFile
+        + "\n\n" + StreamElementsApiInterceptorFile
+        + "\n\n" + StreamerBotEventHandlersFile;
 
     public const string StreamerBotEventHandlersFile = @"// StreamerBotEventHandlers - bridges StreamerBot with StreamElements Widget
 
@@ -64,7 +70,7 @@ const client = new StreamerbotClient({
           apiToken:   '',
           id:         '', // this is streamelements user id
           providerId: broadcaster.platforms['twitch'].broadcastUserId,
-          avatar:     '',
+          avatar:     fetchAvatarUrl(broadcaster.platforms['twitch'].broadcastUser),
         },
         fieldData: CONFIG,
         overlay: {
@@ -82,6 +88,17 @@ const client = new StreamerbotClient({
     console.error('Streamer.bot Client Error: ', data);
   }
 });
+
+async function fetchAvatarUrl(username) {
+  try {
+    const response = await fetch(`https://decapi.me/twitch/avatar/${username}`);
+    if (!response.ok)
+        return '';
+    return await response.text();
+  } catch {
+    return '';
+  }
+}
 
 function dispatchSEEvent(listener, eventData) {
   const seEvent = new CustomEvent('onEventReceived', {
@@ -309,4 +326,65 @@ client.on('Twitch.ChatMessageDeleted', ({ event, data }) => {
 // bot:counter              - not supported
 // kvstore:update           - not supported
 // widget-button            - testing only";
+
+    public const string ApiInterceptorsFile = @"// ApiInterceptors - Intercepts API calls to inject custom handling
+const _originalFetch = globalThis.fetch.bind(globalThis);
+const _interceptors = [];
+
+function registerFetchInterceptor(predicate, handler) {
+  _interceptors.push({ predicate, handler });
+}
+
+globalThis.fetch = async function(input, init) {
+  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+
+  for (const { predicate, handler } of _interceptors) {
+    if (predicate(url)) {
+      return handler(url, input, init, _originalFetch);
+    }
+  }
+
+  return _originalFetch(input, init);
+};";
+
+    public const string DecapiApiInterceptorFile = @"// DecapiApiInterceptor - intercepts and caches calls to Decapi API
+const _decapiCache = new Map();
+const DECAPI_TTL = 10 * 60 * 1000; // cache is valid for 10 mins
+
+registerFetchInterceptor(
+  (url) => url.startsWith('https://decapi.me/'),
+  async (url, input, init, originalFetch) => {
+    console.log('Intercepting Decapi API call...');
+
+    const now = Date.now();
+    const cached = _decapiCache.get(url);
+
+    if (cached && (now - cached.timestamp) < DECAPI_TTL) {
+      console.log('Returning cached response...');
+      return new Response(cached.value, { status: 200 });
+    }
+
+    console.log('Calling Decapi API...');
+    const response = await originalFetch(input, init);
+    if (response.ok) {
+      const value = await response.text();
+      _decapiCache.set(url, { value, timestamp: now });
+      return new Response(value, { status: 200, headers: response.headers });
+    }
+
+    return response;
+  }
+);";
+
+    public const string StreamElementsApiInterceptorFile = @"// StreamElementsApiInterceptor - intercepts calls to StreamElements API to provide dummy data for testing
+registerFetchInterceptor(
+  (url) => url.startsWith('https://api.streamelements.com/'),
+  async (url, input, init, originalFetch) => {
+    // Reroute to StreamerBot instead...
+    console.log('Intercepting StreameElements API call...', url);
+
+    console.log('Calling StreamerBot API...');
+    return client.doAction({ name: 'StreamElements Proxy' }, { url });
+  }
+);";
 }
