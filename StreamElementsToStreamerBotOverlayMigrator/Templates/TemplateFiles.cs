@@ -11,6 +11,7 @@ public static class TemplateFiles
   <!-- Widget Scripts -->
   <script src=""https://code.jquery.com/jquery-4.0.0.js""></script>
   <script src=""https://cdn.jsdelivr.net/npm/@streamerbot/client/dist/streamerbot-client.js""></script>
+  <script src=""https://cdn.jsdelivr.net/npm/profanity-cleaner@latest""></script>
   <script src=""config.js""></script>
   <script src=""index.js""></script>
   <script src=""streamerBotApiAndEventBridge.js""></script>
@@ -354,17 +355,13 @@ const DECAPI_TTL = 10 * 60 * 1000; // cache is valid for 10 mins
 registerFetchInterceptor(
   (url) => url.startsWith('https://decapi.me/'),
   async (url, input, init, originalFetch) => {
-    console.log('Intercepting Decapi API call...');
-
     const now = Date.now();
     const cached = _decapiCache.get(url);
 
     if (cached && (now - cached.timestamp) < DECAPI_TTL) {
-      console.log('Returning cached response...');
       return new Response(cached.value, { status: 200 });
     }
 
-    console.log('Calling Decapi API...');
     const response = await originalFetch(input, init);
     if (response.ok) {
       const value = await response.text();
@@ -380,11 +377,131 @@ registerFetchInterceptor(
 registerFetchInterceptor(
   (url) => url.startsWith('https://api.streamelements.com/'),
   async (url, input, init, originalFetch) => {
-    // Reroute to StreamerBot instead...
-    console.log('Intercepting StreameElements API call...', url);
-
-    console.log('Calling StreamerBot API...');
-    return client.doAction({ name: 'StreamElements Proxy' }, { url });
+    const data = await handleStreamElementsRequest(url, init);
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
-);";
+);
+
+const SE_ROUTES = [
+  {
+    name:    'Get channel by username',
+    pattern: /^\/kappa\/v[23]\/channels\/(?<channel>[^/]+)\/?$/,
+    handler: handleGetChannel
+  },
+  {
+    name:    'Get bot counter',
+    pattern: /^\/kappa\/v[23]\/bot\/(?<channelId>[^/]+)\/counters\/(?<counter>[^/]+)\/?$/,
+    handler: handleGetCounter
+  },
+];
+
+async function handleStreamElementsRequest(url, init) {
+  const { pathname } = new URL(url);
+
+  for (const route of SE_ROUTES) {
+    const match = pathname.match(route.pattern);
+    if (match) {
+      return route.handler(match.groups ?? {}, { url, pathname, init });
+    }
+  }
+
+  console.warn('Unhandled StreamElements API route:', pathname);
+  return {};
+}
+
+async function handleGetChannel({ channel }) {
+  return {
+    'profile': {
+        'title':       channel + '\'s profile',
+        'headerImage': ''
+    },
+    '_id':             '123',
+    'providerId':      '123',
+    'provider':        'twitch',
+    'avatar':          fetchAvatarUrl(channel),
+    'username':        channel,
+    'alias':           channel,
+    'displayName':     channel, //TODO
+    'broadcasterType': 'affiliate', //TODO
+    'suspended':       false,
+    'inactive':        false,
+    'isPartner':       true
+  };
+}
+
+async function handleGetCounter({ channelId, counter }) {
+  try {
+    const result = await client.getGlobal(counter);
+
+    if (result.status !== 'ok') {
+      console.warn(`StreamerBot returned error status for counter ""${counter}""`);
+      return { id: counter, count: 0 };
+    }
+
+    return {
+      id: counter,
+      count: result.variable?.value ?? 0
+    };
+  } catch (err) {
+    console.error(`StreamerBot call failed for counter ""${counter}"":`, err);
+    return { id: counter, count: 0 };
+  }
+}
+
+const SE_API = {
+  store: {
+    set(keyName, object) {
+      console.error(""SE_API.store.set is not yet implemented."");
+      throw new Error(""SE_API.store.set is not yet implemented."");
+    },
+    get(keyName) {
+      console.error(""SE_API.store.get is not yet implemented."");
+      throw new Error(""SE_API.store.get is not yet implemented."");
+    },
+  },
+
+  counters: {
+    async get(counterName) {
+      return handleGetCounter({ channelId: null, counter: counterName });
+    },
+  },
+
+  async sanitize({ message }) {
+    return {
+      skip: false,
+      result: { message: profanityCleaner.clean(message) },
+    };
+  },
+
+  cheerFilter(message) {
+    console.error(""SE_API.cheerFilter is not yet implemented."");
+    throw new Error(""SE_API.cheerFilter is not yet implemented."");
+  },
+
+  getOverlayStatus() {
+    console.error(""SE_API.getOverlayStatus is not yet implemented."");
+    throw new Error(""SE_API.getOverlayStatus is not yet implemented."");
+  },
+
+  resumeQueue() {
+    console.error(""SE_API.resumeQueue is not yet implemented."");
+    throw new Error(""SE_API.resumeQueue is not yet implemented."");
+  },
+
+  setField(key, value, reload = true) {
+    console.error(""SE_API.setField is not yet implemented."");
+    throw new Error(""SE_API.setField is not yet implemented."");
+  },
+
+  // Internal: lazy-load the bad-words filter
+  _badWordsFilter: null,
+  async _loadBadWords() {
+    // Assumes bad-words is available in the widget sandbox (e.g. via CDN or bundled)
+    const { Filter } = await import(""bad-words"");
+    SE_API._badWordsFilter = new Filter();
+  },
+};";
 }
