@@ -18,6 +18,8 @@ public static class WidgetManager
 
     static WidgetManager()
     {
+        RestoreDatabaseBackupIfNeeded();
+
         using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 

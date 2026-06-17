@@ -37,8 +37,6 @@ public partial class MainWindow: Window
         if (version != null && VersionLabel.Content is TextBlock versionText)
             versionText.Text = $"v{version.Major}.{version.Minor}.{version.Build}";
 
-        WidgetManager.RestoreDatabaseBackupIfNeeded();
-
         WidgetList.ItemsSource = _widgets = new ObservableCollection<Widget>(WidgetManager.GetAll());
 
         if (_widgets.Any())
