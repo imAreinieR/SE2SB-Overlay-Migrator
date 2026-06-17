@@ -31,30 +31,6 @@ public static class TemplateFiles
         + "\n\n" + StreamerBotEventHandlersFile;
 
     public const string StreamerBotEventHandlersFile = @"// StreamerBotEventHandlers - bridges StreamerBot with StreamElements Widget
-
-const seEvent = new CustomEvent('onWidgetLoad', {
-  detail: {
-    session:  {},
-    recents:  {},
-    currency: {},
-    channel: {
-      username:   'Ami.Bot',
-      apiToken:   '',
-      id:         '',
-      providerId: '12345',
-      avatar:     '',
-    },
-    fieldData: CONFIG,
-    overlay: {
-      isEditorMode: false,
-      muted:        false,
-    }
-  }
-});
-
-console.log('Dispatching dummy onWidgetLoadEvent...');
-window.dispatchEvent(seEvent);
-
 const client = new StreamerbotClient({
   autoReconnect: true,
   retries: -1,

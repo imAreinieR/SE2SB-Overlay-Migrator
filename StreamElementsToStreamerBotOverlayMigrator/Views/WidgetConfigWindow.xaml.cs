@@ -7,11 +7,11 @@ using StreamElementsToStreamerBotOverlayMigrator.Managers;
 using StreamElementsToStreamerBotOverlayMigrator.Services;
 using StreamElementsToStreamerBotOverlayMigrator.Templates;
 using StreamElementsToStreamerBotOverlayMigrator.Themes;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Channels;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -69,6 +69,12 @@ public partial class WidgetConfigWindow: Window
         InitializeWebViewAsync();
     }
 
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        TeardownWidget();
+        base.OnClosing(e);
+    }
+
     private async void InitializeWebViewAsync()
     {
         try
@@ -96,6 +102,7 @@ public partial class WidgetConfigWindow: Window
             PreviewWebView.CoreWebView2.WebResourceRequested += OnWebResourceRequested;
 
             ReloadPreview();
+            await InitializeWidget();
         }
         catch (Exception exception)
         {
@@ -834,6 +841,55 @@ public partial class WidgetConfigWindow: Window
         {
             SetStatus($"Simulate failed: {exception.Message}", error: true);
         }
+    }
+
+    private async Task InitializeWidget()
+    {
+        if (!_webViewReady)
+            return;
+        try
+        {
+            string fieldDataJson = BuildDataJson();
+            await PreviewWebView.ExecuteScriptAsync
+            (
+                $@"const dummySeEvent = new CustomEvent('onWidgetLoad', {{
+                    detail: {{
+                        session:  {{}},
+                        recents:  {{}},
+                        currency: {{}},
+                        channel:
+                        {{
+                            username:   '{SimulatedUsername}',
+                            apiToken:   '',
+                            id:         '',
+                            providerId: '{SimulatedUserId}',
+                            avatar:     '',
+                        }},
+                        fieldData: {fieldDataJson},
+                        overlay:
+                        {{
+                            isEditorMode: false,
+                            muted:        false,
+                        }}
+                    }}
+                }});
+                console.log('[LIVE-PREVIEW] Dispatching dummy onWidgetLoad event...');
+                window.dispatchEvent(dummySeEvent);"
+            );
+        }
+        catch (Exception exception)
+        {
+            SetStatus($"InitializeWidget failed: {exception.Message}", error: true);
+        }
+    }
+
+    private void TeardownWidget()
+    {
+        if (!_webViewReady)
+            return;
+
+        PreviewWebView.Source = new Uri("about:blank");
+        PreviewWebView.Dispose();
     }
 
     #endregion SE Event Simulation Event Handlers
