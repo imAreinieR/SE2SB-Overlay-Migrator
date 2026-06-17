@@ -28,7 +28,8 @@ public static class TemplateFiles
         + "\n\n" + ApiInterceptorsFile
         + "\n\n" + DecapiApiInterceptorFile
         + "\n\n" + StreamElementsApiInterceptorFile
-        + "\n\n" + StreamerBotEventHandlersFile;
+        + "\n\n" + StreamerBotEventHandlersFile
+        + "\n\n" + StreamElementsSeApiFunctionFile;
 
     public const string StreamerBotEventHandlersFile = @"// StreamerBotEventHandlers - bridges StreamerBot with StreamElements Widget
 const client = new StreamerbotClient({
@@ -425,8 +426,9 @@ async function handleGetCounter({ channelId, counter }) {
     console.error(`StreamerBot call failed for counter ""${counter}"":`, err);
     return { id: counter, count: 0 };
   }
-}
+}";
 
+    public const string StreamElementsSeApiFunctionFile = @"// StreamElementsSeApiFunction - intercepts calls to StreamElements API to provide dummy data for testing
 const SE_API = {
   store: {
     set(keyName, object) {
@@ -438,40 +440,33 @@ const SE_API = {
       throw new Error(""SE_API.store.get is not yet implemented."");
     },
   },
-
   counters: {
     async get(counterName) {
       return handleGetCounter({ channelId: null, counter: counterName });
     },
   },
-
   async sanitize({ message }) {
     return {
       skip: false,
       result: { message: profanityCleaner.clean(message) },
     };
   },
-
   cheerFilter(message) {
     console.error(""SE_API.cheerFilter is not yet implemented."");
     throw new Error(""SE_API.cheerFilter is not yet implemented."");
   },
-
   getOverlayStatus() {
     console.error(""SE_API.getOverlayStatus is not yet implemented."");
     throw new Error(""SE_API.getOverlayStatus is not yet implemented."");
   },
-
   resumeQueue() {
     console.error(""SE_API.resumeQueue is not yet implemented."");
     throw new Error(""SE_API.resumeQueue is not yet implemented."");
   },
-
   setField(key, value, reload = true) {
     console.error(""SE_API.setField is not yet implemented."");
     throw new Error(""SE_API.setField is not yet implemented."");
   },
-
   // Internal: lazy-load the bad-words filter
   _badWordsFilter: null,
   async _loadBadWords() {
