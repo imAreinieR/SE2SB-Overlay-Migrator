@@ -5,6 +5,7 @@ using StreamElementsToStreamerBotOverlayMigrator.Managers;
 using StreamElementsToStreamerBotOverlayMigrator.Services;
 using StreamElementsToStreamerBotOverlayMigrator.Themes;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -36,12 +37,20 @@ public partial class MainWindow: Window
         if (version != null && VersionLabel.Content is TextBlock versionText)
             versionText.Text = $"v{version.Major}.{version.Minor}.{version.Build}";
 
+        WidgetManager.RestoreDatabaseBackupIfNeeded();
+
         WidgetList.ItemsSource = _widgets = new ObservableCollection<Widget>(WidgetManager.GetAll());
 
         if (_widgets.Any())
             WidgetList.SelectedItem = _widgets.First();
         else
             UpdateEmptyState();
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        WidgetManager.CreateDatabaseBackupIfNeeded();
+        base.OnClosing(e);
     }
 
     #region UI Elements
