@@ -155,15 +155,13 @@ public partial class UpdaterWindow: Window
     {
         try
         {
-            string canonicalPath = Path.GetFullPath(path);
             string canonicalTempPath = Path.GetFullPath(Path.GetTempPath());
+            string allowedPath = Path.GetFullPath(Path.Combine(canonicalTempPath, "SE2SB_Update"));
+            string canonicalPath = Path.GetFullPath(path);
 
-            if (!canonicalTempPath.EndsWith(Path.DirectorySeparatorChar))
-                canonicalTempPath += Path.DirectorySeparatorChar;
-
-            if (!canonicalPath.StartsWith(canonicalTempPath, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(canonicalPath, allowedPath, StringComparison.OrdinalIgnoreCase))
             {
-                DisplayError($"[Updater] Skipping deletion — path outside temp: {canonicalPath}");
+                DisplayError($"[Updater] Skipping deletion — path not allowlisted: {canonicalPath}");
                 return;
             }
 
