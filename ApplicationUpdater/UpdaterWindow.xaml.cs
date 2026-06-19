@@ -103,8 +103,11 @@ public partial class UpdaterWindow: Window
 
             await fileStream.DisposeAsync();
 
-            string exeName  = Path.GetFileName(_targetPath);
-            string tempRoot = Path.GetFullPath(Path.GetTempPath());
+            string exeName = Path.GetFileName(_targetPath);
+            string tempRoot = Path.GetFullPath(
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "SE2SB"));
             if (!tempRoot.EndsWith(Path.DirectorySeparatorChar))
                 tempRoot += Path.DirectorySeparatorChar;
 
