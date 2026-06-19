@@ -450,7 +450,7 @@ const SE_API = {
     set(keyName, object) {
       setGlobal(keyName, JSON.stringify(object));
     },
-    get(keyName) {
+    async get(keyName) {
       const result = await client.getGlobal(keyName);
       return JSON.parse(result);
     },
