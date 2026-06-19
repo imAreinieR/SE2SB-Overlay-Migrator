@@ -468,8 +468,8 @@ const SE_API = {
     };
   },
   cheerFilter(message) {
-    console.error(""SE_API.cheerFilter is not yet implemented."");
-    throw new Error(""SE_API.cheerFilter is not yet implemented."");
+    const allCheersRegex = /(?<=^|\s)[a-z0-9]+cheer\d+(?=$|\s)|(?<=^|\s)(cheer|Kappa|LUL|PogChamp|Kreygasm|4Head|Swiftrage|PJSalt|FailFish|NotLikeThis|VoHiYo)\d+(?=$|\s)/gi;
+    return message.replace(allCheersRegex, '').replace(/\s+/g, ' ').trim();
   },
   getOverlayStatus() {
     console.error(""SE_API.getOverlayStatus is not yet implemented."");
@@ -482,13 +482,6 @@ const SE_API = {
   setField(key, value, reload = true) {
     console.error(""SE_API.setField is not yet implemented."");
     throw new Error(""SE_API.setField is not yet implemented."");
-  },
-  // Internal: lazy-load the bad-words filter
-  _badWordsFilter: null,
-  async _loadBadWords() {
-    // Assumes bad-words is available in the widget sandbox (e.g. via CDN or bundled)
-    const { Filter } = await import(""bad-words"");
-    SE_API._badWordsFilter = new Filter();
-  },
+  }
 };";
 }
