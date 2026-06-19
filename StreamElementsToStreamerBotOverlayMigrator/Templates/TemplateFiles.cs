@@ -461,9 +461,10 @@ const SE_API = {
     },
   },
   async sanitize({ message }) {
+    const sanitizedMessage = profanityCleaner.clean(message);
     return {
-      skip: false,
-      result: { message: profanityCleaner.clean(message) },
+      skip: message === sanitizedMessage,
+      result: { message: sanitizedMessage },
     };
   },
   cheerFilter(message) {
