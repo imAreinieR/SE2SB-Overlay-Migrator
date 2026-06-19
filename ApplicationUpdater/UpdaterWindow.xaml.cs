@@ -103,9 +103,19 @@ public partial class UpdaterWindow: Window
 
             await fileStream.DisposeAsync();
 
-            string exeName                   = Path.GetFileName(_targetPath);
-            string extractDirectory          = Path.Combine(Path.GetTempPath(), "SE2SB_Update");
-            string canonicalExtractDirectory = Path.GetFullPath(extractDirectory) + Path.DirectorySeparatorChar;
+            string exeName = Path.GetFileName(_targetPath);
+            string tempRoot = Path.GetFullPath(
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "SE2SB"));
+            if (!tempRoot.EndsWith(Path.DirectorySeparatorChar))
+                tempRoot += Path.DirectorySeparatorChar;
+
+            string extractDirectory = Path.GetFullPath(Path.Combine(tempRoot, "SE2SB_Update"));
+            if (!extractDirectory.StartsWith(tempRoot, StringComparison.OrdinalIgnoreCase))
+                throw new Exception("Invalid extraction directory.");
+
+            string canonicalExtractDirectory = extractDirectory + Path.DirectorySeparatorChar;
 
             TryDeleteDirectory(extractDirectory);
 
