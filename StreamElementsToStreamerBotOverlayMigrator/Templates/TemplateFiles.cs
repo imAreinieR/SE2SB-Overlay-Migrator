@@ -78,6 +78,22 @@ async function fetchAvatarUrl(username) {
   }
 }
 
+async function setGlobal(variableName, variableValue, persistVariable = true) {
+  try {
+    const sanitizedValue = variableValue.trim() === '' ? null : variableValue;
+    const response = await client.request({
+      request: 'SetGlobal',
+      variable: variableName,
+      value: sanitizedValue,
+      persisted: persistVariable
+    });
+
+    console.log('Global set successfully:', response);
+  } catch (error) {
+    console.error('Failed to set global variable:', error);
+  }
+}
+
 function dispatchSEEvent(listener, eventData) {
   const seEvent = new CustomEvent('onEventReceived', {
     detail: {
@@ -432,12 +448,11 @@ async function handleGetCounter({ channelId, counter }) {
 const SE_API = {
   store: {
     set(keyName, object) {
-      console.error(""SE_API.store.set is not yet implemented."");
-      throw new Error(""SE_API.store.set is not yet implemented."");
+      setGlobal(keyName, JSON.stringify(object));
     },
     get(keyName) {
-      console.error(""SE_API.store.get is not yet implemented."");
-      throw new Error(""SE_API.store.get is not yet implemented."");
+      const result = await client.getGlobal(keyName);
+      return JSON.parse(result);
     },
   },
   counters: {
