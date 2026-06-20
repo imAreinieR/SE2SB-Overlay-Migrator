@@ -820,17 +820,19 @@ public partial class WidgetConfigWindow: Window
 
     private async void SimulateChannelPoints_Click(object sender, RoutedEventArgs e)
     {
+        DateTime now = DateTime.UtcNow;
+
         await DispatchWidgetEvent
         (
             "event",
             new
             {
-                type            = "channelPointsRedemption",
-                provider        = "twitch",
-                channel         = SimulatedUserId,
-                flagged         = false,
-                createdAt       = DateTime.UtcNow.ToString("o"),
-                data            = new
+                type               = "channelPointsRedemption",
+                provider           = "twitch",
+                channel            = SimulatedUserId,
+                flagged            = false,
+                createdAt          = DateTimeForJavascriptCode(now),
+                data               = new
                 {
                     amount      = 500,
                     username    = SimulatedUsername,
@@ -838,12 +840,12 @@ public partial class WidgetConfigWindow: Window
                     providerId  = SimulatedUserId,
                     redemption  = "Headpats",
                     quantity    = 0,
-                    avatar      = "",
+                    avatar      = string.Empty,
                 },
-                _id = Guid.NewGuid().ToString("N").Substring(0, 24),
-                expiresAt = DateTime.UtcNow.AddDays(28).ToString("o"),
-                updatedAt = DateTime.UtcNow.ToString("o"),
-                activityId = Guid.NewGuid().ToString("N").Substring(0, 24),
+                _id                = GenerateGuidForJavascriptCode(),
+                expiresAt          = DateTimeForJavascriptCode(now.AddDays(28)),
+                updatedAt          = DateTimeForJavascriptCode(now),
+                activityId         = GenerateGuidForJavascriptCode(),
                 sessionEventsCount = 1,
             }
         );
@@ -1167,6 +1169,12 @@ public partial class WidgetConfigWindow: Window
                 ? AppColors.StatusSuccess
                 : AppColors.StatusDefault;
     }
+
+    private string GenerateGuidForJavascriptCode()
+        => Guid.NewGuid().ToString("N");
+
+    private string DateTimeForJavascriptCode(DateTime datetime)
+        => datetime.ToUniversalTime().ToString("o");
 
     #endregion Helpers
 }

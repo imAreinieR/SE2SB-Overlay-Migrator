@@ -67,6 +67,13 @@ const client = new StreamerbotClient({
   }
 });
 
+function generateUuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
 async function fetchAvatarUrl(username) {
   try {
     const response = await fetch(`https://decapi.me/twitch/avatar/${username}`);
@@ -74,17 +81,18 @@ async function fetchAvatarUrl(username) {
         return '';
     return await response.text();
   } catch {
+    console.error('Failed to fetch avatar url:', error);
     return '';
   }
 }
 
+// TODO: does not exist in WebSocket API, need to call doAction instead
 async function setGlobal(variableName, variableValue, persistVariable = true) {
   try {
-    const sanitizedValue = variableValue.trim() === '' ? null : variableValue;
     const response = await client.request({
       request: 'SetGlobal',
       variable: variableName,
-      value: sanitizedValue,
+      value: variableValue,
       persisted: persistVariable
     });
 
@@ -229,9 +237,8 @@ client.on('Twitch.Raid', ({ event, data }) => {
   });
 });
 
-// TODO UNTESTED
 // channelPointsRedemption - Channel points reward redeemed
-client.on('Twitch.ChannelPointsRedemption', ({ event, data }) => {
+client.on('Twitch.RewardRedemption', ({ event, data }) => {
   dispatchSEEvent('event', {
     type:               'channelPointsRedemption',
     provider:           'twitch',
@@ -239,18 +246,18 @@ client.on('Twitch.ChannelPointsRedemption', ({ event, data }) => {
     flagged:            false,
     createdAt:          new Date().toISOString(),
     data: {
-      amount:           data.reward?.cost ?? 0,
-      username:         data.user_login ?? '',
-      displayName:      data.user_name  ?? '',
-      providerId:       data.user_id    ?? '12345',
-      redemption:       data.reward?.title ?? '',
-      quantity:         0,
-      avatar:           ''
+      amount:      data.reward?.cost  ?? 0,
+      username:    data.user_login    ?? '',
+      displayName: data.user_name     ?? '',
+      providerId:  data.user_id       ?? '12345',
+      redemption:  data.reward?.title ?? '',
+      quantity:    0,
+      avatar:      ''
     },
-    _id:                crypto.randomUUID().replace(/-/g, '').slice(0, 24),
+    _id:                generateUuid(),
     expiresAt:          new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt:          new Date().toISOString(),
-    activityId:         crypto.randomUUID().replace(/-/g, '').slice(0, 24),
+    activityId:         generateUuid(),
     sessionEventsCount: 1
   });
 });
@@ -369,7 +376,7 @@ globalThis.fetch = async function(input, init) {
 
     public const string DecapiApiInterceptorFile = @"// DecapiApiInterceptor - intercepts and caches calls to Decapi API
 const _decapiCache = new Map();
-const DECAPI_TTL = 10 * 60 * 1000; // cache is valid for 10 mins
+const DECAPI_TTL = 60 * 60 * 1000; // cache is valid for 60 mins
 
 registerFetchInterceptor(
   (url) => url.startsWith('https://decapi.me/'),
@@ -437,7 +444,7 @@ async function handleGetChannel({ channel }) {
         'title':       channel + '\'s profile',
         'headerImage': ''
     },
-    '_id':             '123',
+    '_id':             generateUuid(),
     'providerId':      '123',
     'provider':        'twitch',
     'avatar':          fetchAvatarUrl(channel),
