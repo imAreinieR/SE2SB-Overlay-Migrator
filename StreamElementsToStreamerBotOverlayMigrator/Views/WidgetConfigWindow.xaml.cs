@@ -704,7 +704,7 @@ public partial class WidgetConfigWindow: Window
             "follower-latest",
             new
             {
-                avatar      = string.Empty,
+                avatar      = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName = SimulatedUsername,
                 username    = SimulatedUsername,
                 name        = SimulatedUsername,
@@ -721,7 +721,7 @@ public partial class WidgetConfigWindow: Window
             new
             {
                 amount      = 1,
-                avatar      = string.Empty,
+                avatar      = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName = SimulatedUsername,
                 username    = SimulatedUsername,
                 name        = SimulatedUsername,
@@ -741,7 +741,7 @@ public partial class WidgetConfigWindow: Window
             new
             {
                 amount      = 67,
-                avatar      = string.Empty,
+                avatar      = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName = SimulatedUsername,
                 username    = SimulatedUsername,
                 name        = SimulatedUsername,
@@ -761,7 +761,7 @@ public partial class WidgetConfigWindow: Window
             new
             {
                 amount                = 1,
-                avatar                = string.Empty,
+                avatar                = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName           = SimulatedUsername,
                 username              = SimulatedUsername,
                 name                  = SimulatedUsername,
@@ -785,7 +785,7 @@ public partial class WidgetConfigWindow: Window
             new
             {
                 amount                = 67,
-                avatar                = string.Empty,
+                avatar                = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName           = SimulatedUsername,
                 username              = SimulatedUsername,
                 name                  = SimulatedUsername,
@@ -809,7 +809,7 @@ public partial class WidgetConfigWindow: Window
             new
             {
                 amount      = 67,
-                avatar      = string.Empty,
+                avatar      = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName = SimulatedUsername,
                 username    = SimulatedUsername,
                 name        = SimulatedUsername,
@@ -840,7 +840,7 @@ public partial class WidgetConfigWindow: Window
                     providerId  = SimulatedUserId,
                     redemption  = "Headpats",
                     quantity    = 0,
-                    avatar      = string.Empty,
+                    avatar      = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 },
                 _id                = GenerateGuidForJavascriptCode(),
                 expiresAt          = DateTimeForJavascriptCode(now.AddDays(28)),
@@ -896,7 +896,7 @@ public partial class WidgetConfigWindow: Window
                             apiToken:   '',
                             id:         '',
                             providerId: '{SimulatedUserId}',
-                            avatar:     '',
+                            avatar:     {JavascriptFunctionCallForAvatarUrl(SimulatedUsername)},
                         }},
                         fieldData: {fieldDataJson},
                         overlay:
@@ -1175,6 +1175,9 @@ public partial class WidgetConfigWindow: Window
 
     private string DateTimeForJavascriptCode(DateTime datetime)
         => datetime.ToUniversalTime().ToString("o");
+
+    private string JavascriptFunctionCallForAvatarUrl(string username)
+        => $"fetchAvatarUrl('{username}')";
 
     #endregion Helpers
 }
