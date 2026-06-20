@@ -229,6 +229,32 @@ client.on('Twitch.Raid', ({ event, data }) => {
   });
 });
 
+// TODO UNTESTED
+// channelPointsRedemption - Channel points reward redeemed
+client.on('Twitch.ChannelPointsRedemption', ({ event, data }) => {
+  dispatchSEEvent('event', {
+    type:               'channelPointsRedemption',
+    provider:           'twitch',
+    channel:            data.broadcaster_user_id ?? '',
+    flagged:            false,
+    createdAt:          new Date().toISOString(),
+    data: {
+      amount:           data.reward?.cost ?? 0,
+      username:         data.user_login ?? '',
+      displayName:      data.user_name  ?? '',
+      providerId:       data.user_id    ?? '12345',
+      redemption:       data.reward?.title ?? '',
+      quantity:         0,
+      avatar:           ''
+    },
+    _id:                crypto.randomUUID().replace(/-/g, '').slice(0, 24),
+    expiresAt:          new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt:          new Date().toISOString(),
+    activityId:         crypto.randomUUID().replace(/-/g, '').slice(0, 24),
+    sessionEventsCount: 1
+  });
+});
+
 // message - New chat message
 client.on('Twitch.ChatMessage', ({ event, data }) => {
   const msg  = data.message ?? {};

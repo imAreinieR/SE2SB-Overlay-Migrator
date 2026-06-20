@@ -818,6 +818,37 @@ public partial class WidgetConfigWindow: Window
         );
     }
 
+    private async void SimulateChannelPoints_Click(object sender, RoutedEventArgs e)
+    {
+        await DispatchWidgetEvent
+        (
+            "event",
+            new
+            {
+                type            = "channelPointsRedemption",
+                provider        = "twitch",
+                channel         = SimulatedUserId,
+                flagged         = false,
+                createdAt       = DateTime.UtcNow.ToString("o"),
+                data            = new
+                {
+                    amount      = 500,
+                    username    = SimulatedUsername,
+                    displayName = SimulatedUsername,
+                    providerId  = SimulatedUserId,
+                    redemption  = "Headpats",
+                    quantity    = 0,
+                    avatar      = "",
+                },
+                _id = Guid.NewGuid().ToString("N").Substring(0, 24),
+                expiresAt = DateTime.UtcNow.AddDays(28).ToString("o"),
+                updatedAt = DateTime.UtcNow.ToString("o"),
+                activityId = Guid.NewGuid().ToString("N").Substring(0, 24),
+                sessionEventsCount = 1,
+            }
+        );
+    }
+
     private async Task DispatchWidgetEvent(string listener, object payload)
     {
         if (!_webViewReady)
