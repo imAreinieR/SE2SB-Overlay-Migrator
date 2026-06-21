@@ -47,7 +47,7 @@ const client = new StreamerbotClient({
   }
 });
 
-function sendOnWidgetLoadEvent() {
+async function sendOnWidgetLoadEvent() {
   const broadcaster = await client.getBroadcaster();
   const seEvent = new CustomEvent('onWidgetLoad', {
     detail: {
@@ -84,7 +84,7 @@ async function fetchAvatarUrl(username) {
     if (!response.ok)
         return '';
     return await response.text();
-  } catch {
+  } catch (error) {
     console.error('Failed to fetch avatar url:', error);
     return '';
   }
@@ -125,7 +125,7 @@ client.on('Twitch.Follow', ({ event, data }) => {
       displayName: data.user_name ?? '',
       username:    data.user_login ?? '',
       name:        data.user_login ?? '',
-      providerId:  user_id ?? '12345'
+      providerId:  data.user_id ?? '12345'
     }
   });
 });
@@ -438,7 +438,7 @@ async function handleStreamElementsRequest(url, init) {
     }
   }
 
-  console.warn('Unhandled StreamElements API route:', pathname);
+  console.error('Unhandled StreamElements API route:', pathname);
   return {};
 }
 
@@ -457,7 +457,7 @@ async function handleGetChannel({ channel }) {
         'title':       channel + '\'s profile',
         'headerImage': ''
     },
-    '_id':             generateUuid()
+    '_id':             generateUuid(),
     'providerId':      twitchChannelInfo.broadcastUserId,
     'provider':        'twitch',
     'avatar':          fetchAvatarUrl(channel),
@@ -501,8 +501,12 @@ const SE_API = {
       setGlobal(keyName, JSON.stringify(object));
     },
     async get(keyName) {
-      const result = await client.getGlobal(keyName);
-      return JSON.parse(result);
+      try{
+        const result = await client.getGlobal(keyName);
+        return JSON.parse(result.variable?.value);
+      } catch (error) {
+        return ''
+      }
     },
   },
   counters: {
@@ -538,5 +542,6 @@ const SE_API = {
     } catch (err) {
       console.error(`Failed to set field ""${key}"" with value ""${value}"":`, err);
     }
+  }
 };";
 }
