@@ -335,6 +335,32 @@ client.on('Twitch.RewardRedemption', ({ event, data }) => {
   });
 });
 
+// bot:counter & kvstore:update - Updated global variables for counters and key-value pairs
+client.on('Misc.GlobalVariableUpdated', ({ event, data }) => {
+  try{
+    if (Number.isFinite(data.newValue)){
+      dispatchSEEvent('bot:counter', {
+        service: 'twitch',
+        data: {
+          counter: data.name,
+          value: data.newValue
+        }
+      });
+    }
+    else if (typeof data.newValue === 'string' && data.newValue.startsWith('{') && data.newValue.endsWith('}')) {
+      dispatchSEEvent('kvstore:update', {
+        service: 'twitch',
+        data: { // TODO: not certain about the property names
+          key:   data.name,
+          value: JSON.parse(data.newValue)
+        }
+      });
+    }
+  } catch (error) {
+    console.error(`Failed processing of counter or key-value pair (""${data.name}"")`, error);
+  }
+});
+
 // message - New chat message
 client.on('Twitch.ChatMessage', ({ event, data }) => {
   const msg  = data.message ?? {};
@@ -423,8 +449,6 @@ client.on('Twitch.ChatMessageDeleted', ({ event, data }) => {
 // tip-latest               - not supported
 // event:skip               - not supported
 // alertService:toggleSound - not supported
-// bot:counter              - not supported
-// kvstore:update           - not supported
 // widget-button            - testing only";
 
     public const string ApiInterceptorsFile = @"// ApiInterceptors - Intercepts API calls to inject custom handling
