@@ -563,8 +563,10 @@ const SE_API = {
     return message.replace(allCheersRegex, '').replace(/\s+/g, ' ').trim();
   },
   getOverlayStatus() {
-    console.error(""SE_API.getOverlayStatus is not yet implemented."");
-    throw new Error(""SE_API.getOverlayStatus is not yet implemented."");
+    return {
+      isEditorMode: false, // TODO: this is true in the LivePreview only
+      muted:        false,
+    };
   },
   resumeQueue() {
     console.error(""SE_API.resumeQueue is not yet implemented."");
