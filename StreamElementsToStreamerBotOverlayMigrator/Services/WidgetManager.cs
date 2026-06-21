@@ -12,8 +12,8 @@ public static class WidgetManager
     private const           int    MaxDatabaseBackupCount = 5;
     private const           string DatabaseFileExtension  = ".db";
 
-    private static readonly string DefaultRootFolderPath  = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "imA-SB-Widgets");
-    private static readonly string DatabaseFilePath       = Path.Combine(AppContext.BaseDirectory, "database.db");
+    private static readonly string DefaultRootFolderPath  = Path.GetFullPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "imA-SB-Widgets"));
+    private static readonly string DatabaseFilePath       = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "database.db"));
     private static readonly string ConnectionString       = $"Data Source={DatabaseFilePath}";
 
     static WidgetManager()
@@ -130,12 +130,25 @@ public static class WidgetManager
     public static bool GenerateExportFiles(Widget widget, out string errorMessage)
         => WidgetFileImportAndExportService.GenerateExportFilesForWidget(widget, out errorMessage);
 
+    private static bool IsPathWithinBaseDirectory(string baseDirectory, string candidatePath)
+    {
+        string fullBasePath = Path.GetFullPath(baseDirectory)
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+            + Path.DirectorySeparatorChar;
+        string fullCandidatePath = Path.GetFullPath(candidatePath);
+
+        return fullCandidatePath.StartsWith(fullBasePath, StringComparison.OrdinalIgnoreCase);
+    }
+
     public static void RestoreDatabaseBackupIfNeeded()
     {
         if (File.Exists(DatabaseFilePath))
             return;
 
-        string backupFolder = Path.Combine(DefaultRootFolderPath, "Backups");
+        string backupFolder = Path.GetFullPath(Path.Combine(DefaultRootFolderPath, "Backups"));
+
+        if (!IsPathWithinBaseDirectory(DefaultRootFolderPath, backupFolder))
+            return;
 
         if (!Directory.Exists(backupFolder))
             return;
@@ -163,7 +176,11 @@ public static class WidgetManager
 
         try
         {
-            string backupFolder = Path.Combine(DefaultRootFolderPath, "Backups");
+            string backupFolder = Path.GetFullPath(Path.Combine(DefaultRootFolderPath, "Backups"));
+
+            if (!IsPathWithinBaseDirectory(DefaultRootFolderPath, backupFolder))
+                return;
+
             Directory.CreateDirectory(backupFolder);
 
             string todayStamp = DateTime.Now.ToString("yyyy-MM-dd");
