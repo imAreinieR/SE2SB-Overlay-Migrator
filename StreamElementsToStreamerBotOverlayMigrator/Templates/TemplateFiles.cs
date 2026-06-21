@@ -297,7 +297,7 @@ client.on('Twitch.ChatMessage', ({ event, data }) => {
         };
   
     return {
-      'type':  e.type === 'Twitch' ? 'twitch' : e.type.toLowerCase(),
+      'type':  e.type === 'Twitch' ? 'twitch' : (e.type ?? '').toLowerCase(),
       'name':  e.name,
       'id':    id                  ?? e.name  ?? '',
       'gif':   false,
@@ -434,7 +434,12 @@ async function handleStreamElementsRequest(url, init) {
   for (const route of SE_ROUTES) {
     const match = pathname.match(route.pattern);
     if (match) {
-      return route.handler(match.groups ?? {}, { url, pathname, init });
+      try {
+        return await route.handler(match.groups ?? {}, { url, pathname, init });
+      } catch (error) {
+        console.error(`StreamElements route handler ""${route.name}"" failed for ""${pathname}"":`, error);
+        return {};
+      }
     }
   }
 
@@ -443,41 +448,72 @@ async function handleStreamElementsRequest(url, init) {
 }
 
 async function handleGetChannel({ channel }) {
-  const broadcasterInfo = await client.getBroadcaster();
-  const twitchChannelInfo = broadcasterInfo.platforms?.twitch
-    ?? {
-        broadcastUserId:   '1234',
-        broadcastUserName: channel,
-        isAffiliate:       false,
-        isPartner:         false
+  try {
+    const broadcasterInfo = await client.getBroadcaster();
+    
+    if (!broadcasterInfo?.platforms?.twitch) {
+      console.warn(`No Twitch platform info from StreamerBot for channel ""${channel}"", using fallback data`);
+    }
+    
+    const twitchChannelInfo = broadcasterInfo?.platforms?.twitch
+      ?? {
+          broadcastUserId:   '1234',
+          broadcastUserName: channel,
+          isAffiliate:       false,
+          isPartner:         false
+      };
+    
+    return {
+      'profile': {
+          'title':       channel + '\'s profile',
+          'headerImage': ''
+      },
+      '_id':             generateUuid(),
+      'providerId':      twitchChannelInfo.broadcastUserId ?? '1234',
+      'provider':        'twitch',
+      'avatar':          await fetchAvatarUrl(channel),
+      'username':        twitchChannelInfo.broadcastUserName ?? channel,
+      'alias':           twitchChannelInfo.broadcastUserName ?? channel,
+      'displayName':     twitchChannelInfo.broadcastUserName ?? channel,
+      'broadcasterType': twitchChannelInfo.isAffiliate
+          ? 'affiliate'
+          : twitchChannelInfo.isPartner
+              ? 'partner'
+              : '',
+      'suspended':       false,
+      'inactive':        false,
+      'isPartner':       true
     };
-
-  return {
-    'profile': {
-        'title':       channel + '\'s profile',
+  } catch (error) {
+    console.error(`Failed to get channel info for ""${channel}"":`, error);
+    return {
+      'profile': {
+        'title': channel + '\'s profile',
         'headerImage': ''
-    },
-    '_id':             generateUuid(),
-    'providerId':      twitchChannelInfo.broadcastUserId,
-    'provider':        'twitch',
-    'avatar':          fetchAvatarUrl(channel),
-    'username':        twitchChannelInfo.broadcastUserName,
-    'alias':           twitchChannelInfo.broadcastUserName,
-    'displayName':     twitchChannelInfo.broadcastUserName,
-    'broadcasterType': twitchChannelInfo.isAffiliate
-        ? 'affiliate'
-        : twitchChannelInfo.isPartner
-            ? 'partner'
-            : '',
-    'suspended':       false,
-    'inactive':        false,
-    'isPartner':       true
-  };
+      },
+      '_id':             generateUuid(),
+      'providerId':      '1234',
+      'provider':        'twitch',
+      'avatar':          '',
+      'username':        channel,
+      'alias':           channel,
+      'displayName':     channel,
+      'broadcasterType': '',
+      'suspended':       false,
+      'inactive':        false,
+      'isPartner':       true
+    };
+  }
 }
 
 async function handleGetCounter({ channelId, counter }) {
   try {
     const result = await client.getGlobal(counter);
+
+    if (!result) {
+      console.warn(`StreamerBot returned no result for counter ""${counter}""`);
+      return { id: counter, count: 0 };
+    }
 
     if (result.status !== 'ok') {
       console.warn(`StreamerBot returned error status for counter ""${counter}""`);
@@ -505,6 +541,7 @@ const SE_API = {
         const result = await client.getGlobal(keyName);
         return JSON.parse(result.variable?.value);
       } catch (error) {
+        console.error(`Failed to get/parse store value for key ""${keyName}"":`, error);
         return ''
       }
     },
