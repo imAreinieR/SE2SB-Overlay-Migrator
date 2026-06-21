@@ -343,14 +343,14 @@ client.on('Misc.GlobalVariableUpdated', ({ event, data }) => {
         service: 'twitch',
         data: {
           counter: data.name,
-          value: data.newValue
+          value:   data.newValue
         }
       });
     }
     else if (typeof data.newValue === 'string' && data.newValue.startsWith('{') && data.newValue.endsWith('}')) {
       dispatchSEEvent('kvstore:update', {
         service: 'twitch',
-        data: { // TODO: not certain about the property names
+        data: {
           key:   data.name,
           value: JSON.parse(data.newValue)
         }
