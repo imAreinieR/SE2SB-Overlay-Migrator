@@ -26,7 +26,7 @@ public static class TemplateFiles
 
     public const string ApiAndEventBridgeFile = @"// EventAndApiBridge - bridges StreamElements Widget with StreamerBot for both events and API calls"
         + "\n\n" + ApiInterceptorsFile
-        + "\n\n" + DecapiApiInterceptorFile
+        + "\n\n" + CachedApiInterceptorFile
         + "\n\n" + StreamElementsApiInterceptorFile
         + "\n\n" + StreamerBotEventHandlersFile
         + "\n\n" + StreamElementsSeApiFunctionFile;
@@ -447,24 +447,28 @@ globalThis.fetch = async function(input, init) {
   return _originalFetch(input, init);
 };";
 
-    public const string DecapiApiInterceptorFile = @"// DecapiApiInterceptor - intercepts and caches calls to Decapi API
-const _decapiCache = new Map();
-const DECAPI_TTL = 60 * 60 * 1000; // cache is valid for 60 mins
+    public const string CachedApiInterceptorFile = @"// CachedApiInterceptor - intercepts and caches calls to a set of URLs
+const _cache = new Map();
+const CACHE_TTL = 60 * 60 * 1000; // 60 mins
+const CACHED_URL_PREFIXES = [
+  'https://decapi.me/',
+  'https://unavatar.io/',
+];
 
 registerFetchInterceptor(
-  (url) => url.startsWith('https://decapi.me/'),
+  (url) => CACHED_URL_PREFIXES.some((prefix) => url.startsWith(prefix)),
   async (url, input, init, originalFetch) => {
     const now = Date.now();
-    const cached = _decapiCache.get(url);
+    const cached = _cache.get(url);
 
-    if (cached && (now - cached.timestamp) < DECAPI_TTL) {
-      return new Response(cached.value, { status: 200 });
+    if (cached && (now - cached.timestamp) < CACHE_TTL) {
+      return new Response(cached.value, { status: 200, headers: cached.headers });
     }
 
     const response = await originalFetch(input, init);
     if (response.ok) {
       const value = await response.text();
-      _decapiCache.set(url, { value, timestamp: now });
+      _cache.set(url, { value, timestamp: now, headers: response.headers });
       return new Response(value, { status: 200, headers: response.headers });
     }
 
