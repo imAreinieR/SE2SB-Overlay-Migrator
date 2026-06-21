@@ -37,27 +37,7 @@ const client = new StreamerbotClient({
   retries: -1,
   onConnect: async (data) => {
     console.log('Streamer.bot Client Connected!');
-    const broadcaster = await client.getBroadcaster();
-    const seEvent = new CustomEvent('onWidgetLoad', {
-      detail: {
-        session:  {},
-        recents:  {},
-        currency: {},
-        channel: {
-          username:   broadcaster.platforms['twitch'].broadcastUser,
-          apiToken:   '',
-          id:         '', // this is streamelements user id
-          providerId: broadcaster.platforms['twitch'].broadcastUserId,
-          avatar:     fetchAvatarUrl(broadcaster.platforms['twitch'].broadcastUser),
-        },
-        fieldData: CONFIG,
-        overlay: {
-          isEditorMode: false,
-          muted:        false,
-        }
-      }
-    });
-    window.dispatchEvent(seEvent);
+    sendOnWidgetLoadEvent();
   },
   onDisconnect: (data) => {
     console.log('Streamer.bot Client Disconnected!');
@@ -66,6 +46,30 @@ const client = new StreamerbotClient({
     console.error('Streamer.bot Client Error: ', data);
   }
 });
+
+function sendOnWidgetLoadEvent() {
+  const broadcaster = await client.getBroadcaster();
+  const seEvent = new CustomEvent('onWidgetLoad', {
+    detail: {
+      session:  {},
+      recents:  {},
+      currency: {},
+      channel: {
+        username:   broadcaster.platforms['twitch'].broadcastUser,
+        apiToken:   '', // this is StreamElements API token
+        id:         '', // this is Streamelements user id
+        providerId: broadcaster.platforms['twitch'].broadcastUserId,
+        avatar:     fetchAvatarUrl(broadcaster.platforms['twitch'].broadcastUser),
+      },
+      fieldData: CONFIG,
+      overlay: {
+        isEditorMode: false,
+        muted:        false,
+      }
+    }
+  });
+  window.dispatchEvent(seEvent);
+}
 
 function generateUuid() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -439,19 +443,32 @@ async function handleStreamElementsRequest(url, init) {
 }
 
 async function handleGetChannel({ channel }) {
+  const broadcasterInfo = await client.getBroadcaster();
+  const twitchChannelInfo = broadcasterInfo.platforms?.twitch
+    ?? {
+        broadcastUserId:   '1234',
+        broadcastUserName: channel,
+        isAffiliate:       false,
+        isPartner:         false
+    };
+
   return {
     'profile': {
         'title':       channel + '\'s profile',
         'headerImage': ''
     },
-    '_id':             generateUuid(),
-    'providerId':      '123',
+    '_id':             generateUuid()
+    'providerId':      twitchChannelInfo.broadcastUserId,
     'provider':        'twitch',
     'avatar':          fetchAvatarUrl(channel),
-    'username':        channel,
-    'alias':           channel,
-    'displayName':     channel, //TODO
-    'broadcasterType': 'affiliate', //TODO
+    'username':        twitchChannelInfo.broadcastUserName,
+    'alias':           twitchChannelInfo.broadcastUserName,
+    'displayName':     twitchChannelInfo.broadcastUserName,
+    'broadcasterType': twitchChannelInfo.isAffiliate
+        ? 'affiliate'
+        : twitchChannelInfo.isPartner
+            ? 'partner'
+            : '',
     'suspended':       false,
     'inactive':        false,
     'isPartner':       true
@@ -513,8 +530,13 @@ const SE_API = {
     throw new Error(""SE_API.resumeQueue is not yet implemented."");
   },
   setField(key, value, reload = true) {
-    console.error(""SE_API.setField is not yet implemented."");
-    throw new Error(""SE_API.setField is not yet implemented."");
-  }
+    try {
+      CONFIG[key] = value;
+      if (reload) {
+         sendOnWidgetLoadEvent();
+      }
+    } catch (err) {
+      console.error(`Failed to set field ""${key}"" with value ""${value}"":`, err);
+    }
 };";
 }
