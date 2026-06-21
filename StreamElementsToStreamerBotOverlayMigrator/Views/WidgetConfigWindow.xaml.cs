@@ -7,11 +7,11 @@ using StreamElementsToStreamerBotOverlayMigrator.Managers;
 using StreamElementsToStreamerBotOverlayMigrator.Services;
 using StreamElementsToStreamerBotOverlayMigrator.Templates;
 using StreamElementsToStreamerBotOverlayMigrator.Themes;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Channels;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -69,6 +69,12 @@ public partial class WidgetConfigWindow: Window
         InitializeWebViewAsync();
     }
 
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        TeardownWidget();
+        base.OnClosing(e);
+    }
+
     private async void InitializeWebViewAsync()
     {
         try
@@ -112,7 +118,9 @@ public partial class WidgetConfigWindow: Window
         _fileNameAndContents.Clear();
 
         string dataJson = BuildDataJson();
-        _fileNameAndContents["streamerBotEvents.js"] = TemplateFiles.StreamerBotEventHandlersFile;
+        _fileNameAndContents["streamerBotApiAndEventBridge.js"] = DummyWidgetOnLoadEvent()
+            + Environment.NewLine
+            + TemplateFiles.ApiAndEventBridgeFile;
 
         _widget
             .Files
@@ -697,7 +705,7 @@ public partial class WidgetConfigWindow: Window
             "follower-latest",
             new
             {
-                avatar      = string.Empty,
+                avatar      = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName = SimulatedUsername,
                 username    = SimulatedUsername,
                 name        = SimulatedUsername,
@@ -714,7 +722,7 @@ public partial class WidgetConfigWindow: Window
             new
             {
                 amount      = 1,
-                avatar      = string.Empty,
+                avatar      = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName = SimulatedUsername,
                 username    = SimulatedUsername,
                 name        = SimulatedUsername,
@@ -734,7 +742,7 @@ public partial class WidgetConfigWindow: Window
             new
             {
                 amount      = 67,
-                avatar      = string.Empty,
+                avatar      = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName = SimulatedUsername,
                 username    = SimulatedUsername,
                 name        = SimulatedUsername,
@@ -754,7 +762,7 @@ public partial class WidgetConfigWindow: Window
             new
             {
                 amount                = 1,
-                avatar                = string.Empty,
+                avatar                = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName           = SimulatedUsername,
                 username              = SimulatedUsername,
                 name                  = SimulatedUsername,
@@ -778,7 +786,7 @@ public partial class WidgetConfigWindow: Window
             new
             {
                 amount                = 67,
-                avatar                = string.Empty,
+                avatar                = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName           = SimulatedUsername,
                 username              = SimulatedUsername,
                 name                  = SimulatedUsername,
@@ -802,11 +810,44 @@ public partial class WidgetConfigWindow: Window
             new
             {
                 amount      = 67,
-                avatar      = string.Empty,
+                avatar      = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName = SimulatedUsername,
                 username    = SimulatedUsername,
                 name        = SimulatedUsername,
                 providerId  = SimulatedUserId,
+            }
+        );
+    }
+
+    private async void SimulateChannelPoints_Click(object sender, RoutedEventArgs e)
+    {
+        DateTime now = DateTime.UtcNow;
+
+        await DispatchWidgetEvent
+        (
+            "event",
+            new
+            {
+                type               = "channelPointsRedemption",
+                provider           = "twitch",
+                channel            = SimulatedUserId,
+                flagged            = false,
+                createdAt          = DateTimeForJavascriptCode(now),
+                data               = new
+                {
+                    amount      = 500,
+                    username    = SimulatedUsername,
+                    displayName = SimulatedUsername,
+                    providerId  = SimulatedUserId,
+                    redemption  = "Headpats",
+                    quantity    = 0,
+                    avatar      = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
+                },
+                _id                = GenerateGuidForJavascriptCode(),
+                expiresAt          = DateTimeForJavascriptCode(now.AddDays(28)),
+                updatedAt          = DateTimeForJavascriptCode(now),
+                activityId         = GenerateGuidForJavascriptCode(),
+                sessionEventsCount = 1,
             }
         );
     }
@@ -834,6 +875,15 @@ public partial class WidgetConfigWindow: Window
         {
             SetStatus($"Simulate failed: {exception.Message}", error: true);
         }
+    }
+
+    private void TeardownWidget()
+    {
+        if (!_webViewReady)
+            return;
+
+        PreviewWebView.Source = new Uri("about:blank");
+        PreviewWebView.Dispose();
     }
 
     #endregion SE Event Simulation Event Handlers
@@ -1080,6 +1130,40 @@ public partial class WidgetConfigWindow: Window
                 ? AppColors.StatusSuccess
                 : AppColors.StatusDefault;
     }
+
+    private string GenerateGuidForJavascriptCode()
+        => Guid.NewGuid().ToString("N");
+
+    private string DateTimeForJavascriptCode(DateTime datetime)
+        => datetime.ToUniversalTime().ToString("o");
+
+    private string JavascriptFunctionCallForAvatarUrl(string username)
+        => $"fetchAvatarUrl('{username}')";
+
+    private string DummyWidgetOnLoadEvent()
+        => $@"const dummySeEvent = new CustomEvent('onWidgetLoad', {{
+               detail: {{
+                   session:  {{}},
+                   recents:  {{}},
+                   currency: {{}},
+                   channel:
+                   {{
+                       username:   '{SimulatedUsername}',
+                       apiToken:   '',
+                       id:         '',
+                       providerId: '{SimulatedUserId}',
+                       avatar:     {JavascriptFunctionCallForAvatarUrl(SimulatedUsername)},
+                   }},
+                   fieldData: {BuildDataJson()},
+                   overlay:
+                   {{
+                       isEditorMode: false,
+                       muted:        false,
+                   }}
+               }}
+           }});
+           console.log('[LIVE-PREVIEW] Dispatching dummy onWidgetLoad event...');
+           window.dispatchEvent(dummySeEvent);";
 
     #endregion Helpers
 }

@@ -77,8 +77,32 @@ flowchart TB
 - Adjust configuration settings and see your changes in the live preview.
 - Test your widget with simulated events without needing to trigger real Twitch events.
 
-### StreamerBot Event Bridge
-- A `streamerBotEvents.js` file is generated automatically alongside your widget files. This bridges StreamerBot's event system to your overlay so it can respond to stream events (follows, subs, etc.) without any manual wiring.
+### StreamElements -> StreamerBot API and Event Bridge
+- A `streamerBotApiAndEventBridge.js` file is generated automatically alongside your widget files.
+- This reroutes calls to the [SE API](https://dev.streamelements.com/docs/api-docs) to the [StreamerBot API](https://docs.streamer.bot/api/websocket/requests) and listens for StreamerBot events, re-emitting them as SE events that your widget can understand.
+- It also uses the [Decapi API](https://docs.decapi.me/) to supplement calls with data from Twitch and caches responses to minimize duplicate calls.
+
+**How the bridge works under the hood:**
+- **API interceptors** transparently catches your widget's existing `fetch()` calls and reroutes them, so the widget's original code doesn't need to change:
+  - Calls to the StreamElements API (e.g. channel info, counters) are answered locally using live data from StreamerBot.
+  - Calls to the `Decapi API` and `unavatar.io` are cached for an hour to cut down on repeat network requests to help avoid hitting rate limits.
+- **`SE_API`** reimplements the subset of the `window.SE_API` helper object that StreamElements widgets commonly use (e.g. `SE_API.store`, `SE_API.counters`, `SE_API.sanitize`), backed by StreamerBot's global variables instead of StreamElements' cloud storage.
+- **Event listeners** subscribe to StreamerBot's Twitch events and translate each one into the matching StreamElements event your widget already knows how to handle:
+
+  | StreamerBot Event | Simulated StreamElements Event |
+  |---|---|
+  | Follow | `follower-latest` |
+  | Subscription (new) | `subscriber-latest` |
+  | Subscription (resub) | `subscriber-latest` |
+  | Gift Sub (individual) | `subscriber-latest` |
+  | Gift Bomb (community) | `subscriber-latest` |
+  | Cheer (bits) | `cheer-latest` |
+  | Raid | `raid-latest` |
+  | Reward Redemption | `event` (`channelPointsRedemption`) |
+  | Chat Message | `message` |
+  | Chat Message Deleted | `delete-message` |
+
+  > Hosting, tips, and a few other legacy StreamElements events aren't supported, as they're either no longer part of Twitch (e.g. hosting) or have no StreamerBot equivalent.
 
 ### Simple File Imports
 - Import `.html`, `.js`, `.css`, `.json` files or even an entire folder or `.zip` file.
@@ -189,7 +213,7 @@ Documents/
         ├── index.js
         ├── index.css
         ├── config.js
-        └── streamerBotEvents.js
+        └── streamerBotApiAndEventBridge.js
 ```
 
 ---

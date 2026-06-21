@@ -2,18 +2,25 @@
 using StreamElementsToStreamerBotOverlayMigrator.Data;
 using StreamElementsToStreamerBotOverlayMigrator.DataServices;
 using StreamElementsToStreamerBotOverlayMigrator.Services;
-using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 
 namespace StreamElementsToStreamerBotOverlayMigrator.Managers;
 
 public static class WidgetManager
 {
-    private static readonly string _connectionString = $"Data Source={Path.Combine(AppContext.BaseDirectory, "database.db")}";
+    private const           int    MaxDatabaseBackupCount = 5;
+    private const           string DatabaseFileExtension  = ".db";
+
+    private static readonly string DefaultRootFolderPath  = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "imA-SB-Widgets");
+    private static readonly string DatabaseFilePath       = Path.Combine(AppContext.BaseDirectory, "database.db");
+    private static readonly string ConnectionString       = $"Data Source={DatabaseFilePath}";
 
     static WidgetManager()
     {
-        using var connection = new SqliteConnection(_connectionString);
+        RestoreDatabaseBackupIfNeeded();
+
+        using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 
         WidgetManagerDb.CreateTableIfNotExists(connection);
@@ -22,7 +29,7 @@ public static class WidgetManager
 
     public static List<Widget> GetAll()
     {
-        using var connection = new SqliteConnection(_connectionString);
+        using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 
         List<Widget> widgets = WidgetManagerDb.GetAll(connection);
@@ -38,7 +45,7 @@ public static class WidgetManager
 
     public static Widget? GetByName(string name)
     {
-        using var connection = new SqliteConnection(_connectionString);
+        using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 
         Widget? widget = WidgetManagerDb.GetByName(connection, name);
@@ -54,7 +61,7 @@ public static class WidgetManager
 
     public static void Save(Widget widget)
     {
-        using var connection = new SqliteConnection(_connectionString);
+        using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 
         if (widget.Id == 0)
@@ -104,7 +111,7 @@ public static class WidgetManager
         if (widget.Id == 0)
             return;
 
-        using var connection = new SqliteConnection(_connectionString);
+        using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 
         foreach (WidgetFile file in widget.Files)
@@ -122,4 +129,68 @@ public static class WidgetManager
     
     public static bool GenerateExportFiles(Widget widget, out string errorMessage)
         => WidgetFileImportAndExportService.GenerateExportFilesForWidget(widget, out errorMessage);
+
+    public static void RestoreDatabaseBackupIfNeeded()
+    {
+        if (File.Exists(DatabaseFilePath))
+            return;
+
+        string backupFolder = Path.Combine(DefaultRootFolderPath, "Backups");
+
+        if (!Directory.Exists(backupFolder))
+            return;
+
+        string? latestBackup = Directory
+            .EnumerateFiles(backupFolder, $"*{DatabaseFileExtension}")
+            .OrderByDescending(file => file)
+            .FirstOrDefault();
+
+        if (latestBackup == null)
+            return;
+
+        try
+        {
+            File.Copy(latestBackup, DatabaseFilePath);
+        }
+        catch (Exception)
+        {}
+    }
+
+    public static void CreateDatabaseBackupIfNeeded()
+    {
+        if (!File.Exists(DatabaseFilePath))
+            return;
+
+        try
+        {
+            string backupFolder = Path.Combine(DefaultRootFolderPath, "Backups");
+            Directory.CreateDirectory(backupFolder);
+
+            string todayStamp = DateTime.Now.ToString("yyyy-MM-dd");
+
+            bool backupExistsForToday = Directory
+                .EnumerateFiles(backupFolder, $"*{DatabaseFileExtension}")
+                .Any(file => Path.GetFileName(file).StartsWith(todayStamp));
+
+            if (backupExistsForToday)
+                return;
+
+            string backupFileName = $"{todayStamp}{DatabaseFileExtension}";
+            string backupPath = Path.Combine(backupFolder, backupFileName);
+            File.Copy(DatabaseFilePath, backupPath, true);
+
+            List<string> allBackups = Directory
+                .EnumerateFiles(backupFolder, $"*{DatabaseFileExtension}")
+                .OrderBy(file => file)
+                .ToList();
+
+            while (allBackups.Count > MaxDatabaseBackupCount)
+            {
+                File.Delete(allBackups[0]);
+                allBackups.RemoveAt(0);
+            }
+        }
+        catch (Exception)
+        {}
+    }
 }

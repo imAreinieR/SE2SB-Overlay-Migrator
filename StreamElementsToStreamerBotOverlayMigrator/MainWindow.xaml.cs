@@ -5,6 +5,7 @@ using StreamElementsToStreamerBotOverlayMigrator.Managers;
 using StreamElementsToStreamerBotOverlayMigrator.Services;
 using StreamElementsToStreamerBotOverlayMigrator.Themes;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -42,6 +43,12 @@ public partial class MainWindow: Window
             WidgetList.SelectedItem = _widgets.First();
         else
             UpdateEmptyState();
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        WidgetManager.CreateDatabaseBackupIfNeeded();
+        base.OnClosing(e);
     }
 
     #region UI Elements
