@@ -106,7 +106,31 @@ async function setGlobal(variableName, variableValue, persistVariable = true) {
   }
 }
 
-function dispatchSEEvent(listener, eventData) {
+// queue logic for withholding events based on widget duration
+const SKIPPABLE_LISTENERS = [
+  'bot:counter',
+  'event',
+  'event:test',
+  'event:skip',
+  'alertService:toggleSound',
+  'message',
+  'delete-message',
+  'delete-messages',
+  'kvstore:update',
+];
+
+function resolveWidgetDuration() {
+  const raw = CONFIG?.widgetDuration;
+  const value = (raw && typeof raw === 'object') ? raw.value : raw;
+  const seconds = Number(value);
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : 0;
+}
+
+const _eventQueue = [];
+let _queueBusy = false;
+let _queueTimer = null;
+
+function _dispatchNow(listener, eventData) {
   const seEvent = new CustomEvent('onEventReceived', {
     detail: {
       listener: listener,
@@ -114,6 +138,51 @@ function dispatchSEEvent(listener, eventData) {
     }
   });
   window.dispatchEvent(seEvent);
+}
+
+function _drainQueue() {
+  const widgetDuration = resolveWidgetDuration();
+
+  if (_eventQueue.length === 0) {
+    _queueBusy = false;
+    return;
+  }
+
+  const { listener, eventData } = _eventQueue.shift();
+  _queueBusy = true;
+  _dispatchNow(listener, eventData);
+
+  // Hold for up to widgetDuration seconds, or until resumeQueue() fires
+  // early, whichever comes first.
+  clearTimeout(_queueTimer);
+  _queueTimer = setTimeout(_drainQueue, widgetDuration * 1000);
+}
+
+function resumeQueue() {
+  clearTimeout(_queueTimer);
+  _drainQueue();
+}
+
+function dispatchSEEvent(listener, eventData) {
+  const widgetDuration = resolveWidgetDuration();
+
+  // No widgetDuration configured (0/null/missing): behave exactly as
+  // before, every event dispatches immediately, in order, no holding.
+  if (widgetDuration === 0) {
+    _dispatchNow(listener, eventData);
+    return;
+  }
+
+  if (SKIPPABLE_LISTENERS.indexOf(listener) !== -1) {
+    _dispatchNow(listener, eventData);
+    return;
+  }
+
+  _eventQueue.push({ listener, eventData });
+
+  if (!_queueBusy) {
+    _drainQueue();
+  }
 }
 
 // follower-latest - New Follower
@@ -569,8 +638,7 @@ const SE_API = {
     };
   },
   resumeQueue() {
-    console.error(""SE_API.resumeQueue is not yet implemented."");
-    throw new Error(""SE_API.resumeQueue is not yet implemented."");
+    resumeQueue();
   },
   setField(key, value, reload = true) {
     try {
