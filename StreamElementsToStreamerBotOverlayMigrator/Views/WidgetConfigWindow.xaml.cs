@@ -102,7 +102,6 @@ public partial class WidgetConfigWindow: Window
             PreviewWebView.CoreWebView2.WebResourceRequested += OnWebResourceRequested;
 
             ReloadPreview();
-            await InitializeWidget();
         }
         catch (Exception exception)
         {
@@ -119,7 +118,9 @@ public partial class WidgetConfigWindow: Window
         _fileNameAndContents.Clear();
 
         string dataJson = BuildDataJson();
-        _fileNameAndContents["streamerBotApiAndEventBridge.js"] = TemplateFiles.ApiAndEventBridgeFile;
+        _fileNameAndContents["streamerBotApiAndEventBridge.js"] = DummyWidgetOnLoadEvent()
+            + Environment.NewLine
+            + TemplateFiles.ApiAndEventBridgeFile;
 
         _widget
             .Files
@@ -876,46 +877,6 @@ public partial class WidgetConfigWindow: Window
         }
     }
 
-    private async Task InitializeWidget()
-    {
-        if (!_webViewReady)
-            return;
-        try
-        {
-            string fieldDataJson = BuildDataJson();
-            await PreviewWebView.ExecuteScriptAsync
-            (
-                $@"const dummySeEvent = new CustomEvent('onWidgetLoad', {{
-                    detail: {{
-                        session:  {{}},
-                        recents:  {{}},
-                        currency: {{}},
-                        channel:
-                        {{
-                            username:   '{SimulatedUsername}',
-                            apiToken:   '',
-                            id:         '',
-                            providerId: '{SimulatedUserId}',
-                            avatar:     {JavascriptFunctionCallForAvatarUrl(SimulatedUsername)},
-                        }},
-                        fieldData: {fieldDataJson},
-                        overlay:
-                        {{
-                            isEditorMode: false,
-                            muted:        false,
-                        }}
-                    }}
-                }});
-                console.log('[LIVE-PREVIEW] Dispatching dummy onWidgetLoad event...');
-                window.dispatchEvent(dummySeEvent);"
-            );
-        }
-        catch (Exception exception)
-        {
-            SetStatus($"InitializeWidget failed: {exception.Message}", error: true);
-        }
-    }
-
     private void TeardownWidget()
     {
         if (!_webViewReady)
@@ -1178,6 +1139,31 @@ public partial class WidgetConfigWindow: Window
 
     private string JavascriptFunctionCallForAvatarUrl(string username)
         => $"fetchAvatarUrl('{username}')";
+
+    private string DummyWidgetOnLoadEvent()
+        => $@"const dummySeEvent = new CustomEvent('onWidgetLoad', {{
+               detail: {{
+                   session:  {{}},
+                   recents:  {{}},
+                   currency: {{}},
+                   channel:
+                   {{
+                       username:   '{SimulatedUsername}',
+                       apiToken:   '',
+                       id:         '',
+                       providerId: '{SimulatedUserId}',
+                       avatar:     {JavascriptFunctionCallForAvatarUrl(SimulatedUsername)},
+                   }},
+                   fieldData: {BuildDataJson()},
+                   overlay:
+                   {{
+                       isEditorMode: false,
+                       muted:        false,
+                   }}
+               }}
+           }});
+           console.log('[LIVE-PREVIEW] Dispatching dummy onWidgetLoad event...');
+           window.dispatchEvent(dummySeEvent);";
 
     #endregion Helpers
 }
