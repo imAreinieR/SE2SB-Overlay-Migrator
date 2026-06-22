@@ -83,8 +83,8 @@ flowchart TB
 - It also uses the [Decapi API](https://docs.decapi.me/) to supplement calls with data from Twitch and caches responses to minimize duplicate calls.
 
 **How the bridge works under the hood:**
-- **API interceptors** transparently catches your widget's existing `fetch()` calls and reroutes them, so the widget's original code doesn't need to change:
-  - Calls to the StreamElements API (e.g. channel info, counters) are answered locally using live data from StreamerBot.
+- **API interceptors** catches your widget's `fetch()` calls and reroutes them so the widget's original code doesn't need to change:
+  - Calls to the StreamElements API (e.g. channel info, counters) are rerouted to the StreamerBot WebSocket API.
   - Calls to the `Decapi API` and `unavatar.io` are cached for an hour to cut down on repeat network requests to help avoid hitting rate limits.
 - **`SE_API`** reimplements the subset of the `window.SE_API` helper object that StreamElements widgets commonly use (e.g. `SE_API.store`, `SE_API.counters`, `SE_API.sanitize`), backed by StreamerBot's global variables instead of StreamElements' cloud storage.
 - **Event listeners** subscribe to StreamerBot's Twitch events and translate each one into the matching StreamElements event your widget already knows how to handle:
@@ -106,7 +106,7 @@ flowchart TB
 
 - **The generated file includes the following third-party scripts at runtime:**
   - [jQuery](https://jquery.com/) — DOM utilities used by many SE widgets.
-  - [StreamerBot Client](https://github.com/StreamerBot/client) — official JS client for the StreamerBot WebSocket API.
+  - [StreamerBot Client](https://github.com/StreamerBot/client) — official JS client for the StreamerBot WebSocket Server and API.
   - [profanity-cleaner](https://www.npmjs.com/package/profanity-cleaner) — used by the `SE_API.sanitize` implementation to filter chat message content.
 
 ### Simple File Imports
@@ -118,6 +118,7 @@ flowchart TB
 
 ### Misc
 - Easily check for newer version and update!
+- Automatic backup of your data locally!
 - Switch between light and dark themes.
 
 ---
@@ -148,9 +149,9 @@ The WebSocket Server is now running.
 
 ## Importing `SetGlobal` StreamerBot Action
 
-> **Prerequisite:** This step is required for `SE_API.store.set()` to work correctly. The StreamerBot WebSocket API does not currently support setting global variables directly from the client so we need to setup a custom Action for the client to call instead.
+> **Prerequisite:** The StreamerBot WebSocket API does not currently support setting global variables directly from the client so we need to setup a custom Action for the client to call instead.
 
-A pre-built StreamerBot Action is included with this tool to handle global variable writes from the bridge. You only need to import it once — it will be shared by all widgets.
+A SetGlobal Action is required for `SE_API.store.set()` to work correctly. You will only need to import this once.
 
 ### Step 1 — Open the Import dialog
 In StreamerBot, navigate to **Actions** and right-click anywhere in the actions list. Select **Import**.
