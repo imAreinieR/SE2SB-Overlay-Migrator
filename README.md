@@ -1,14 +1,14 @@
 # SE2SB Overlay Migrator
 
-A desktop utility for migrating StreamElements overlay widgets to [StreamerBot](https://streamer.bot/), making your existing overlays compatible with StreamerBot's event system without having to rebuild them from scratch.
+A desktop utility for migrating StreamElements overlay widgets to [StreamerBot](https://streamer.bot/) - keep your overlays functional without rebuilding them from scratch!
 
 ---
 
 ## Overview
 
-StreamElements hosts overlays and services them with stream events out of the box. StreamerBot can service apps with events too, but has no native overlay system of its own.
+StreamElements hosts overlays and services them with stream events out of the box. StreamerBot can drive apps with events too, but has no native overlay system of its own.
 
-This tool migrates your existing SE overlays so they live locally on your machine and can be served by StreamerBot instead — keeping your overlays working without rebuilding them from scratch.
+This tool converts your existing SE overlays to run locally on your machine, wiring them up to StreamerBot instead.
 
 ![Application UI - Main Screen](Images/application_ui_1.png)
 
@@ -104,17 +104,17 @@ flowchart TB
 
   > Hosting, tips, and a few other legacy StreamElements events aren't supported, as they're either no longer part of Twitch (e.g. hosting) or have no StreamerBot equivalent.
 
-- **The generated file includes the following third-party scripts at runtime:**
+> **Note — Third-party scripts:** The generated bridge file imports the following libraries at runtime:
   - [jQuery](https://jquery.com/) — DOM utilities used by many SE widgets.
   - [StreamerBot Client](https://github.com/StreamerBot/client) — official JS client for the StreamerBot WebSocket Server and API.
   - [profanity-cleaner](https://www.npmjs.com/package/profanity-cleaner) — used by the `SE_API.sanitize` implementation to filter chat message content.
 
 ### Simple File Imports
 - Import `.html`, `.js`, `.css`, `.json` files or even an entire folder or `.zip` file.
-- Warns if the required files are missing or if duplicate files exist.
+- Warns if `.html` is missing or if more than one file shares the same extension.
 
 ### One-Click!
-- Just one click to copy URL and add to OBS as a browser source.
+- Just one click to copy the URL and add to OBS as a browser source.
 
 ### Misc
 - Easily check for newer version and update!
@@ -149,7 +149,7 @@ The WebSocket Server is now running.
 
 ## Importing `SetGlobal` StreamerBot Action
 
-> **Prerequisite:** The StreamerBot WebSocket API does not currently support setting global variables directly from the client so we need to setup a custom Action for the client to call instead.
+> **Prerequisite:** This Action is required for widgets that use `SE_API.store.set()` to save values. Without it, those calls will silently do nothing.
 
 A SetGlobal Action is required for `SE_API.store.set()` to work correctly. You will only need to import this once.
 
@@ -157,7 +157,7 @@ A SetGlobal Action is required for `SE_API.store.set()` to work correctly. You w
 In StreamerBot, navigate to **Actions** and right-click anywhere in the actions list. Select **Import**.
 
 ### Step 2 — Import the Action
-Click the **Import** button and paste in the following and click **Import**.
+Paste the import string below into the text field, then click **Import**.
 
 **Import string:**
 ```
@@ -223,13 +223,13 @@ If the warning banner appears, follow its instructions (e.g. add the missing HTM
 ### Step 4 — Save your work
 Click **Save**.
 
-### Step 6 — Edit Configuration (optional)
+### Step 5 — Edit Configuration (optional)
 Click **Edit Configuration**. Configure the widget settings as needed.
 
-### Step 7 — Generate
+### Step 6 — Generate
 Click **Generate**. The tool writes the processed files to the path shown under **Deploy Location**.
 
-### Step 8 — Add to OBS
+### Step 7 — Add to OBS
 Copy the URL and create a local browser source in OBS pointing to it.
 ![OBS Browser Source Settings](Images/obs_browser_source.png)
 
@@ -252,6 +252,6 @@ Documents/
 
 ## Notes
 
-- **Multiple `.json` files are allowed** — the tool accepts more than one `.json` file, unlike `.html`, `.css`, and `.js` where only one of each is permitted.
 - **SE template variables** — `{{variableName}}` and `{variableName}` placeholders in your HTML and CSS are replaced at generation time using values from your `data.json`.
 - **Protocol-relative URLs** — Any `src="//..."` or `href="//..."` references in your HTML are automatically upgraded to `https://` to avoid mixed-content issues.
+- **Multiple `.json` files are allowed** — the tool accepts more than one `.json` file, unlike `.html`, `.css`, and `.js` where only one of each is permitted.
