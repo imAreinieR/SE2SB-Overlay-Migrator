@@ -1,0 +1,36 @@
+{
+  "displayDuration": {
+    "type": "number",
+    "label": "Alert display duration (seconds)",
+    "value": 5
+  },
+  "fontName": {
+    "type": "text",
+    "label": "Font name (from Google Fonts)",
+    "value": "Montserrat"
+  },
+  "fontSize": {
+    "type": "number",
+    "label": "Font size (px)",
+    "value": 18
+  },
+  "fontColor": {
+    "type": "colorpicker",
+    "label": "Font color",
+    "value": "rgb(255, 255, 255)"
+  },
+  "backgroundColor": {
+    "type": "colorpicker",
+    "label": "Background color",
+    "value": "rgba(36, 6, 73, 0.85)"
+  },
+  "iconColor": {
+    "type": "colorpicker",
+    "label": "Icon color",
+    "value": "rgb(255, 255, 255)"
+  },
+  "widgetDuration":{
+    "type": "hidden",
+    "value": 5
+  }
+}
