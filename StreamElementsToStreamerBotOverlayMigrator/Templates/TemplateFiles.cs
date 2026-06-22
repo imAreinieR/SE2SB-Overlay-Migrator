@@ -9,9 +9,9 @@ public static class TemplateFiles
   <!-- Widget Stylesheet -->
   <link rel=""stylesheet"" type=""text/css"" href=""index.css"">
   <!-- Widget Scripts -->
-  <script src=""https://code.jquery.com/jquery-4.0.0.js""></script>
+  <script src=""https://code.jquery.com/jquery-4.0.0.slim.min.js"" integrity=""sha256-8DGpv13HIm+5iDNWw1XqxgFB4mj+yOKFNb+tHBZOowc="" crossorigin=""anonymous""></script>
   <script src=""https://cdn.jsdelivr.net/npm/@streamerbot/client/dist/streamerbot-client.js""></script>
-  <script src=""https://cdn.jsdelivr.net/npm/profanity-cleaner@latest""></script>
+  <script src=""https://cdn.jsdelivr.net/npm/profanity-cleaner@0.0.3/dist/profanity-cleaner.min.js""></script>
   <script src=""config.js""></script>
   <script src=""index.js""></script>
   <script src=""streamerBotApiAndEventBridge.js""></script>
@@ -90,9 +90,37 @@ async function fetchAvatarUrl(username) {
   }
 }
 
+function validateVariableName(name, context = 'unknown') {
+  if (typeof name !== 'string') {
+    throw new Error(`[${context}] rejected non-string name`);
+  }
+  if (name === '__proto__' || name === 'constructor' || name === 'prototype') {
+    throw new Error(`[${context}] rejected unsafe name`);
+  }
+  if (name.length === 0 || name.length > 128) {
+    throw new Error(`[${context}] rejected variable name with invalid length`);
+  }
+  if (!/^[a-zA-Z0-9_\-.]+$/.test(name)) {
+    throw new Error(`[${context}] rejected variable name with illegal characters`);
+  }
+
+  return true;
+}
+
+function validateVariableValue(value, context = 'unknown') {
+  if (typeof value === 'string') {
+    throw new Error(`[${context}] rejected string value`);
+  }
+
+  return true;
+}
+
 async function setGlobal(variableName, variableValue, persistVariable = true) {
   try {
-    const test = await client.doAction(
+    if (!validateVariableName(variableName, 'setGlobal') || !validateVariableValue(variableValue, 'setGlobal'))
+      return;
+    
+    const response = await client.doAction(
         action = { name: 'SetGlobal' },
         args = {
             name: variableName,
@@ -630,10 +658,20 @@ async function handleGetCounter({ channelId, counter }) {
 const SE_API = {
   store: {
     set(keyName, object) {
-      setGlobal(keyName, JSON.stringify(object));
+      try {
+        if (!validateVariableName(keyName, 'store.set'))
+          return;
+
+        setGlobal(keyName, JSON.stringify(object));
+      } catch (error) {
+        console.error(`Failed to set store value for key ""${keyName}"":`, error);
+      }
     },
     async get(keyName) {
-      try{
+      try {
+        if (!validateVariableName(keyName, 'store.get'))
+          return '';
+
         const result = await client.getGlobal(keyName);
         return JSON.parse(result.variable?.value);
       } catch (error) {
@@ -644,6 +682,8 @@ const SE_API = {
   },
   counters: {
     async get(counterName) {
+      if (!validateVariableName(counterName, 'counters.get'))
+        return { id: counterName, count: 0 };
       return handleGetCounter({ channelId: null, counter: counterName });
     },
   },
@@ -669,12 +709,15 @@ const SE_API = {
   },
   setField(key, value, reload = true) {
     try {
+      if (!validateVariableName(key, 'setField'))
+        return;
+
       CONFIG[key] = value;
       if (reload) {
          sendOnWidgetLoadEvent();
       }
-    } catch (err) {
-      console.error(`Failed to set field ""${key}"" with value ""${value}"":`, err);
+    } catch (error) {
+      console.error(`Failed to set field ""${key}"" with value ""${value}"":`, error);
     }
   }
 };";
