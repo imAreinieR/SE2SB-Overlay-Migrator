@@ -80,7 +80,7 @@ function generateUuid() {
 
 async function fetchAvatarUrl(username) {
   try {
-    const response = await fetch(`https://decapi.me/twitch/avatar/${username}`);
+    const response = await fetch(`https://decapi.me/twitch/avatar/${encodeURIComponent(username)}`);
     if (!response.ok)
         return '';
     return await response.text();
@@ -108,8 +108,8 @@ function validateVariableName(name, context = 'unknown') {
 }
 
 function validateVariableValue(value, context = 'unknown') {
-  if (typeof value === 'string') {
-    throw new Error(`[${context}] rejected string value`);
+  if (typeof value !== 'string') {
+    throw new Error(`[${context}] rejected non-string value`);
   }
 
   return true;
@@ -117,8 +117,8 @@ function validateVariableValue(value, context = 'unknown') {
 
 async function setGlobal(variableName, variableValue, persistVariable = true) {
   try {
-    if (!validateVariableName(variableName, 'setGlobal') || !validateVariableValue(variableValue, 'setGlobal'))
-      return;
+    validateVariableName(variableName, 'setGlobal');
+    validateVariableValue(variableValue, 'setGlobal');
     
     const response = await client.doAction(
         action = { name: 'SetGlobal' },
@@ -364,7 +364,9 @@ client.on('Twitch.RewardRedemption', ({ event, data }) => {
 
 // bot:counter & kvstore:update - Updated global variables for counters and key-value pairs
 client.on('Misc.GlobalVariableUpdated', ({ event, data }) => {
-  try{
+  try {
+    validateVariableName(data.name, 'Misc.GlobalVariableUpdated');
+
     if (Number.isFinite(data.newValue)){
       dispatchSEEvent('bot:counter', {
         service: 'twitch',
@@ -375,11 +377,18 @@ client.on('Misc.GlobalVariableUpdated', ({ event, data }) => {
       });
     }
     else if (typeof data.newValue === 'string' && data.newValue.startsWith('{') && data.newValue.endsWith('}')) {
+      let parsed;
+      try {
+        parsed = JSON.parse(data.newValue);
+      } catch (parseError) {
+        console.error(`Failed to parse kvstore value for ""${data.name}"":`, parseError);
+        return;
+      }
       dispatchSEEvent('kvstore:update', {
         service: 'twitch',
         data: {
           key:   data.name,
-          value: JSON.parse(data.newValue)
+          value: parsed
         }
       });
     }
@@ -659,9 +668,7 @@ const SE_API = {
   store: {
     set(keyName, object) {
       try {
-        if (!validateVariableName(keyName, 'store.set'))
-          return;
-
+        validateVariableName(keyName, 'store.set');
         setGlobal(keyName, JSON.stringify(object));
       } catch (error) {
         console.error(`Failed to set store value for key ""${keyName}"":`, error);
@@ -669,9 +676,7 @@ const SE_API = {
     },
     async get(keyName) {
       try {
-        if (!validateVariableName(keyName, 'store.get'))
-          return '';
-
+        validateVariableName(keyName, 'store.get');
         const result = await client.getGlobal(keyName);
         return JSON.parse(result.variable?.value);
       } catch (error) {
@@ -682,8 +687,7 @@ const SE_API = {
   },
   counters: {
     async get(counterName) {
-      if (!validateVariableName(counterName, 'counters.get'))
-        return { id: counterName, count: 0 };
+      validateVariableName(counterName, 'counters.get');
       return handleGetCounter({ channelId: null, counter: counterName });
     },
   },
@@ -709,9 +713,7 @@ const SE_API = {
   },
   setField(key, value, reload = true) {
     try {
-      if (!validateVariableName(key, 'setField'))
-        return;
-
+      validateVariableName(key, 'setField');
       CONFIG[key] = value;
       if (reload) {
          sendOnWidgetLoadEvent();
