@@ -90,16 +90,15 @@ async function fetchAvatarUrl(username) {
   }
 }
 
-// TODO: does not exist in WebSocket API, need to call doAction instead
 async function setGlobal(variableName, variableValue, persistVariable = true) {
   try {
-    const response = await client.request({
-      request: 'SetGlobal',
-      variable: variableName,
-      value: variableValue,
-      persisted: persistVariable
-    });
-
+    const test = await client.doAction(
+        action = { name: 'SetGlobal' },
+        args = {
+            name: variableName,
+            value: variableValue
+        }
+    );
     console.log('Global set successfully:', response);
   } catch (error) {
     console.error('Failed to set global variable:', error);

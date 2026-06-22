@@ -104,6 +104,11 @@ flowchart TB
 
   > Hosting, tips, and a few other legacy StreamElements events aren't supported, as they're either no longer part of Twitch (e.g. hosting) or have no StreamerBot equivalent.
 
+- **The generated file includes the following third-party scripts at runtime:**
+  - [jQuery](https://jquery.com/) — DOM utilities used by many SE widgets.
+  - [StreamerBot Client](https://github.com/StreamerBot/client) — official JS client for the StreamerBot WebSocket API.
+  - [profanity-cleaner](https://www.npmjs.com/package/profanity-cleaner) — used by the `SE_API.sanitize` implementation to filter chat message content.
+
 ### Simple File Imports
 - Import `.html`, `.js`, `.css`, `.json` files or even an entire folder or `.zip` file.
 - Warns if the required files are missing or if duplicate files exist.
@@ -138,6 +143,32 @@ The WebSocket Server is now running.
 ![WebSocket Server is Running](Images/streamerbot_websocket_started.png)
 
 > **Note:** The default host and port (`127.0.0.1:8080`) are what this tool expects. Only change these if you have a conflict with another application, and update the connection settings in this tool to match.
+
+---
+
+## Importing `SetGlobal` StreamerBot Action
+
+> **Prerequisite:** This step is required for `SE_API.store.set()` to work correctly. The StreamerBot WebSocket API does not currently support setting global variables directly from the client so we need to setup a custom Action for the client to call instead.
+
+A pre-built StreamerBot Action is included with this tool to handle global variable writes from the bridge. You only need to import it once — it will be shared by all widgets.
+
+### Step 1 — Open the Import dialog
+In StreamerBot, navigate to **Actions** and right-click anywhere in the actions list. Select **Import**.
+
+### Step 2 — Import the Action
+Click the **Import** button and paste in the following and click **Import**.
+
+**Import string:**
+```
+U0JBRR+LCAAAAAAABAB1VE1vozAQvVfqf7CQcisREBqS3qJK2+5ltWpXe6l6MHhIrBqb9Uc+VOW/r40hCYFwiOJ5zzPjec/+vr9DKKhA4+AJfbuFXXJcgV0G76BfmMgxWxWaCh48tDg2eiOkY9BqJYFyCm8ncAtSObJF42k0jU4AAVVIWusW9DmRFggzJnZIgdaUr5GviLZYUpwzUJdVxZvhbS9PiBvGOqyyPVSm+nuq7UCHHRtGQHDvgLjJoWzkw0dQBzUwJa7BLEmT8nE+D6MszsM0XSThMlmkYUbyWVrOo2Wc5l1zzbZ/Bkwzt6j9wpGf7uvtBO6O6qpqaaCH7AtmCPyQonqlSgt5sKQSM3WL9Rs4sWMcYw1k7fWwlsLUDn4FVoNEq3ZGlxzMdvigrAhj6SXmRFQneQZ4IXhhpASux1At6Xpt5XOafF4CyuSroVxXknUGsw7Cbf3o4QruHPWrHcPEzWMSXNNq5yGlx9Tw/QgjCxgvwLz+k+bfMLVz8J9DDTcye9sVOY6W86IMk3JWhmmRJuFiEeUhlBnEkD2SKMkGmXdA1xs3V3vhrjHtK8ZJMjgqdmr8JP3LdIJvutJ3ywnsXcXL+PG8+OxrzxiuFZAX5zIvcge3ezq+v0Y9H9jtVWXd1Q/uIFei+AL9DnJ75Zwz+MyoPWMf1LTq+BdvxPnhSmY+AvtaSOsEd6+69yz1sx++OP61CzGrN3gaB/d3x/8yi2myXAUAAA==
+```
+
+![Importing the StreamerBot Action](Images/streamerbot_import_action_setglobal.png)
+
+### Step 3 — Confirm the Action appears
+After importing, you should see the **SE2SB — Set Global Variable** Action in your actions list. No additional configuration is needed.
+
+![Imported Action in StreamerBot](Images/streamerbot_action_setglobal.png)
 
 ---
 
