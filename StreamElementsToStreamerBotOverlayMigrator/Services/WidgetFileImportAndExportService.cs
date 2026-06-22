@@ -14,7 +14,7 @@ public static class WidgetFileImportAndExportService
 {
     private readonly static List<string> _allowedImportFileExtensions = new() { ".html", ".js", ".css", ".json", ".zip" };
     private readonly static List<string> _allowedWidgetFileExtensions = new() { ".html", ".js", ".css", ".json" };
-    private readonly static TimeSpan     _defaultRegexTimeout = TimeSpan.FromSeconds(1);
+    private readonly static TimeSpan     _defaultRegexTimeout         = TimeSpan.FromSeconds(1);
 
     public static IEnumerable<WidgetFile> FetchWidgetFiles(IEnumerable<string> filePaths)
         => filePaths
@@ -41,11 +41,14 @@ public static class WidgetFileImportAndExportService
         return zip
             .Entries
             .Where(entry => _allowedWidgetFileExtensions.Contains(Path.GetExtension(entry.Name)))
-            .Select(entry =>
-            {
-                using var stream = entry.Open();
-                return new WidgetFile(entry.Name, new StreamReader(stream).ReadToEnd());
-            })
+            .Select
+            (
+                entry =>
+                {
+                    using var stream = entry.Open();
+                    return new WidgetFile(entry.Name, new StreamReader(stream).ReadToEnd());
+                }
+            )
             .ToList();
     }
 
@@ -217,7 +220,8 @@ public static class WidgetFileImportAndExportService
     }
 
     private static bool RequiresVariableReplacement(string fileContent)
-        => Regex.IsMatch(
+        => Regex.IsMatch
+        (
             fileContent,
             @"(?<!\$)\{\{[\w]+\}\}|(?<!\$)(?<!\{)\{[\w]+\}(?!\})",
             RegexOptions.None,

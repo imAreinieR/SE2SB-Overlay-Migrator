@@ -103,10 +103,14 @@ public partial class UpdaterWindow: Window
             await fileStream.DisposeAsync();
 
             string exeName = Path.GetFileName(_targetPath);
-            string tempRoot = Path.GetFullPath(
-                Path.Combine(
+            string tempRoot = Path.GetFullPath
+            (
+                Path.Combine
+                (
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "SE2SB"));
+                    "SE2SB"
+                )
+            );
             if (!tempRoot.EndsWith(Path.DirectorySeparatorChar))
                 tempRoot += Path.DirectorySeparatorChar;
 
@@ -165,8 +169,8 @@ public partial class UpdaterWindow: Window
         try
         {
             string canonicalTempPath = Path.GetFullPath(Path.GetTempPath());
-            string allowedPath = Path.GetFullPath(Path.Combine(canonicalTempPath, "SE2SB_Update"));
-            string canonicalPath = Path.GetFullPath(path);
+            string allowedPath       = Path.GetFullPath(Path.Combine(canonicalTempPath, "SE2SB_Update"));
+            string canonicalPath     = Path.GetFullPath(path);
 
             if (!string.Equals(canonicalPath, allowedPath, StringComparison.OrdinalIgnoreCase))
             {

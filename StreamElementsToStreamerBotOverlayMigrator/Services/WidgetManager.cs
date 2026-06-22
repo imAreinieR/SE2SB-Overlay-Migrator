@@ -147,10 +147,7 @@ public static class WidgetManager
 
         string backupFolder = Path.GetFullPath(Path.Combine(DefaultRootFolderPath, "Backups"));
 
-        if (!IsPathWithinBaseDirectory(DefaultRootFolderPath, backupFolder))
-            return;
-
-        if (!Directory.Exists(backupFolder))
+        if (!IsPathWithinBaseDirectory(DefaultRootFolderPath, backupFolder) || !Directory.Exists(backupFolder))
             return;
 
         string? latestBackup = Directory
@@ -192,8 +189,8 @@ public static class WidgetManager
             if (backupExistsForToday)
                 return;
 
-            string backupFileName = $"{todayStamp}{DatabaseFileExtension}";
-            string backupPath = Path.Combine(backupFolder, backupFileName);
+            string backupPath = Path.Combine(backupFolder, $"{todayStamp}{DatabaseFileExtension}");
+
             File.Copy(DatabaseFilePath, backupPath, true);
 
             List<string> allBackups = Directory

@@ -26,15 +26,15 @@ public static partial class ExtensionMethods
     }
 
     public static T? FindVisualChild<T>(this DependencyObject parent, string name)
-        where T : FrameworkElement
+        where T: FrameworkElement
     {
         for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
         {
-            var child = VisualTreeHelper.GetChild(parent, i);
-            if (child is T fe && fe.Name == name)
-                return fe;
+            DependencyObject? child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T frameworkElement && frameworkElement.Name == name)
+                return frameworkElement;
 
-            var result = FindVisualChild<T>(child, name);
+            T? result = FindVisualChild<T>(child, name);
             if (result != null)
                 return result;
         }
@@ -42,9 +42,9 @@ public static partial class ExtensionMethods
     }
 
     public static T? FindVisualSibling<T>(this FrameworkElement element, string name)
-        where T : FrameworkElement
+        where T: FrameworkElement
     {
-        var parent = VisualTreeHelper.GetParent(element);
+        DependencyObject parent = VisualTreeHelper.GetParent(element);
         if (parent == null)
             return null;
 

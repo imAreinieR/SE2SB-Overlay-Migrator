@@ -19,7 +19,7 @@ public partial class ColorPickerDialog: Window
     private double _value      = 1;    // 0–1
     private byte   _alpha      = 255;  // 0–255
 
-    private bool _updating;
+    private bool   _updating;
 
     public ColorPickerDialog(Color initial)
     {
@@ -32,10 +32,10 @@ public partial class ColorPickerDialog: Window
         // Defer all UI seeding until the window is fully loaded and laid out
         Loaded += (_, _) =>
         {
-            _updating = true;
+            _updating         = true;
             HueSlider.Value   = _hue;
             AlphaSlider.Value = _alpha;
-            _updating = false;
+            _updating         = false;
 
             UpdateHueSurface();
             UpdateSvCursor();
@@ -52,9 +52,7 @@ public partial class ColorPickerDialog: Window
     }
 
     private void SvCanvas_MouseUp(object sender, MouseButtonEventArgs e)
-    {
-        SvCanvas.ReleaseMouseCapture();
-    }
+        => SvCanvas.ReleaseMouseCapture();
 
     private void SvCanvas_MouseMove(object sender, MouseEventArgs e)
     {
@@ -64,7 +62,7 @@ public partial class ColorPickerDialog: Window
 
     private void UpdateSvFromMouse(Point p)
     {
-        _saturation = Math.Clamp(p.X / SvCanvas.ActualWidth,  0, 1);
+        _saturation = Math.Clamp(p.X / SvCanvas.ActualWidth, 0, 1);
         _value      = Math.Clamp(1 - p.Y / SvCanvas.ActualHeight, 0, 1);
 
         UpdateSvCursor();
@@ -73,18 +71,19 @@ public partial class ColorPickerDialog: Window
 
     private void UpdateSvCursor()
     {
-        double x = _saturation * SvCanvas.ActualWidth  - SvCursor.Width  / 2;
+        double x = _saturation * SvCanvas.ActualWidth - SvCursor.Width / 2;
         double y = (1 - _value) * SvCanvas.ActualHeight - SvCursor.Height / 2;
 
         Canvas.SetLeft(SvCursor, x);
-        Canvas.SetTop(SvCursor,  y);
+        Canvas.SetTop (SvCursor, y);
     }
 
     // ── Hue slider ────────────────────────────────────────────────────────────
 
     private void HueSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (_updating) return;
+        if (_updating)
+            return;
 
         _hue = HueSlider.Value;
         UpdateHueSurface();
@@ -101,16 +100,20 @@ public partial class ColorPickerDialog: Window
 
     private void AlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (_updating) return;
+        if (_updating)
+            return;
 
-        _alpha = (byte)Math.Round(AlphaSlider.Value);
+        _alpha = (byte) Math.Round(AlphaSlider.Value);
 
         // Update the alpha slider track: current colour fading to transparent
-        Color opaque      = HsvToColor(_hue, _saturation, _value, 255);
-        Color transparent = Color.FromArgb(0, opaque.R, opaque.G, opaque.B);
+        Color opaque           = HsvToColor(_hue, _saturation, _value, 255);
+        Color transparent      = Color.FromArgb(0, opaque.R, opaque.G, opaque.B);
         AlphaSlider.Background = new LinearGradientBrush
         (
-            transparent, opaque, new Point(0, 0), new Point(1, 0)
+            transparent,
+            opaque,
+            new Point(0, 0),
+            new Point(1, 0)
         );
 
         UpdatePreviewAndInputs();
@@ -120,7 +123,8 @@ public partial class ColorPickerDialog: Window
 
     private void HexBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (_updating) return;
+        if (_updating)
+            return;
 
         string hex = HexBox.Text.TrimStart('#');
         if (hex.Length != 6 && hex.Length != 8)
@@ -128,7 +132,11 @@ public partial class ColorPickerDialog: Window
 
         try
         {
-            byte a = 255, r, g, b;
+            byte a = 255;
+            byte r;
+            byte g;
+            byte b;
+
             if (hex.Length == 8)
             {
                 a = Convert.ToByte(hex[0..2], 16);
@@ -146,10 +154,10 @@ public partial class ColorPickerDialog: Window
             _alpha = a;
             RgbToHsv(r, g, b, out _hue, out _saturation, out _value);
 
-            _updating = true;
+            _updating         = true;
             HueSlider.Value   = _hue;
             AlphaSlider.Value = _alpha;
-            _updating = false;
+            _updating         = false;
 
             UpdateHueSurface();
             UpdateSvCursor();
@@ -161,19 +169,23 @@ public partial class ColorPickerDialog: Window
 
     private void RgbaBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (_updating) return;
-        if (!byte.TryParse(RBox.Text, out byte r)) return;
-        if (!byte.TryParse(GBox.Text, out byte g)) return;
-        if (!byte.TryParse(BBox.Text, out byte b)) return;
-        if (!byte.TryParse(ABox.Text, out byte a)) return;
+        if
+        (
+            _updating
+                || !byte.TryParse(RBox.Text, out byte r)
+                || !byte.TryParse(GBox.Text, out byte g)
+                || !byte.TryParse(BBox.Text, out byte b)
+                || !byte.TryParse(ABox.Text, out byte a)
+        )
+            return;
 
         _alpha = a;
         RgbToHsv(r, g, b, out _hue, out _saturation, out _value);
 
-        _updating = true;
+        _updating         = true;
         HueSlider.Value   = _hue;
         AlphaSlider.Value = _alpha;
-        _updating = false;
+        _updating         = false;
 
         UpdateHueSurface();
         UpdateSvCursor();
@@ -188,33 +200,34 @@ public partial class ColorPickerDialog: Window
         if (PreviewSwatch is null)
             return;
 
-        Color c = HsvToColor(_hue, _saturation, _value, _alpha);
-        SelectedColor            = c;
-        PreviewSwatch.Background = new SolidColorBrush(c);
+        Color currentColor       = HsvToColor(_hue, _saturation, _value, _alpha);
+        SelectedColor            = currentColor;
+        PreviewSwatch.Background = new SolidColorBrush(currentColor);
 
         // Keep alpha slider track in sync
-        Color opaque      = HsvToColor(_hue, _saturation, _value, 255);
-        Color transparent = Color.FromArgb(0, opaque.R, opaque.G, opaque.B);
+        Color opaque           = HsvToColor(_hue, _saturation, _value, 255);
+        Color transparent      = Color.FromArgb(0, opaque.R, opaque.G, opaque.B);
         AlphaSlider.Background = new LinearGradientBrush
         (
-            transparent, opaque, new Point(0, 0), new Point(1, 0)
+            transparent,
+            opaque,
+            new Point(0, 0),
+            new Point(1, 0)
         );
 
         _updating = true;
 
         if (!skipHex)
-        {
             HexBox.Text = _alpha == 255
-                ? $"#{c.R:X2}{c.G:X2}{c.B:X2}"
-                : $"#{c.A:X2}{c.R:X2}{c.G:X2}{c.B:X2}";
-        }
+                ? $"#{currentColor.R:X2}{currentColor.G:X2}{currentColor.B:X2}"
+                : $"#{currentColor.A:X2}{currentColor.R:X2}{currentColor.G:X2}{currentColor.B:X2}";
 
         if (!skipRgba)
         {
-            RBox.Text = c.R.ToString();
-            GBox.Text = c.G.ToString();
-            BBox.Text = c.B.ToString();
-            ABox.Text = c.A.ToString();
+            RBox.Text = currentColor.R.ToString();
+            GBox.Text = currentColor.G.ToString();
+            BBox.Text = currentColor.B.ToString();
+            ABox.Text = currentColor.A.ToString();
         }
 
         _updating = false;
@@ -232,7 +245,9 @@ public partial class ColorPickerDialog: Window
 
     private static Color HsvToColor(double h, double s, double v, byte a)
     {
-        double r, g, b;
+        double r;
+        double g;
+        double b;
 
         if (s == 0)
         {
@@ -240,8 +255,8 @@ public partial class ColorPickerDialog: Window
         }
         else
         {
-            h /= 60;
-            int    i  = (int)h;
+            h        /= 60;
+            int    i  = (int) h;
             double f  = h - i;
             double p  = v * (1 - s);
             double q  = v * (1 - s * f);
@@ -258,15 +273,16 @@ public partial class ColorPickerDialog: Window
             };
         }
 
-        return Color.FromArgb(a, (byte)(r * 255), (byte)(g * 255), (byte)(b * 255));
+        return Color.FromArgb(a, (byte) (r * 255), (byte) (g * 255), (byte) (b * 255));
     }
 
-    private static void RgbToHsv(byte r, byte g, byte b,
-                                  out double h, out double s, out double v)
+    private static void RgbToHsv(byte r, byte g, byte b, out double h, out double s, out double v)
     {
-        double rd = r / 255.0, gd = g / 255.0, bd = b / 255.0;
-        double max = Math.Max(rd, Math.Max(gd, bd));
-        double min = Math.Min(rd, Math.Min(gd, bd));
+        double rd    = r / 255.0;
+        double gd    = g / 255.0;
+        double bd    = b / 255.0;
+        double max   = Math.Max(rd, Math.Max(gd, bd));
+        double min   = Math.Min(rd, Math.Min(gd, bd));
         double delta = max - min;
 
         v = max;
@@ -278,10 +294,14 @@ public partial class ColorPickerDialog: Window
             return;
         }
 
-        if (max == rd)      h = 60 * (((gd - bd) / delta) % 6);
-        else if (max == gd) h = 60 * (((bd - rd) / delta) + 2);
-        else                h = 60 * (((rd - gd) / delta) + 4);
+        if (max == rd)
+            h = 60 * (((gd - bd) / delta) % 6);
+        else if (max == gd)
+            h = 60 * (((bd - rd) / delta) + 2);
+        else
+            h = 60 * (((rd - gd) / delta) + 4);
 
-        if (h < 0) h += 360;
+        if (h < 0)
+            h += 360;
     }
 }

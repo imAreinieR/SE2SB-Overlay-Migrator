@@ -37,13 +37,10 @@ public static class UpdaterService
                 }
             );
 
-            JsonElement releases = jsonDocument.RootElement;
+            JsonElement releases  = jsonDocument.RootElement;
             string?     latestTag = releases[0].GetProperty("tag_name").GetString();
 
-            if (latestTag is null)
-                return null;
-
-            if (!TryParseGitTag(latestTag, out Version? latestVersion) || !TryParseGitTag(currentVersion, out Version? currentParsed))
+            if (latestTag is null || !TryParseGitTag(latestTag, out Version? latestVersion) || !TryParseGitTag(currentVersion, out Version? currentParsed))
                 return null;
 
             return latestVersion > currentParsed

@@ -35,7 +35,6 @@ public class WidgetFile
             return WidgetFileType.Javascript;
         if (fileName.EndsWith(".css", StringComparison.OrdinalIgnoreCase))
             return WidgetFileType.Css;
-
         if (fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase) && fileContent != null)
             return DetermineJsonFileType(fileContent);
 

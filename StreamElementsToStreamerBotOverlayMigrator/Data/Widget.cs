@@ -26,7 +26,7 @@ public class Widget: INotifyPropertyChanged
             if (_name == value)
                 return;
 
-            _name    = value;
+            _name = value;
 
             OnPropertyChanged(nameof(Name));
             OnChanged();
