@@ -21,9 +21,9 @@ namespace StreamElementsToStreamerBotOverlayMigrator;
 
 public partial class WidgetConfigWindow: Window
 {
-    private const    string                               SimulatedUsername       = "Ami.Bot";
+    private const    string                               SimulatedUsername       = "AmiElements";
     private const    string                               SimulatedUserId         = "123456";
-    private const    string                               SimulatedGifterUsername = "Cat.God";
+    private const    string                               SimulatedGifterUsername = "CatGod";
     private const    string                               SimulatedGifterId       = "676767";
 
     private readonly Widget                               _widget;
