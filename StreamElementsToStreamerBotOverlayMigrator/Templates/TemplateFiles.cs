@@ -9,7 +9,7 @@ public static class TemplateFiles
   <!-- Widget Stylesheet -->
   <link rel=""stylesheet"" type=""text/css"" href=""index.css"">
   <!-- Widget Scripts -->
-  <script src=""https://code.jquery.com/jquery-4.0.0.slim.min.js"" integrity=""sha256-8DGpv13HIm+5iDNWw1XqxgFB4mj+yOKFNb+tHBZOowc="" crossorigin=""anonymous""></script>
+  <script src=""https://code.jquery.com/jquery-4.0.0.min.js"" integrity=""sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao="" crossorigin=""anonymous""></script>
   <script src=""https://cdn.jsdelivr.net/npm/@streamerbot/client@1.12.2/dist/streamerbot-client.js""></script>
   <script src=""https://cdn.jsdelivr.net/npm/profanity-cleaner@0.0.3/dist/profanity-cleaner.min.js""></script>
   <script src=""config.js""></script>
