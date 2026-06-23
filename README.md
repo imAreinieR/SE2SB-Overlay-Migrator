@@ -255,3 +255,9 @@ Documents/
 - **SE template variables** — `{{variableName}}` and `{variableName}` placeholders in your HTML and CSS are replaced at generation time using values from your `data.json`.
 - **Protocol-relative URLs** — Any `src="//..."` or `href="//..."` references in your HTML are automatically upgraded to `https://` to avoid mixed-content issues.
 - **Multiple `.json` files are allowed** — the tool accepts more than one `.json` file, unlike `.html`, `.css`, and `.js` where only one of each is permitted.
+
+---
+
+## Disclaimer
+
+This tool processes and runs widget code locally on your machine. Any widget code you write yourself or obtain from third-party sources online is used entirely at your own discretion and is your own responsibility. Always review code from unknown sources before running it.
