@@ -399,10 +399,9 @@ client.on('Misc.GlobalVariableUpdated', ({ event, data }) => {
 
 // message - New chat message
 client.on('Twitch.ChatMessage', ({ event, data }) => {
-  const msg  = data.message ?? {};
   const user = data.user    ?? {};
 
-  const badges = (msg.badges ?? []).map(b => ({
+  const badges = (user.badges ?? []).map(b => ({
     'type':        b.name,
     'version':     b.version,
     'url':         b.imageUrl,
@@ -440,18 +439,18 @@ client.on('Twitch.ChatMessage', ({ event, data }) => {
 
   const tags = {
     'badges':       badges,
-    'color':        user.color         ?? msg.color       ?? '',
-    'display-name': user.name          ?? msg.displayName ?? '',
+    'color':        user.color          ?? '',
+    'display-name': user.name           ?? '',
     'emotes':       emotes,
     'flags':        '',
-    'id':           msg.msgId          ?? data.messageId  ?? '',
-    'mod':          (msg.role === 2)   ? '1' : '0',
+    'id':           data.messageId      ?? '',
+    'mod':          (user.role === 2)   ? '1' : '0',
     'room-id':      '',
-    'subscriber':   msg.subscriber     ? '1' : '0',
+    'subscriber':   user.subscribed     ? '1' : '0',
     'tmi-sent-ts':  String(Date.now()),
     'turbo':        '0',
-    'user-id':      user.id            ?? msg.userId      ?? '',
-    'user-type':    (msg.role === 2)   ? 'mod' : ''
+    'user-id':      user.id             ?? '',
+    'user-type':    (user.role === 2)   ? 'mod' : ''
   };
 
   dispatchSEEvent('message', {
@@ -459,16 +458,16 @@ client.on('Twitch.ChatMessage', ({ event, data }) => {
     data: {
       'time':         Date.now(),
       'tags':         tags,
-      'nick':         user.login  ?? msg.username    ?? '',
-      'userId':       user.id     ?? msg.userId      ?? '',
-      'displayName':  user.name   ?? msg.displayName ?? '',
-      'displayColor': user.color  ?? msg.color       ?? '',
+      'nick':         user.login     ?? '',
+      'userId':       user.id        ?? '',
+      'displayName':  user.name      ?? '',
+      'displayColor': user.color     ?? '',
       'badges':       badges,
-      'channel':      msg.channel ?? user.login      ?? '',
-      'text':         data.text   ?? msg.message     ?? '',
-      'isAction':     msg.isMe    ?? false,
+      'channel':      user.login     ?? '',
+      'text':         data.text      ?? '',
+      'isAction':     data.meta.isMe ?? false,
       'emotes':       emotes,
-      'msgId':        msg.msgId   ?? data.messageId  ?? ''
+      'msgId':        data.messageId ?? ''
     }
   });
 });
