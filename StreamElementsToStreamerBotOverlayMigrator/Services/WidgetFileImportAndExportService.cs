@@ -27,7 +27,7 @@ public static class WidgetFileImportAndExportService
                     ? FetchWidgetFiles(Directory.EnumerateFiles(filePath, "*.*", SearchOption.AllDirectories))
                     : Path.GetExtension(filePath).Equals(".zip", StringComparison.OrdinalIgnoreCase)
                         ? UnZipAndExtractWidgetFiles(filePath)
-                        : new[] { new WidgetFile(Path.GetFileName(filePath), File.ReadAllText(filePath)) };
+                        : new[] { new WidgetFile(Path.GetFileName(filePath), Convert.ToBase64String(File.ReadAllBytes(filePath))) };
             }
         );
 
@@ -43,8 +43,11 @@ public static class WidgetFileImportAndExportService
             (
                 entry =>
                 {
-                    using var stream = entry.Open();
-                    return new WidgetFile(entry.Name, new StreamReader(stream).ReadToEnd());
+                    using Stream stream = entry.Open();
+                    using var memoryStream = new MemoryStream();
+                    stream.CopyTo(memoryStream);
+
+                    return new WidgetFile(entry.Name, Convert.ToBase64String(memoryStream.ToArray()));
                 }
             )
             .ToList();
@@ -92,7 +95,15 @@ public static class WidgetFileImportAndExportService
                 string fileName    = widgetFile.GetFileNameForWidgetFileType();
                 string destination = Path.Combine(widget.FolderLocation, fileName);
 
-                File.WriteAllText(destination, GenerateFile(widgetFile, jsonData));
+                if (widgetFile.WidgetFileType.IsTextBasedFile())
+                {
+                    File.WriteAllText(destination, GenerateFile(widgetFile, jsonData));
+                }
+                else
+                {
+                    byte[] fileBytes = Convert.FromBase64String(widgetFile.Content);
+                    File.WriteAllBytes(destination, fileBytes);
+                }
             }
 
             File.WriteAllText(Path.Combine(widget.FolderLocation, "streamerBotApiAndEventBridge.js"), TemplateFiles.ApiAndEventBridgeFile);

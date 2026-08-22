@@ -207,4 +207,11 @@ public static class WidgetManager
         catch (Exception)
         {}
     }
+
+    public static void ResizeDatabaseIfNeeded()
+    {
+        using var connection = new SqliteConnection(ConnectionString);
+        connection.Open();
+        DatabaseManagerDb.VacuumIfNeeded(connection);
+    }
 }

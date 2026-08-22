@@ -18,4 +18,11 @@ public static partial class ExtensionMethods
             _
                 => widgetFile.FileName
         };
+
+    public static bool IsTextBasedFile(this WidgetFileType widgetFileType)
+        => widgetFileType     == WidgetFileType.Html
+            || widgetFileType == WidgetFileType.Css
+            || widgetFileType == WidgetFileType.Javascript
+            || widgetFileType == WidgetFileType.FieldJson
+            || widgetFileType == WidgetFileType.DataJson;
 }
