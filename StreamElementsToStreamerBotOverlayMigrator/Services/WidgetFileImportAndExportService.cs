@@ -12,8 +12,21 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Services;
 
 public static class WidgetFileImportAndExportService
 {
-    private readonly static List<string> _allowedImportFileExtensions = new() { ".html", ".js", ".css", ".json", ".zip" };
-    private readonly static List<string> _allowedWidgetFileExtensions = new() { ".html", ".js", ".css", ".json" };
+    private readonly static List<string> _allowedImportFileExtensions = new()
+    {
+        ".html", ".js", ".css", ".json", ".zip",
+        ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".ico",
+        ".mp3", ".wav", ".m4a", ".aac",
+        ".mp4", ".webm"
+    };
+
+    private readonly static List<string> _allowedWidgetFileExtensions = new()
+    {
+        ".html", ".js", ".css", ".json",
+        ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".ico",
+        ".mp3", ".wav", ".m4a", ".aac",
+        ".mp4", ".webm"
+    };
     private readonly static TimeSpan     _defaultRegexTimeout         = TimeSpan.FromSeconds(1);
 
     public static IEnumerable<WidgetFile> FetchWidgetFiles(IEnumerable<string> filePaths)

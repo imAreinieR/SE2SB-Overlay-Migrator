@@ -208,9 +208,11 @@ public partial class MainWindow: Window
 
         var dialog = new OpenFileDialog
         {
-            Title       = "Select widget files",
+            Title = "Select widget files",
             Multiselect = true,
-            Filter      = "Widget files (*.html;*.js;*.css;*.json;*.zip)|*.html;*.js;*.css;*.json;*.zip|All files (*.*)|*.*"
+            Filter = "Widget files (*.html;*.js;*.css;*.json;*.zip;*.jpg;*.jpeg;*.png;*.gif;*.webp;*.svg;*.bmp;*.ico;*.mp3;*.wav;*.m4a;*.aac;*.mp4;*.webm)|"
+                + "*.html;*.js;*.css;*.json;*.zip;*.jpg;*.jpeg;*.png;*.gif;*.webp;*.svg;*.bmp;*.ico;*.mp3;*.wav;*.m4a;*.aac;*.mp4;*.webm|"
+                + "All files (*.*)|*.*"
         };
 
         if (dialog.ShowDialog() != true)

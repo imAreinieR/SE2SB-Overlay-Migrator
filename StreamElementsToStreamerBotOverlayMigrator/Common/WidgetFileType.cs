@@ -7,5 +7,8 @@ public enum WidgetFileType
     Css,
     FieldJson,
     DataJson,
+    ImageAsset,
+    AudioAsset,
+    VideoAsset,
     Other,
 }
