@@ -5,10 +5,6 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Data;
 
 public class WidgetFile
 {
-    private readonly string[] SupportedImageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".ico" };
-    private readonly string[] SupportedAudioExtensions = { ".mp3", ".wav", ".m4a", ".aac" };
-    private readonly string[] SupportedVideoExtensions = { ".mp4", ".webm" };
-
     public int            Id             { get; set; }
     public int            WidgetId       { get; set; }
     public string         FileName       { get; set; }
@@ -41,11 +37,11 @@ public class WidgetFile
             return WidgetFileType.Css;
         if (fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase) && fileContent != null)
             return DetermineJsonFileType(fileContent);
-        if (SupportedImageExtensions.Any(extension => fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)))
+        if (SupportedFileTypes.ImageExtensions.Any(extension => fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)))
             return WidgetFileType.ImageAsset;
-        if (SupportedAudioExtensions.Any(extension => fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)))
+        if (SupportedFileTypes.AudioExtensions.Any(extension => fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)))
             return WidgetFileType.AudioAsset;
-        if (SupportedVideoExtensions.Any(extension => fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)))
+        if (SupportedFileTypes.VideoExtensions.Any(extension => fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)))
             return WidgetFileType.VideoAsset;
 
         return WidgetFileType.Other;

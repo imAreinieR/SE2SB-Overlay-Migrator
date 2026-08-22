@@ -12,26 +12,11 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Services;
 
 public static class WidgetFileImportAndExportService
 {
-    private readonly static List<string> _allowedImportFileExtensions = new()
-    {
-        ".html", ".js", ".css", ".json", ".zip",
-        ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".ico",
-        ".mp3", ".wav", ".m4a", ".aac",
-        ".mp4", ".webm"
-    };
-
-    private readonly static List<string> _allowedWidgetFileExtensions = new()
-    {
-        ".html", ".js", ".css", ".json",
-        ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".ico",
-        ".mp3", ".wav", ".m4a", ".aac",
-        ".mp4", ".webm"
-    };
-    private readonly static TimeSpan     _defaultRegexTimeout         = TimeSpan.FromSeconds(1);
+    private readonly static TimeSpan _defaultRegexTimeout = TimeSpan.FromSeconds(1);
 
     public static IEnumerable<WidgetFile> FetchWidgetFiles(IEnumerable<string> filePaths)
         => filePaths
-        .Where(filePath => _allowedImportFileExtensions.Contains(Path.GetExtension(filePath)) || File.GetAttributes(filePath).HasFlag(FileAttributes.Directory))
+        .Where(filePath => SupportedFileTypes.AllowedImportFileExtensions.Contains(Path.GetExtension(filePath)) || File.GetAttributes(filePath).HasFlag(FileAttributes.Directory))
         .SelectMany
         (
             filePath =>
@@ -53,7 +38,7 @@ public static class WidgetFileImportAndExportService
 
         return zip
             .Entries
-            .Where(entry => _allowedWidgetFileExtensions.Contains(Path.GetExtension(entry.Name)))
+            .Where(entry => SupportedFileTypes.AllowedWidgetFileExtensions.Contains(Path.GetExtension(entry.Name)))
             .Select
             (
                 entry =>
@@ -69,7 +54,7 @@ public static class WidgetFileImportAndExportService
     {
         var duplicates = new List<string>();
 
-        foreach (string extension in _allowedWidgetFileExtensions)
+        foreach (string extension in SupportedFileTypes.AllowedWidgetFileExtensions)
         {
             int count = widgetFiles.Count(file => Path.GetExtension(file.FileName).Equals(extension, StringComparison.OrdinalIgnoreCase));
 

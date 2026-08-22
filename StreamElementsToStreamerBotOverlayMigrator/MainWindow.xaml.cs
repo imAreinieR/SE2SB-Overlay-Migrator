@@ -210,9 +210,7 @@ public partial class MainWindow: Window
         {
             Title = "Select widget files",
             Multiselect = true,
-            Filter = "Widget files (*.html;*.js;*.css;*.json;*.zip;*.jpg;*.jpeg;*.png;*.gif;*.webp;*.svg;*.bmp;*.ico;*.mp3;*.wav;*.m4a;*.aac;*.mp4;*.webm)|"
-                + "*.html;*.js;*.css;*.json;*.zip;*.jpg;*.jpeg;*.png;*.gif;*.webp;*.svg;*.bmp;*.ico;*.mp3;*.wav;*.m4a;*.aac;*.mp4;*.webm|"
-                + "All files (*.*)|*.*"
+            Filter = Common.SupportedFileTypes.BuildImportFileDialogFilter()
         };
 
         if (dialog.ShowDialog() != true)
