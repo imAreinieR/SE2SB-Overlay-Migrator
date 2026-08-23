@@ -25,4 +25,9 @@ public static partial class ExtensionMethods
             || widgetFileType == WidgetFileType.Javascript
             || widgetFileType == WidgetFileType.FieldJson
             || widgetFileType == WidgetFileType.DataJson;
+
+    public static bool IsAssetFile(this WidgetFileType widgetFileType)
+        => widgetFileType     == WidgetFileType.ImageAsset
+            || widgetFileType == WidgetFileType.AudioAsset
+            || widgetFileType == WidgetFileType.VideoAsset;
 }

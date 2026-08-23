@@ -225,144 +225,21 @@ public partial class WidgetConfigWindow: Window
     {
         string valueStr = field.Value?.ToString() ?? string.Empty;
 
-        switch (field.Type.ToLowerInvariant())
+        return field.Type.ToLowerInvariant() switch
         {
-            case "text":
-                var textBox = new TextBox
-                {
-                    Style = (Style) FindResource("FieldInput"),
-                    Text  = valueStr,
-                    Tag   = field.Key
-                };
-                textBox.TextChanged += OnControlChanged;
-                return textBox;
-            case "checkbox":
-                bool isChecked = valueStr.Equals("true", StringComparison.OrdinalIgnoreCase)
-                    || valueStr == "1";
-                var checkBox = new CheckBox
-                {
-                    Style     = (Style) FindResource("FieldToggle"),
-                    IsChecked = isChecked,
-                    Tag       = field.Key
-                };
-                checkBox.Checked   += OnControlChanged;
-                checkBox.Unchecked += OnControlChanged;
-                return checkBox;
-            case "colorpicker":
-                var picker = new ColorSwatchPicker
-                {
-                    Color = ParseColor(valueStr),
-                    Tag   = field.Key
-                };
-                picker.ColorChanged += OnControlChanged;
-                return picker;
-            case "number":
-                var spinner = new NumericSpinner
-                {
-                    Value = double.TryParse(valueStr, out double initialNumber)
-                        ? initialNumber
-                        : 1,
-                    Tag   = field.Key
-                };
-                spinner.ValueChanged += OnControlChanged;
-                return spinner;
-            case "slider":
-                var sliderField = new SliderField
-                {
-                    Minimum = field.Min  ?? 0,
-                    Maximum = field.Max  ?? 100,
-                    Step    = field.Step ?? 1,
-                    Value   = double.TryParse(valueStr, out double initialSlider)
-                        ? initialSlider
-                        : field.Min ?? 0,
-                    Tag     = field.Key
-                };
-                sliderField.ValueChanged += OnControlChanged;
-                return sliderField;
-            case "dropdown":
-                var comboBox = new StyledDropdown
-                {
-                    Tag = field.Key
-                };
-
-                if (field.Options is not null)
-                {
-                    foreach ((string key, string label) in field.Options)
-                        comboBox.Items.Add
-                        (
-                            new ComboBoxItem
-                            {
-                                Content = label,
-                                Tag = key
-                            }
-                        );
-
-                    foreach (ComboBoxItem item in comboBox.Items)
-                    {
-                        if (item.Tag?.ToString() == valueStr)
-                        {
-                            comboBox.SelectedItem = item;
-                            break;
-                        }
-                    }
-
-                    comboBox.SelectionChanged += OnControlChanged;
-                }
-
-                return comboBox;
-            case "image-input":
-            case "video-input":
-            case "sound-input":
-                var unsupportedLabel = new TextBlock
-                {
-                    Text       = $"'{field.Type}' is not yet supported in the config UI.",
-                    Style      = (Style) FindResource("FieldLabel"),
-                    FontStyle  = FontStyles.Italic,
-                    Foreground = AppColors.StatusError
-                };
-                return unsupportedLabel;
-            case "googlefont":
-                if (!GoogleFonts.AvailableFonts.Contains(valueStr))
-                    valueStr = GoogleFonts.AvailableFonts.First();
-
-                var fontComboBox = new StyledDropdown
-                {
-                    Tag = field.Key
-                };
-
-                foreach (string fontName in GoogleFonts.AvailableFonts)
-                    fontComboBox.Items.Add
-                    (
-                        new ComboBoxItem
-                        {
-                            Content = fontName,
-                            Tag     = fontName
-                        }
-                    );
-
-                foreach (ComboBoxItem item in fontComboBox.Items)
-                {
-                    if (item.Tag?.ToString() == valueStr)
-                    {
-                        fontComboBox.SelectedItem = item;
-                        break;
-                    }
-                }
-
-                fontComboBox.SelectionChanged += OnControlChanged;
-                return fontComboBox;
-            case "button":
-                var button = new Button
-                {
-                    Style   = (Style) FindResource("FieldButton"),
-                    Content = field.Label,
-                    Tag     = field.Key
-                };
-                button.Click += FieldButton_Click;
-                return button;
-            default:
-                return null;
-        }
+            "text"        => BuildTextControl       (field, valueStr),
+            "checkbox"    => BuildCheckboxControl   (field, valueStr),
+            "colorpicker" => BuildColorPickerControl(field, valueStr),
+            "number"      => BuildNumberControl     (field, valueStr),
+            "slider"      => BuildSliderControl     (field, valueStr),
+            "dropdown"    => BuildDropdownControl   (field, valueStr),
+            "image-input" => BuildImageInputControl (field, valueStr),
+            "video-input" => BuildVideoInputControl (field, valueStr),
+            "sound-input" => BuildAudioInputControl (field, valueStr),
+            "googlefont"  => BuildGoogleFontControl (field, valueStr),
+            "button"      => BuildButtonControl     (field),
+            _             => BuildUnsupportedControl(field)
+        };
     }
 
     private void ShowNoFieldsMessage(string message)
@@ -454,6 +331,219 @@ public partial class WidgetConfigWindow: Window
                 },
                 control
             }
+        };
+
+    private TextBox BuildTextControl(WidgetDataField field, string valueStr)
+    {
+        var textBox = new TextBox
+        {
+            Style = (Style) FindResource("FieldInput"),
+            Text  = valueStr,
+            Tag   = field.Key
+        };
+        textBox.TextChanged += OnControlChanged;
+
+        return textBox;
+    }
+
+    private CheckBox BuildCheckboxControl(WidgetDataField field, string valueStr)
+    {
+        bool isChecked = valueStr.Equals("true", StringComparison.OrdinalIgnoreCase)
+            || valueStr == "1";
+
+        var checkBox = new CheckBox
+        {
+            Style     = (Style) FindResource("FieldToggle"),
+            IsChecked = isChecked,
+            Tag       = field.Key
+        };
+        checkBox.Checked += OnControlChanged;
+        checkBox.Unchecked += OnControlChanged;
+
+        return checkBox;
+    }
+
+    private ColorSwatchPicker BuildColorPickerControl(WidgetDataField field, string valueStr)
+    {
+        var picker = new ColorSwatchPicker
+        {
+            Color = ParseColor(valueStr),
+            Tag   = field.Key
+        };
+        picker.ColorChanged += OnControlChanged;
+
+        return picker;
+    }
+
+    private NumericSpinner BuildNumberControl(WidgetDataField field, string valueStr)
+    {
+        var spinner = new NumericSpinner
+        {
+            Value = double.TryParse(valueStr, out double initialNumber)
+                ? initialNumber
+                : 1,
+            Tag   = field.Key
+        };
+        spinner.ValueChanged += OnControlChanged;
+
+        return spinner;
+    }
+
+    private SliderField BuildSliderControl(WidgetDataField field, string valueStr)
+    {
+        var sliderField = new SliderField
+        {
+            Minimum = field.Min  ?? 0,
+            Maximum = field.Max  ?? 100,
+            Step    = field.Step ?? 1,
+            Value   = double.TryParse(valueStr, out double initialSlider)
+                ? initialSlider
+                : field.Min ?? 0,
+            Tag     = field.Key
+        };
+        sliderField.ValueChanged += OnControlChanged;
+
+        return sliderField;
+    }
+
+    private StyledDropdown BuildDropdownControl(WidgetDataField field, string valueStr)
+    {
+        var comboBox = new StyledDropdown
+        {
+            Tag = field.Key
+        };
+
+        if (field.Options is not null)
+        {
+            foreach ((string key, string label) in field.Options)
+                comboBox.Items.Add
+                (
+                    new ComboBoxItem
+                    {
+                        Content = label,
+                        Tag     = key
+                    }
+                );
+
+            foreach (ComboBoxItem item in comboBox.Items)
+            {
+                if (item.Tag?.ToString() == valueStr)
+                {
+                    comboBox.SelectedItem = item;
+                    break;
+                }
+            }
+
+            comboBox.SelectionChanged += OnControlChanged;
+        }
+
+        return comboBox;
+    }
+
+    private FrameworkElement? BuildImageInputControl(WidgetDataField field, string valueStr)
+        => BuildAssetInputControl(field, valueStr, WidgetFileType.ImageAsset);
+
+    private FrameworkElement? BuildAudioInputControl(WidgetDataField field, string valueStr)
+        => BuildAssetInputControl(field, valueStr, WidgetFileType.AudioAsset);
+
+    private FrameworkElement? BuildVideoInputControl(WidgetDataField field, string valueStr)
+        => BuildAssetInputControl(field, valueStr, WidgetFileType.VideoAsset);
+
+    private FrameworkElement? BuildAssetInputControl(WidgetDataField field, string valueStr, WidgetFileType assetWidgetFileType)
+    {
+        if (!assetWidgetFileType.IsAssetFile())
+            return BuildUnsupportedControl(field);
+
+        var comboBox = new StyledDropdown
+        {
+            Tag = field.Key
+        };
+
+        IEnumerable<string> assets = _widget
+            .Files
+            .Where(file => file.WidgetFileType == assetWidgetFileType)
+            .Select(file => file.FileName);
+
+        if (assets.Any())
+        {
+            foreach (string fileName in assets)
+                comboBox.Items.Add
+                (
+                    new ComboBoxItem
+                    {
+                        Content = fileName,
+                        Tag = fileName
+                    }
+                );
+
+            foreach (ComboBoxItem item in comboBox.Items)
+            {
+                if (item.Tag?.ToString() == valueStr)
+                {
+                    comboBox.SelectedItem = item;
+                    break;
+                }
+            }
+
+            comboBox.SelectionChanged += OnControlChanged;
+        }
+
+        return comboBox;
+    }
+
+    private StyledDropdown BuildGoogleFontControl(WidgetDataField field, string valueStr)
+    {
+        if (!GoogleFonts.AvailableFonts.Contains(valueStr))
+            valueStr = GoogleFonts.AvailableFonts.First();
+
+        var fontComboBox = new StyledDropdown
+        {
+            Tag = field.Key
+        };
+
+        foreach (string fontName in GoogleFonts.AvailableFonts)
+            fontComboBox.Items.Add
+            (
+                new ComboBoxItem
+                {
+                    Content = fontName,
+                    Tag     = fontName
+                }
+            );
+
+        foreach (ComboBoxItem item in fontComboBox.Items)
+        {
+            if (item.Tag?.ToString() == valueStr)
+            {
+                fontComboBox.SelectedItem = item;
+                break;
+            }
+        }
+
+        fontComboBox.SelectionChanged += OnControlChanged;
+
+        return fontComboBox;
+    }
+
+    private Button BuildButtonControl(WidgetDataField field)
+    {
+        var button = new Button
+        {
+            Style   = (Style) FindResource("FieldButton"),
+            Content = field.Label,
+            Tag     = field.Key
+        };
+        button.Click += FieldButton_Click;
+        return button;
+    }
+
+    private TextBlock BuildUnsupportedControl(WidgetDataField field)
+        => new TextBlock
+        {
+            Text       = $"'{field.Type}' is not yet supported in the config UI.",
+            Style      = (Style) FindResource("FieldLabel"),
+            FontStyle  = FontStyles.Italic,
+            Foreground = AppColors.StatusError
         };
 
     #endregion UI Elements
