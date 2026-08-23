@@ -27,7 +27,7 @@ public static class WidgetFileImportAndExportService
                     ? FetchWidgetFiles(Directory.EnumerateFiles(filePath, "*.*", SearchOption.AllDirectories))
                     : Path.GetExtension(filePath).Equals(".zip", StringComparison.OrdinalIgnoreCase)
                         ? UnZipAndExtractWidgetFiles(filePath)
-                        : new[] { new WidgetFile(Path.GetFileName(filePath), Convert.ToBase64String(File.ReadAllBytes(filePath))) };
+                        : new[] { new WidgetFile(Path.GetFileName(filePath), EncodeFileContentForImport(File.ReadAllBytes(filePath), filePath)) };
             }
         );
 
@@ -47,11 +47,21 @@ public static class WidgetFileImportAndExportService
                     using var memoryStream = new MemoryStream();
                     stream.CopyTo(memoryStream);
 
-                    return new WidgetFile(entry.Name, Convert.ToBase64String(memoryStream.ToArray()));
+                    return new WidgetFile(entry.Name, EncodeFileContentForImport(memoryStream.ToArray(), entry.Name));
                 }
             )
             .ToList();
     }
+
+    private static bool IsTextBasedExtension(string fileName)
+        => SupportedFileTypes
+            .DocumentExtensions
+            .Contains(Path.GetExtension(fileName), StringComparer.OrdinalIgnoreCase);
+
+    private static string EncodeFileContentForImport(byte[] fileBytes, string fileName)
+        => IsTextBasedExtension(fileName)
+            ? System.Text.Encoding.UTF8.GetString(fileBytes)
+            : Convert.ToBase64String(fileBytes);
 
     public static bool CheckIsValidFileSet(this IEnumerable<WidgetFile> widgetFiles, out string validationError)
     {
