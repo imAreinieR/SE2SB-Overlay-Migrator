@@ -102,8 +102,16 @@ public static class WidgetFileImportAndExportService
 
             foreach (WidgetFile widgetFile in widget.Files)
             {
-                string fileName    = widgetFile.GetFileNameForWidgetFileType();
-                string destination = Path.Combine(widget.FolderLocation, fileName);
+                string fileName          = widgetFile.GetFileNameForWidgetFileType();
+                string subFolderName     = widgetFile.WidgetFileType.GetSubFolderForWidgetFileType();
+                string destinationFolder = string.IsNullOrEmpty(subFolderName)
+                    ? widget.FolderLocation
+                    : Path.Combine(widget.FolderLocation, subFolderName);
+
+                if (!Directory.Exists(destinationFolder))
+                    Directory.CreateDirectory(destinationFolder);
+
+                string destination = Path.Combine(destinationFolder, fileName);
 
                 if (widgetFile.WidgetFileType.IsTextBasedFile())
                 {

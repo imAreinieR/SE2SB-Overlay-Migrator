@@ -19,6 +19,15 @@ public static partial class ExtensionMethods
                 => widgetFile.FileName
         };
 
+    public static string GetSubFolderForWidgetFileType(this WidgetFileType widgetFileType)
+        => widgetFileType switch
+        {
+            WidgetFileType.ImageAsset => "Images",
+            WidgetFileType.AudioAsset => "Audio",
+            WidgetFileType.VideoAsset => "Video",
+            _ => string.Empty
+        };
+
     public static bool IsTextBasedFile(this WidgetFileType widgetFileType)
         => widgetFileType     == WidgetFileType.Html
             || widgetFileType == WidgetFileType.Css

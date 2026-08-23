@@ -472,7 +472,7 @@ public partial class WidgetConfigWindow: Window
                     new ComboBoxItem
                     {
                         Content = fileName,
-                        Tag = fileName
+                        Tag     = $"{assetWidgetFileType.GetSubFolderForWidgetFileType()}/{fileName}"
                     }
                 );
 
