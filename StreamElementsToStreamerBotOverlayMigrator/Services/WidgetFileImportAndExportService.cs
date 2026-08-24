@@ -239,7 +239,7 @@ public static class WidgetFileImportAndExportService
 
         if (widgetFile.WidgetFileType == WidgetFileType.Html)
         {
-            content = string.Format(TemplateFiles.HtmlFile, FixProtocolRelativeUrls(widgetFile.Content));
+            content = string.Format(TemplateFiles.HtmlFile, FixProtocolRelativeUrls(content));
         }
         else if (widgetFile.WidgetFileType == WidgetFileType.DataJson)
         {
