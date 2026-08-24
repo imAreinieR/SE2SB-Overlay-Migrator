@@ -1,6 +1,7 @@
-﻿using StreamElementsToStreamerBotOverlayMigrator.Common;
+using StreamElementsToStreamerBotOverlayMigrator.Common;
 using StreamElementsToStreamerBotOverlayMigrator.Common.ExtensionMethods;
 using StreamElementsToStreamerBotOverlayMigrator.Data;
+using StreamElementsToStreamerBotOverlayMigrator.Data.Interfaces;
 using StreamElementsToStreamerBotOverlayMigrator.Templates;
 using System.Diagnostics;
 using System.IO;
@@ -12,51 +13,155 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Services;
 
 public static class WidgetFileImportAndExportService
 {
-    private readonly static List<string> _allowedImportFileExtensions = new() { ".html", ".js", ".css", ".json", ".zip" };
-    private readonly static List<string> _allowedWidgetFileExtensions = new() { ".html", ".js", ".css", ".json" };
-    private readonly static TimeSpan     _defaultRegexTimeout         = TimeSpan.FromSeconds(1);
+    private readonly static TimeSpan                   _defaultRegexTimeout = TimeSpan.FromSeconds(1);
+    private readonly static Dictionary<string, string> WidgetIniSectionToCanonicalFileName = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["HTML"]   = "widget.html",
+        ["CSS"]    = "widget.css",
+        ["JS"]     = "widget.js",
+        ["FIELDS"] = "fields.json",
+        ["DATA"]   = "data.json"
+    };
 
     public static IEnumerable<WidgetFile> FetchWidgetFiles(IEnumerable<string> filePaths)
-        => filePaths
-        .Where(filePath => _allowedImportFileExtensions.Contains(Path.GetExtension(filePath)) || File.GetAttributes(filePath).HasFlag(FileAttributes.Directory))
-        .SelectMany
-        (
-            filePath =>
-            {
-                bool isDirectory = File.GetAttributes(filePath).HasFlag(FileAttributes.Directory);
+    {
+        List<string> filePathList      = filePaths.ToList();
+        List<string> nonDirectoryPaths = filePathList.Where(filePath => !File.GetAttributes(filePath).HasFlag(FileAttributes.Directory)).ToList();
 
-                return isDirectory
-                    ? FetchWidgetFiles(Directory.EnumerateFiles(filePath, "*.*", SearchOption.AllDirectories))
-                    : Path.GetExtension(filePath).Equals(".zip", StringComparison.OrdinalIgnoreCase)
-                        ? UnZipAndExtractWidgetFiles(filePath)
-                        : new[] { new WidgetFile(Path.GetFileName(filePath), File.ReadAllText(filePath)) };
-            }
+        string? widgetIniPath = nonDirectoryPaths.FirstOrDefault
+        (
+            filePath => Path.GetFileName(filePath).Equals("widget.ini", StringComparison.OrdinalIgnoreCase)
         );
 
-    private static IEnumerable<WidgetFile> UnZipAndExtractWidgetFiles(string filePath)
+        if (widgetIniPath is not null)
+            return ExtractWidgetIoFiles(new LooseWidgetFileSource(nonDirectoryPaths), File.ReadAllText(widgetIniPath));
+
+        return filePathList
+            .Where(filePath => SupportedFileTypes.AllowedImportFileExtensions.Contains(Path.GetExtension(filePath)) || File.GetAttributes(filePath).HasFlag(FileAttributes.Directory))
+            .SelectMany
+            (
+                filePath =>
+                {
+                    bool isDirectory = File.GetAttributes(filePath).HasFlag(FileAttributes.Directory);
+
+                    return isDirectory
+                        ? FetchWidgetFiles(Directory.EnumerateFiles(filePath, "*.*", SearchOption.AllDirectories))
+                        : Path.GetExtension(filePath).Equals(".zip", StringComparison.OrdinalIgnoreCase)
+                            ? FetchWidgetFilesFromZip(filePath)
+                            : new[] { new WidgetFile(Path.GetFileName(filePath), EncodeFileContentForImport(File.ReadAllBytes(filePath), filePath)) };
+                }
+            );
+    }
+
+    private static List<WidgetFile> FetchWidgetFilesFromZip(string filePath)
     {
         using var file = File.OpenRead(filePath);
-        using var zip = new ZipArchive(file, ZipArchiveMode.Read);
+        using var zip  = new ZipArchive(file, ZipArchiveMode.Read);
 
-        return zip
-            .Entries
-            .Where(entry => _allowedWidgetFileExtensions.Contains(Path.GetExtension(entry.Name)))
+        var source = new ZipWidgetFileSource(zip);
+
+        ZipArchiveEntry? widgetIniEntry = zip.Entries.FirstOrDefault
+        (
+            entry => entry.Name.Equals("widget.ini", StringComparison.OrdinalIgnoreCase)
+        );
+
+        return widgetIniEntry is not null
+            ? ExtractWidgetIoFiles(source, ReadZipEntryAsText(widgetIniEntry))
+            : ExtractFilesByExtension(source, SupportedFileTypes.AllowedWidgetFileExtensions);
+    }
+
+    private static List<WidgetFile> ExtractWidgetIoFiles(IWidgetFileSource source, string iniContent)
+    {
+        Dictionary<string, string> sectionPaths = ParseWidgetIniPaths(iniContent);
+
+        var widgetFiles = new List<WidgetFile>();
+
+        foreach ((string section, string canonicalFileName) in WidgetIniSectionToCanonicalFileName)
+        {
+            if (!sectionPaths.TryGetValue(section, out string? referencedFileName))
+                continue;
+
+            string lookupName = Path.GetFileName(referencedFileName);
+
+            if (!source.TryReadFile(lookupName, out byte[] fileBytes))
+                continue;
+
+            widgetFiles.Add(new WidgetFile(canonicalFileName, EncodeFileContentForImport(fileBytes, canonicalFileName)));
+        }
+
+        return widgetFiles;
+    }
+
+    private static List<WidgetFile> ExtractFilesByExtension(IWidgetFileSource source, IEnumerable<string> allowedExtensions)
+        => source
+            .FileNames
+            .Where(fileName => allowedExtensions.Contains(Path.GetExtension(fileName)))
             .Select
             (
-                entry =>
+                fileName =>
                 {
-                    using var stream = entry.Open();
-                    return new WidgetFile(entry.Name, new StreamReader(stream).ReadToEnd());
+                    source.TryReadFile(fileName, out byte[] fileBytes);
+                    return new WidgetFile(fileName, EncodeFileContentForImport(fileBytes, fileName));
                 }
             )
             .ToList();
+
+    private static Dictionary<string, string> ParseWidgetIniPaths(string iniContent)
+    {
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        string? currentSection = null;
+
+        foreach (string rawLine in iniContent.Split('\n'))
+        {
+            string line = rawLine.Trim().TrimEnd('\r');
+
+            if (line.Length == 0 || line.StartsWith(";") || line.StartsWith("#"))
+                continue;
+
+            if (line.StartsWith("[") && line.EndsWith("]"))
+            {
+                currentSection = line[1..^1].Trim();
+                continue;
+            }
+
+            if (currentSection is null)
+                continue;
+
+            Match match = Regex.Match(line, @"^path\s*=\s*""(?<path>.*)""\s*$", RegexOptions.IgnoreCase);
+
+            if (match.Success)
+                result[currentSection] = match.Groups["path"].Value.Trim();
+        }
+
+        return result;
     }
+
+    private static byte[] ReadZipEntryAsBytes(ZipArchiveEntry entry)
+    {
+        using Stream stream = entry.Open();
+        using var memoryStream = new MemoryStream();
+        stream.CopyTo(memoryStream);
+        return memoryStream.ToArray();
+    }
+
+    private static string ReadZipEntryAsText(ZipArchiveEntry entry)
+        => System.Text.Encoding.UTF8.GetString(ReadZipEntryAsBytes(entry));
+
+    private static bool IsTextBasedExtension(string fileName)
+        => SupportedFileTypes
+            .DocumentExtensions
+            .Contains(Path.GetExtension(fileName), StringComparer.OrdinalIgnoreCase);
+
+    private static string EncodeFileContentForImport(byte[] fileBytes, string fileName)
+        => IsTextBasedExtension(fileName)
+            ? System.Text.Encoding.UTF8.GetString(fileBytes)
+            : Convert.ToBase64String(fileBytes);
 
     public static bool CheckIsValidFileSet(this IEnumerable<WidgetFile> widgetFiles, out string validationError)
     {
         var duplicates = new List<string>();
 
-        foreach (string extension in _allowedWidgetFileExtensions)
+        foreach (string extension in SupportedFileTypes.AllowedWidgetFileExtensions)
         {
             int count = widgetFiles.Count(file => Path.GetExtension(file.FileName).Equals(extension, StringComparison.OrdinalIgnoreCase));
 
@@ -91,10 +196,26 @@ public static class WidgetFileImportAndExportService
 
             foreach (WidgetFile widgetFile in widget.Files)
             {
-                string fileName    = widgetFile.GetFileNameForWidgetFileType();
-                string destination = Path.Combine(widget.FolderLocation, fileName);
+                string fileName          = widgetFile.GetFileNameForWidgetFileType();
+                string subFolderName     = widgetFile.WidgetFileType.GetSubFolderForWidgetFileType();
+                string destinationFolder = string.IsNullOrEmpty(subFolderName)
+                    ? widget.FolderLocation
+                    : Path.Combine(widget.FolderLocation, subFolderName);
 
-                File.WriteAllText(destination, GenerateFile(widgetFile, jsonData));
+                if (!Directory.Exists(destinationFolder))
+                    Directory.CreateDirectory(destinationFolder);
+
+                string destination = Path.Combine(destinationFolder, fileName);
+
+                if (widgetFile.WidgetFileType.IsTextBasedFile())
+                {
+                    File.WriteAllText(destination, GenerateFile(widgetFile, jsonData));
+                }
+                else
+                {
+                    byte[] fileBytes = Convert.FromBase64String(widgetFile.Content);
+                    File.WriteAllBytes(destination, fileBytes);
+                }
             }
 
             File.WriteAllText(Path.Combine(widget.FolderLocation, "streamerBotApiAndEventBridge.js"), TemplateFiles.ApiAndEventBridgeFile);

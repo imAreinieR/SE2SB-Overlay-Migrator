@@ -18,4 +18,25 @@ public static partial class ExtensionMethods
             _
                 => widgetFile.FileName
         };
+
+    public static string GetSubFolderForWidgetFileType(this WidgetFileType widgetFileType)
+        => widgetFileType switch
+        {
+            WidgetFileType.ImageAsset => "Images",
+            WidgetFileType.AudioAsset => "Audio",
+            WidgetFileType.VideoAsset => "Video",
+            _ => string.Empty
+        };
+
+    public static bool IsTextBasedFile(this WidgetFileType widgetFileType)
+        => widgetFileType     == WidgetFileType.Html
+            || widgetFileType == WidgetFileType.Css
+            || widgetFileType == WidgetFileType.Javascript
+            || widgetFileType == WidgetFileType.FieldJson
+            || widgetFileType == WidgetFileType.DataJson;
+
+    public static bool IsAssetFile(this WidgetFileType widgetFileType)
+        => widgetFileType     == WidgetFileType.ImageAsset
+            || widgetFileType == WidgetFileType.AudioAsset
+            || widgetFileType == WidgetFileType.VideoAsset;
 }

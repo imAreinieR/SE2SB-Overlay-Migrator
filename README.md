@@ -110,8 +110,10 @@ flowchart TB
   - [profanity-cleaner](https://www.npmjs.com/package/profanity-cleaner) — used by the `SE_API.sanitize` implementation to filter chat message content.
 
 ### Simple File Imports
-- Import `.html`, `.js`, `.css`, `.json` files or even an entire folder or `.zip` file.
+- Import `.html`, `.js`, `.css`, `.json`, images, audio, and video files or even an entire folder or `.zip` file.
 - Warns if `.html` is missing or if more than one file shares the same extension.
+
+> **Note:** Only a limited set of common formats is supported — see [Notes](#notes).
 
 ### One-Click!
 - Just one click to copy the URL and add to OBS as a browser source.
@@ -217,6 +219,8 @@ Click **Import** and select your overlay files. You'll typically need:
 - `widget.js`
 - `fields.json` and `data.json`
 
+> **Note:** Make sure to include any nessecary image, audio, or video files (see [supported formats](#notes))
+
 ### Step 3 — Fix any warnings
 If the warning banner appears, follow its instructions (e.g. add the missing HTML file, or remove a duplicate). The Generate button will remain disabled until the file set is ready.
 
@@ -245,8 +249,16 @@ Documents/
         ├── index.js
         ├── index.css
         ├── config.js
-        └── streamerBotApiAndEventBridge.js
+        ├── streamerBotApiAndEventBridge.js
+        ├── Images/
+        │   └── ...image asset files
+        ├── Audio/
+        │   └── ...audio asset files
+        └── Video/
+            └── ...video asset files
 ```
+
+> Asset folders (`Images`, `Audio`, `Video`) are only created if widget includes files of that type.
 
 ---
 
@@ -255,6 +267,10 @@ Documents/
 - **SE template variables** — `{{variableName}}` and `{variableName}` placeholders in your HTML and CSS are replaced at generation time using values from your `data.json`.
 - **Protocol-relative URLs** — Any `src="//..."` or `href="//..."` references in your HTML are automatically upgraded to `https://` to avoid mixed-content issues.
 - **Multiple `.json` files are allowed** — the tool accepts more than one `.json` file, unlike `.html`, `.css`, and `.js` where only one of each is permitted.
+- **Supported asset formats** — the following file types are recognized on import; other extensions will not be picked up:
+  - **Image:** `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.svg`, `.bmp`, `.ico`
+  - **Audio:** `.mp3`, `.wav`, `.m4a`, `.aac`
+  - **Video:** `.mp4`, `.webm`
 
 ---
 

@@ -47,6 +47,7 @@ public partial class MainWindow: Window
 
     protected override void OnClosing(CancelEventArgs e)
     {
+        WidgetManager.ResizeDatabaseIfNeeded();
         WidgetManager.CreateDatabaseBackupIfNeeded();
         base.OnClosing(e);
     }
@@ -208,9 +209,9 @@ public partial class MainWindow: Window
 
         var dialog = new OpenFileDialog
         {
-            Title       = "Select widget files",
+            Title = "Select widget files",
             Multiselect = true,
-            Filter      = "Widget files (*.html;*.js;*.css;*.json;*.zip)|*.html;*.js;*.css;*.json;*.zip|All files (*.*)|*.*"
+            Filter = Common.SupportedFileTypes.BuildImportFileDialogFilter()
         };
 
         if (dialog.ShowDialog() != true)

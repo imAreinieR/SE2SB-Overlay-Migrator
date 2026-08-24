@@ -37,6 +37,12 @@ public class WidgetFile
             return WidgetFileType.Css;
         if (fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase) && fileContent != null)
             return DetermineJsonFileType(fileContent);
+        if (SupportedFileTypes.ImageExtensions.Any(extension => fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)))
+            return WidgetFileType.ImageAsset;
+        if (SupportedFileTypes.AudioExtensions.Any(extension => fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)))
+            return WidgetFileType.AudioAsset;
+        if (SupportedFileTypes.VideoExtensions.Any(extension => fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)))
+            return WidgetFileType.VideoAsset;
 
         return WidgetFileType.Other;
     }
@@ -85,9 +91,12 @@ public class WidgetFile
                 WidgetFileType.Html       => System.Windows.Media.Color.FromArgb(255, 255,  99, 132),
                 WidgetFileType.Javascript => System.Windows.Media.Color.FromArgb(255,  54, 162, 235),
                 WidgetFileType.Css        => System.Windows.Media.Color.FromArgb(255, 255, 206,  86),
-                WidgetFileType.FieldJson  => System.Windows.Media.Color.FromArgb(255,  75, 192, 192),
-                WidgetFileType.DataJson   => System.Windows.Media.Color.FromArgb(255, 153, 102, 255),
-                _                         => System.Windows.Media.Color.FromArgb(255, 201, 203, 207)
+                WidgetFileType.FieldJson  => System.Windows.Media.Color.FromArgb(255, 108, 112, 122),
+                WidgetFileType.DataJson   => System.Windows.Media.Color.FromArgb(255, 255, 255, 255),
+                WidgetFileType.ImageAsset => System.Windows.Media.Color.FromArgb(255, 255, 159,  64),
+                WidgetFileType.AudioAsset => System.Windows.Media.Color.FromArgb(255,  75, 192, 192),
+                WidgetFileType.VideoAsset => System.Windows.Media.Color.FromArgb(255, 153, 102, 255),
+                _                         => System.Windows.Media.Color.FromArgb(255, 108, 112, 122)
             }
         );
 }

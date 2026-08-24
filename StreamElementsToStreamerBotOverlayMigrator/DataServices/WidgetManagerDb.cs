@@ -94,7 +94,6 @@ public static class WidgetManagerDb
             WHERE Id = $id;";
 
         command.Parameters.AddWithValue("$id", widget.Id);
-
         command.ExecuteNonQuery();
     }
 
