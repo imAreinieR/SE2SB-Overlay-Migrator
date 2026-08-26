@@ -23,6 +23,17 @@ public static class WidgetFileImportAndExportService
         ["DATA"]   = "data.json"
     };
 
+    public static void AddWidgetFilesToFromPaths(Widget widget, IEnumerable<string> paths)
+    {
+        foreach (WidgetFile widgetFile in FetchWidgetFiles(paths))
+        {
+            if (widget.Files.Any(file => file.FileName == widgetFile.FileName))
+                continue;
+
+            widget.AddWidgetFile(widgetFile);
+        }
+    }
+
     public static IEnumerable<WidgetFile> FetchWidgetFiles(IEnumerable<string> filePaths)
     {
         List<string> filePathList      = filePaths.ToList();

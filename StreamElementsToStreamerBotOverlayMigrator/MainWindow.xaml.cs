@@ -346,14 +346,7 @@ public partial class MainWindow: Window
 
     private void AddWidgetFilesToFromPaths(Widget widget, IEnumerable<string> paths)
     {
-        foreach (WidgetFile widgetFile in WidgetFileImportAndExportService.FetchWidgetFiles(paths))
-        {
-            if (widget.Files.Any(file => file.FileName == widgetFile.FileName))
-                continue;
-
-            widget.AddWidgetFile(widgetFile);
-        }
-
+        WidgetFileImportAndExportService.AddWidgetFilesToFromPaths(widget, paths);
         OnChanged();
     }
 
