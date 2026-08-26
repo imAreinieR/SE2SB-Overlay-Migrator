@@ -1,4 +1,5 @@
 using Microsoft.Web.WebView2.Core;
+using Microsoft.Win32;
 using StreamElementsToStreamerBotOverlayMigrator.Common;
 using StreamElementsToStreamerBotOverlayMigrator.Common.ExtensionMethods;
 using StreamElementsToStreamerBotOverlayMigrator.Controls;
@@ -30,6 +31,7 @@ public partial class WidgetConfigWindow: Window
     private readonly Dictionary<string, FrameworkElement> _fieldControls          = new ();
     private readonly List<WidgetDataField>                _allFields              = new ();
     private readonly Dictionary<string, string>           _fileNameAndContents    = new ();
+    private readonly List<AssetFieldControl>              _assetFieldControls     = new ();
     private          Dictionary<string, JsonElement>?     _dataValues;
     private          bool                                 _isDirty;
     private          bool                                 _webViewReady           = false;
@@ -198,7 +200,9 @@ public partial class WidgetConfigWindow: Window
         if (control is null)
             return null;
 
-        _fieldControls[widgetDataField.Key] = control;
+        _fieldControls[widgetDataField.Key] = control is AssetFieldControl assetFieldControl
+            ? assetFieldControl.Dropdown
+            : control;
 
         var row = new StackPanel
         {
@@ -459,36 +463,114 @@ public partial class WidgetConfigWindow: Window
             Tag = field.Key
         };
 
+        PopulateAssetDropdown(comboBox, assetWidgetFileType, valueStr);
+
+        var setButton = new Button
+        {
+            Style   = (Style) FindResource("FieldButton"),
+            Content = assetWidgetFileType switch
+            {
+                WidgetFileType.ImageAsset => "Set Image",
+                WidgetFileType.AudioAsset => "Set Audio",
+                WidgetFileType.VideoAsset => "Set Video",
+                _ => "Set File"
+            }
+        };
+
+        var assetFieldControl = new AssetFieldControl(comboBox, setButton, assetWidgetFileType);
+        _assetFieldControls.Add(assetFieldControl);
+
+        assetFieldControl.PlaybackError += (_, message) => SetStatus($"[ERROR] Couldn't play asset: {message}", error: true);
+        setButton.Click                 += (_, _)       => ImportAssetFile(assetFieldControl, assetWidgetFileType, field);
+        comboBox.SelectionChanged       += (_, _)       => UpdateAssetSelection(assetFieldControl, assetWidgetFileType);
+        comboBox.SelectionChanged       += OnControlChanged;
+
+        UpdateAssetSelection(assetFieldControl, assetWidgetFileType);
+
+        return assetFieldControl;
+    }
+
+    private void PopulateAssetDropdown(StyledDropdown comboBox, WidgetFileType assetWidgetFileType, string? selectTag)
+    {
+        comboBox.Items.Clear();
+
         IEnumerable<string> assets = _widget
             .Files
             .Where(file => file.WidgetFileType == assetWidgetFileType)
             .Select(file => file.FileName);
 
-        if (assets.Any())
-        {
-            foreach (string fileName in assets)
-                comboBox.Items.Add
-                (
-                    new ComboBoxItem
-                    {
-                        Content = fileName,
-                        Tag     = $"{assetWidgetFileType.GetSubFolderForWidgetFileType()}/{fileName}"
-                    }
-                );
-
-            foreach (ComboBoxItem item in comboBox.Items)
-            {
-                if (item.Tag?.ToString() == valueStr)
+        foreach (string fileName in assets)
+            comboBox.Items.Add
+            (
+                new ComboBoxItem
                 {
-                    comboBox.SelectedItem = item;
-                    break;
+                    Content = fileName,
+                    Tag     = $"{assetWidgetFileType.GetSubFolderForWidgetFileType()}/{fileName}"
                 }
+            );
+
+        if (string.IsNullOrEmpty(selectTag))
+            return;
+
+        foreach (ComboBoxItem item in comboBox.Items)
+        {
+            if (item.Tag?.ToString() == selectTag)
+            {
+                comboBox.SelectedItem = item;
+                break;
             }
-
-            comboBox.SelectionChanged += OnControlChanged;
         }
+    }
 
-        return comboBox;
+    private void UpdateAssetSelection(AssetFieldControl assetFieldControl, WidgetFileType assetWidgetFileType)
+    {
+        string? fileName = (assetFieldControl.Dropdown.SelectedItem as ComboBoxItem)?.Content?.ToString();
+
+        WidgetFile? widgetFile = string.IsNullOrEmpty(fileName)
+            ? null
+            : _widget
+                .Files
+                .FirstOrDefault(file => file.WidgetFileType == assetWidgetFileType && file.FileName == fileName);
+
+        assetFieldControl.LoadAsset(widgetFile);
+    }
+
+    private void ImportAssetFile(AssetFieldControl assetFieldControl, WidgetFileType assetWidgetFileType, WidgetDataField field)
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title  = $"Select {field.Label}",
+            Filter = assetWidgetFileType switch
+            {
+                WidgetFileType.ImageAsset => "Image files|*.png;*.jpg;*.jpeg;*.gif;*.webp;*.bmp|All files|*.*",
+                WidgetFileType.AudioAsset => "Audio files|*.mp3;*.wav;*.ogg;*.m4a|All files|*.*",
+                WidgetFileType.VideoAsset => "Video files|*.mp4;*.webm;*.mov|All files|*.*",
+                _                         => "All files|*.*"
+            }
+        };
+
+        if (dialog.ShowDialog() != true)
+            return;
+
+        try
+        {
+            WidgetFileImportAndExportService.AddWidgetFilesToFromPaths
+            (
+                _widget,
+                new[] { dialog.FileName }
+            );
+
+            string fileName = Path.GetFileName(dialog.FileName);
+            string newTag = $"{assetWidgetFileType.GetSubFolderForWidgetFileType()}/{fileName}";
+
+            PopulateAssetDropdown(assetFieldControl.Dropdown, assetWidgetFileType, newTag);
+
+            SetStatus($"[INFO] Imported '{fileName}'.", success: true);
+        }
+        catch (Exception exception)
+        {
+            SetStatus($"[ERROR] Failed to import asset: {exception.Message}", error: true);
+        }
     }
 
     private StyledDropdown BuildGoogleFontControl(WidgetDataField field, string valueStr)
@@ -969,6 +1051,18 @@ public partial class WidgetConfigWindow: Window
 
     private void TeardownWidget()
     {
+        foreach (AssetFieldControl assetFieldControl in _assetFieldControls)
+        {
+            try
+            {
+                assetFieldControl.Dispose();
+            }
+            catch
+            {}
+        }
+
+        _assetFieldControls.Clear();
+
         if (!_webViewReady)
             return;
 
