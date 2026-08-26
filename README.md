@@ -87,22 +87,38 @@ flowchart TB
   - Calls to the StreamElements API (e.g. channel info, counters) are rerouted to the StreamerBot WebSocket API.
   - Calls to the `Decapi API` and `unavatar.io` are cached for an hour to cut down on repeat network requests to help avoid hitting rate limits.
 - **`SE_API`** reimplements the subset of the `window.SE_API` helper object that StreamElements widgets commonly use (e.g. `SE_API.store`, `SE_API.counters`, `SE_API.sanitize`), backed by StreamerBot's global variables instead of StreamElements' cloud storage.
-- **Event listeners** subscribe to StreamerBot's Twitch events and translate each one into the matching StreamElements event your widget already knows how to handle:
+- **Event listeners** subscribe to StreamerBot's platform events and translate each one into the matching StreamElements event your widget already knows how to handle:
 
-  | StreamerBot Event | Simulated StreamElements Event |
-  |---|---|
-  | Follow | `follower-latest` |
-  | Subscription (new) | `subscriber-latest` |
-  | Subscription (resub) | `subscriber-latest` |
-  | Gift Sub (individual) | `subscriber-latest` |
-  | Gift Bomb (community) | `subscriber-latest` |
-  | Cheer (bits) | `cheer-latest` |
-  | Raid | `raid-latest` |
-  | Reward Redemption | `event` (`channelPointsRedemption`) |
-  | Chat Message | `message` |
-  | Chat Message Deleted | `delete-message` |
+| StreamerBot.Twitch Event | Simulated StreamElements Event |
+|---|---|
+| Follow | `follower-latest` |
+| Subscription (new) | `subscriber-latest` |
+| Subscription (resub) | `subscriber-latest` |
+| Gift Sub (individual) | `subscriber-latest` |
+| Gift Bomb (community) | `subscriber-latest` |
+| Cheer (bits) | `cheer-latest` |
+| Raid | `raid-latest` |
+| Reward Redemption | `event` (`channelPointsRedemption`) |
+| Chat Message | `message` |
+| Chat Message Deleted | `delete-message` |
+
+| StreamerBot.YouTube Event | Simulated StreamElements Event |
+|---|---|
+| New Subscriber (free) | `follower-latest` |
+| New Sponsor (new membership) | `subscriber-latest` |
+| Member Milestone (renewed membership) | `subscriber-latest` |
+| Gift Membership Received (individual) | `subscriber-latest` |
+| Membership Gift (community/batch) | `subscriber-latest` |
+| Super Chat | `cheer-latest` |
+| Super Sticker | `cheer-latest` |
+| Chat Message | `message` |
+| Chat Message Deleted | `delete-message` |
 
   > Hosting, tips, and a few other legacy StreamElements events aren't supported, as they're either no longer part of Twitch (e.g. hosting) or have no StreamerBot equivalent.
+  >
+  > **YouTube has no equivalent for:** Raids or Channel Points Reward Redemptions — StreamerBot exposes no corresponding trigger for these on YouTube, so widgets relying on `raid-latest` or `channelPointsRedemption` will not fire when running on a YouTube-connected StreamerBot instance.
+  >
+  > **Note on terminology:** YouTube's "Subscriber" (free) is StreamerBot's equivalent of a Twitch "Follow," while YouTube's paid "Membership" (Sponsor) is the equivalent of a Twitch "Subscription" — the naming differs from Twitch but the bridge maps them to the same simulated SE event so your widget doesn't need separate logic to tell them apart.
 
 > **Note — Third-party scripts:** The generated bridge file imports the following libraries at runtime:
   - [jQuery](https://jquery.com/) — DOM utilities used by many SE widgets.
