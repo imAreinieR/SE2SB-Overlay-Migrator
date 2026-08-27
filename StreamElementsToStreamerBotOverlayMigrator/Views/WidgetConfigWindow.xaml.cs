@@ -542,10 +542,10 @@ public partial class WidgetConfigWindow: Window
             Title  = $"Select {field.Label}",
             Filter = assetWidgetFileType switch
             {
-                WidgetFileType.ImageAsset => "Image files|*.png;*.jpg;*.jpeg;*.gif;*.webp;*.bmp|All files|*.*",
-                WidgetFileType.AudioAsset => "Audio files|*.mp3;*.wav;*.ogg;*.m4a|All files|*.*",
-                WidgetFileType.VideoAsset => "Video files|*.mp4;*.webm;*.mov|All files|*.*",
-                _                         => "All files|*.*"
+                WidgetFileType.ImageAsset => SupportedFileTypes.BuildFileDialogFilter("Image files", SupportedFileTypes.ImageExtensions),
+                WidgetFileType.AudioAsset => SupportedFileTypes.BuildFileDialogFilter("Audio files", SupportedFileTypes.AudioExtensions),
+                WidgetFileType.VideoAsset => SupportedFileTypes.BuildFileDialogFilter("Video files", SupportedFileTypes.VideoExtensions),
+                _                         => "All files (*.*)|*.*"
             }
         };
 
