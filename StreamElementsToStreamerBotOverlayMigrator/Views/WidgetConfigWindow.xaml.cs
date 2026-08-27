@@ -824,14 +824,18 @@ public partial class WidgetConfigWindow: Window
     private void OnWebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
     {
         var    uri               = new Uri(e.Request.Uri);
-        string filePath          = Path.Combine("wwwroot", uri.AbsolutePath.TrimStart('/'));
+        string filePath          = Path.Combine("wwwroot", uri.LocalPath.TrimStart('/'));
         string requestedFileName = Path.GetFileName(filePath);
 
         if (!_fileNameAndContents.TryGetValue(requestedFileName, out string? content))
             return;
 
+        byte[] bytes = SupportedFileTypes.IsTextBasedExtension(requestedFileName)
+            ? Encoding.UTF8.GetBytes(content)
+            : Convert.FromBase64String(content);
+
         // NOTE: Do NOT dispose the stream here — WebView2 reads it asynchronously after this handler returns.
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+        var stream = new MemoryStream(bytes);
         e.Response = PreviewWebView.CoreWebView2.Environment.CreateWebResourceResponse
         (
             stream,
@@ -1295,14 +1299,57 @@ public partial class WidgetConfigWindow: Window
     }
 
     private static string GetMimeType(string path)
-        => Path.GetExtension(path) switch
+        => Path.GetExtension(path).ToLowerInvariant() switch
         {
-            ".css"  => "text/css",
-            ".js"   => "application/javascript",
+            // Text / web
+            ".css" => "text/css",
+            ".js" => "application/javascript",
+            ".mjs" => "application/javascript",
             ".html" => "text/html",
-            ".png"  => "image/png",
-            ".svg"  => "image/svg+xml",
-            _       => "application/octet-stream"
+            ".htm" => "text/html",
+            ".json" => "application/json",
+            ".xml" => "application/xml",
+            ".txt" => "text/plain",
+            ".wasm" => "application/wasm",
+
+            // Images
+            ".png" => "image/png",
+            ".jpg" => "image/jpeg",
+            ".jpeg" => "image/jpeg",
+            ".gif" => "image/gif",
+            ".svg" => "image/svg+xml",
+            ".webp" => "image/webp",
+            ".bmp" => "image/bmp",
+            ".ico" => "image/x-icon",
+            ".avif" => "image/avif",
+            ".tif" => "image/tiff",
+            ".tiff" => "image/tiff",
+
+            // Video
+            ".mp4" => "video/mp4",
+            ".webm" => "video/webm",
+            ".ogv" => "video/ogg",
+            ".mov" => "video/quicktime",
+            ".avi" => "video/x-msvideo",
+            ".mkv" => "video/x-matroska",
+
+            // Audio
+            ".mp3" => "audio/mpeg",
+            ".wav" => "audio/wav",
+            ".ogg" => "audio/ogg",
+            ".oga" => "audio/ogg",
+            ".m4a" => "audio/mp4",
+            ".aac" => "audio/aac",
+            ".flac" => "audio/flac",
+            ".weba" => "audio/webm",
+
+            // Fonts (common in wwwroot bundles, cheap to include)
+            ".woff" => "font/woff",
+            ".woff2" => "font/woff2",
+            ".ttf" => "font/ttf",
+            ".otf" => "font/otf",
+
+            _ => "application/octet-stream"
         };
 
     private void SetStatus(string message, bool error = false, bool success = false)

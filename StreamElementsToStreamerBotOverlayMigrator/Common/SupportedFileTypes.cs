@@ -1,4 +1,6 @@
-﻿namespace StreamElementsToStreamerBotOverlayMigrator.Common;
+﻿using System.IO;
+
+namespace StreamElementsToStreamerBotOverlayMigrator.Common;
 
 internal static class SupportedFileTypes
 {
@@ -23,4 +25,7 @@ internal static class SupportedFileTypes
         string pattern = string.Join(";", AllowedImportFileExtensions.Select(extension => $"*{extension}"));
         return $"{label} ({pattern})|{pattern}|All files (*.*)|*.*";
     }
+
+    public static bool IsTextBasedExtension(string fileName)
+        => DocumentExtensions.Contains(Path.GetExtension(fileName), StringComparer.OrdinalIgnoreCase);
 }

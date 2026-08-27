@@ -158,13 +158,8 @@ public static class WidgetFileImportAndExportService
     private static string ReadZipEntryAsText(ZipArchiveEntry entry)
         => System.Text.Encoding.UTF8.GetString(ReadZipEntryAsBytes(entry));
 
-    private static bool IsTextBasedExtension(string fileName)
-        => SupportedFileTypes
-            .DocumentExtensions
-            .Contains(Path.GetExtension(fileName), StringComparer.OrdinalIgnoreCase);
-
     private static string EncodeFileContentForImport(byte[] fileBytes, string fileName)
-        => IsTextBasedExtension(fileName)
+        => SupportedFileTypes.IsTextBasedExtension(fileName)
             ? System.Text.Encoding.UTF8.GetString(fileBytes)
             : Convert.ToBase64String(fileBytes);
 
