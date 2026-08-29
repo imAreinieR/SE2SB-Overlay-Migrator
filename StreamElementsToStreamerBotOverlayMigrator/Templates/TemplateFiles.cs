@@ -352,7 +352,7 @@ function dispatchSESessionUpdateEvent() {
 
 // follower-latest - New Follower
 client.on('Twitch.Follow', ({ event, data }) => {
-  const followerUsername = data.user_name ?? '';
+  const followerUsername = data.targetUser.name;
 
   SESSION['follower-latest'].name    = followerUsername;
   SESSION['follower-session'].count += 1;
@@ -363,9 +363,9 @@ client.on('Twitch.Follow', ({ event, data }) => {
     data: {
       avatar:      '',
       displayName: followerUsername,
-      username:    data.user_login ?? '',
-      name:        data.user_login ?? '',
-      providerId:  data.user_id ?? '12345'
+      username:    data.targetUser.login,
+      name:        data.targetUser.login,
+      providerId:  data.targetUser.id ?? '12345'
     }
   });
 
@@ -376,13 +376,13 @@ client.on('Twitch.Follow', ({ event, data }) => {
 client.on('Twitch.Sub', ({ event, data }) => {
   const subscriberUsername = data.user?.name ?? '';
   const subscriberLogin    = data.user?.login ?? '';
-  const durationMonth      = data.durationMonths ?? 1;
+  const durationMonths     = data.durationMonths ?? 1;
   const subTier            = data.subTier ?? '1000';
   const message            = data.systemMessage ?? '';
 
   SESSION['subscriber-latest'] = {
     name:    subscriberUsername,
-    amount:  durationMonth,
+    amount:  durationMonths,
     tier:    subTier,
     message: message,
     sender:  subscriberLogin
@@ -390,7 +390,7 @@ client.on('Twitch.Sub', ({ event, data }) => {
 
   SESSION['subscriber-new-latest'] = {
     name:    subscriberUsername,
-    amount:  durationMonth,
+    amount:  durationMonths,
     message: message
   };
 
@@ -401,12 +401,12 @@ client.on('Twitch.Sub', ({ event, data }) => {
   dispatchSEEvent('subscriber-latest', {
     service: 'twitch',
     data: {
-      amount:      durationMonth,
+      amount:      durationMonths,
       avatar:      '',
       displayName: subscriberUsername,
       username:    subscriberLogin,
       name:        subscriberLogin,
-      providerId:  data.user?.id ?? '12345',
+      providerId:  data.user.id ?? '12345',
       tier:        subTier,
       gifted:      false,
       message:     message
@@ -420,7 +420,7 @@ client.on('Twitch.Sub', ({ event, data }) => {
 client.on('Twitch.ReSub', ({ event, data }) => {
   const subscriberUsername = data.user?.name ?? '';
   const subscriberLogin    = data.user?.login ?? '';
-  const durationMonths      = data.durationMonths ?? 1;
+  const durationMonths     = data.durationMonths ?? 1;
   const subTier            = data.subTier ?? '1000';
   const message            = data.text ?? data.systemMessage ?? '';
 
@@ -452,7 +452,7 @@ client.on('Twitch.ReSub', ({ event, data }) => {
       name:        subscriberLogin,
       providerId:  data.user?.id ?? '12345',
       tier:        subTier,
-      gifted:      data.isGift ? 1 : 0,
+      gifted:      data.isGift,
       message:     message
     }
   });
@@ -500,7 +500,7 @@ const senderUsername = data.user?.name ?? data.user?.login ?? '';
 // subscriber-latest - Gift Bomb (community mass gift)
 client.on('Twitch.GiftBomb', ({ event, data }) => {
   const senderUsername = data.user?.name ?? data.user?.login ?? '';
-  const totalGifts     = data.gifts ?? 1;
+  const totalGifts     = data.total ?? 1;
 
   SESSION['subscriber-gifted-latest'] = {
     name:   senderUsername,
