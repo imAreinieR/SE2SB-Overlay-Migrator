@@ -13,6 +13,7 @@ public static class TemplateFiles
   <script src=""https://cdn.jsdelivr.net/npm/@streamerbot/client@1.12.2/dist/streamerbot-client.js""></script>
   <script src=""https://cdn.jsdelivr.net/npm/profanity-cleaner@0.0.3/dist/profanity-cleaner.min.js""></script>
   <script src=""config.js""></script>
+  <script src=""sessionData.js""></script>
   <script src=""index.js""></script>
   <script src=""streamerBotApiAndEventBridge.js""></script>
 </head>
@@ -23,6 +24,130 @@ public static class TemplateFiles
 </html>";
 
     public const string JavascriptDataFile = "const CONFIG = {0}";
+
+    public const string SessionDataFile = @"// SE Session Data - Stores the session data for the widget in-memory; automatically cleared on refresh
+const SESSION = {
+  // --- Twitch: followers ---
+  'follower-latest':  { name:   '' },
+  'follower-session': { count:  0  },
+  'follower-week':    { count:  0  },
+  'follower-month':   { count:  0  },
+  'follower-goal':    { amount: 0  },
+  'follower-total':   { count:  0  },
+  'follower-recent':  [],
+
+  // --- Twitch: subscribers ---
+  'subscriber-latest':         { name: '', amount: 0, tier: '', gifted: false, communityGifted: false, sender: '', message: '' },
+  'subscriber-new-latest':     { name: '', amount: 0, message: '' },
+  'subscriber-resub-latest':   { name: '', amount: 0, message: '' },
+  'subscriber-gifted-latest':  { name: '', amount: 0, message: '', tier: '', sender: '' },
+  'subscriber-session':        { count:  0 },
+  'subscriber-new-session':    { count:  0 },
+  'subscriber-resub-session':  { count:  0 },
+  'subscriber-gifted-session': { count:  0 },
+  'subscriber-week':           { count:  0 },
+  'subscriber-month':          { count:  0 },
+  'subscriber-goal':           { amount: 0 },
+  'subscriber-total':          { count:  0 },
+  'subscriber-points':         { amount: 0 },
+  'subscriber-alltime-gifter': { name: '', amount: 0 },
+  'subscriber-recent':         [],
+  'community-gift-latest':     { name: '', amount: 0, tier: '' },
+
+  // --- Twitch: raids / hosts (hosting removed by Twitch in 2023) ---
+  'host-latest': { name: '', amount: 0 },
+  'host-recent': [],
+  'raid-latest': { name: '', amount: 0 },
+  'raid-recent': [],
+
+  // --- Twitch: cheers (bits) ---
+  'cheer-session':              { amount: 0 },
+  'cheer-week':                 { amount: 0 },
+  'cheer-month':                { amount: 0 },
+  'cheer-total':                { amount: 0 },
+  'cheer-count':                { count:  0 },
+  'cheer-goal':                 { amount: 0 },
+  'cheer-latest':               { name: '', amount: 0, message: '' },
+  'cheer-session-top-donation': { name: '', amount: 0 },
+  'cheer-weekly-top-donation':  { name: '', amount: 0 },
+  'cheer-monthly-top-donation': { name: '', amount: 0 },
+  'cheer-alltime-top-donation': { name: '', amount: 0 },
+  'cheer-session-top-donator':  { name: '', amount: 0 },
+  'cheer-weekly-top-donator':   { name: '', amount: 0 },
+  'cheer-monthly-top-donator':  { name: '', amount: 0 },
+  'cheer-alltime-top-donator':  { name: '', amount: 0 },
+  'cheer-recent':               [],
+
+  // --- Twitch: hype train ---
+  'hypetrain-latest':                  { amount: 0, active: 0, level: 0, levelChanged: 0, name: '', type: '' },
+  'hypetrain-level-goal':              { amount: 0 },
+  'hypetrain-level-progress':          { amount: 0, percent: 0 },
+  'hypetrain-total':                   { amount: 0 },
+  'hypetrain-latest-top-contributors': [],
+
+  // --- Twitch: channel points ---
+  'channel-points-latest': { name: '', amount: 0, redemption: '', message: '' },
+
+  // --- Not in scope ---
+  'charityCampaignDonation-latest':               { name: '', amount: 0 },
+  'charityCampaignDonation-session-top-donation': { name: '', amount: 0 },
+  'charityCampaignDonation-weekly-top-donation':  { name: '', amount: 0 },
+  'charityCampaignDonation-monthly-top-donation': { name: '', amount: 0 },
+  'charityCampaignDonation-alltime-top-donation': { name: '', amount: 0 },
+  'charityCampaignDonation-session-top-donator':  { name: '', amount: 0 },
+  'charityCampaignDonation-weekly-top-donator':   { name: '', amount: 0 },
+  'charityCampaignDonation-monthly-top-donator':  { name: '', amount: 0 },
+  'charityCampaignDonation-alltime-top-donator':  { name: '', amount: 0 },
+  'charityCampaignDonation-recent':               [],
+  'cheerPurchase-latest':                         { name: '', amount: 0 },
+  'cheerPurchase-session-top-donation':           { name: '', amount: 0 },
+  'cheerPurchase-weekly-top-donation':            { name: '', amount: 0 },
+  'cheerPurchase-monthly-top-donation':           { name: '', amount: 0 },
+  'cheerPurchase-alltime-top-donation':           { name: '', amount: 0 },
+  'cheerPurchase-session-top-donator':            { name: '', amount: 0 },
+  'cheerPurchase-weekly-top-donator':             { name: '', amount: 0 },
+  'cheerPurchase-monthly-top-donator':            { name: '', amount: 0 },
+  'cheerPurchase-alltime-top-donator':            { name: '', amount: 0 },
+  'cheerPurchase-recent':                         [],
+  'superchat-latest':                             { name: '', amount: 0 },
+  'superchat-session-top-donation':               { name: '', amount: 0 },
+  'superchat-weekly-top-donation':                { name: '', amount: 0 },
+  'superchat-monthly-top-donation':               { name: '', amount: 0 },
+  'superchat-alltime-top-donation':               { name: '', amount: 0 },
+  'superchat-session-top-donator':                { name: '', amount: 0 },
+  'superchat-weekly-top-donator':                 { name: '', amount: 0 },
+  'superchat-monthly-top-donator':                { name: '', amount: 0 },
+  'superchat-alltime-top-donator':                { name: '', amount: 0 },
+  'superchat-session':                            { amount: 0 },
+  'superchat-week':                               { amount: 0 },
+  'superchat-month':                              { amount: 0 },
+  'superchat-total':                              { amount: 0 },
+  'superchat-count':                              { count:  0 },
+  'superchat-goal':                               { amount: 0 },
+  'superchat-recent':                             [],
+  'tip-latest':                                   { name: '', amount: 0 },
+  'tip-session-top-donation':                     { name: '', amount: 0 },
+  'tip-weekly-top-donation':                      { name: '', amount: 0 },
+  'tip-monthly-top-donation':                     { name: '', amount: 0 },
+  'tip-alltime-top-donation':                     { name: '', amount: 0 },
+  'tip-session-top-donator':                      { name: '', amount: 0 },
+  'tip-weekly-top-donator':                       { name: '', amount: 0 },
+  'tip-monthly-top-donator':                      { name: '', amount: 0 },
+  'tip-alltime-top-donator':                      { name: '', amount: 0 },
+  'tip-session':                                  { amount: 0 },
+  'tip-week':                                     { amount: 0 },
+  'tip-month':                                    { amount: 0 },
+  'tip-total':                                    { amount: 0 },
+  'tip-count':                                    { count:  0 },
+  'tip-goal':                                     { amount: 0 },
+  'tip-recent':                                   [],
+  'merch-goal-orders':                            { amount: 0 },
+  'merch-goal-items':                             { amount: 0 },
+  'merch-goal-total':                             { amount: 0 },
+  'merch-latest':                                 { name: '', amount: 0, items: [] },
+  'merch-recent':                                 [],
+  'purchase-latest':                              { name: '', amount: 0, avatar: '', message: '', items: [] }
+};";
 
     public const string ApiAndEventBridgeFile = @"// EventAndApiBridge - bridges StreamElements Widget with StreamerBot for both events and API calls"
         + "\n\n" + ApiInterceptorsFile
@@ -51,9 +176,13 @@ async function sendOnWidgetLoadEvent() {
   const broadcaster = await client.getBroadcaster();
   const seEvent = new CustomEvent('onWidgetLoad', {
     detail: {
-      session:  {},
+      session:  { data: SESSION },
       recents:  {},
-      currency: {},
+      currency: {
+        name:   'U.S. Dollar',
+        code:   'USD',
+        symbol: '$'
+      }
       channel: {
         username:   broadcaster.platforms['twitch'].broadcastUser,
         apiToken:   '', // this is StreamElements API token
@@ -212,58 +341,140 @@ function dispatchSEEvent(listener, eventData) {
   }
 }
 
+function dispatchSESessionUpdateEvent() {
+  const seEvent = new CustomEvent('onSessionUpdate', {
+    detail: {
+      session: SESSION
+    }
+  });
+  window.dispatchEvent(seEvent);
+}
+
 // follower-latest - New Follower
 client.on('Twitch.Follow', ({ event, data }) => {
+  const followerUsername = data.user_name ?? '';
+
+  SESSION['follower-latest'].name    = followerUsername;
+  SESSION['follower-session'].count += 1;
+  SESSION['follower-total'].count   += 1;
+
   dispatchSEEvent('follower-latest', {
     service: 'twitch',
     data: {
       avatar:      '',
-      displayName: data.user_name ?? '',
+      displayName: followerUsername,
       username:    data.user_login ?? '',
       name:        data.user_login ?? '',
       providerId:  data.user_id ?? '12345'
     }
   });
+
+  dispatchSESessionUpdateEvent();
 });
 
 // subscriber-latest - New Subscriber (first sub only)
 client.on('Twitch.Sub', ({ event, data }) => {
+  const subscriberUsername = data.user?.name ?? '';
+  const subscriberLogin    = data.user?.login ?? '';
+  const durationMonth      = data.durationMonths ?? 1;
+  const subTier            = data.subTier ?? '1000';
+  const message            = data.systemMessage ?? '';
+
+  SESSION['subscriber-latest'] = {
+    name:    subscriberUsername,
+    amount:  durationMonth,
+    tier:    subTier,
+    message: message,
+    sender:  subscriberLogin
+  };
+
+  SESSION['subscriber-new-latest'] = {
+    name:    subscriberUsername,
+    amount:  durationMonth,
+    message: message
+  };
+
+  SESSION['subscriber-session'].count     += 1;
+  SESSION['subscriber-new-session'].count += 1;
+  SESSION['subscriber-total'].count       += 1;
+
   dispatchSEEvent('subscriber-latest', {
     service: 'twitch',
     data: {
-      amount:      1,
+      amount:      durationMonth,
       avatar:      '',
-      displayName: data.user?.name ?? '',
-      username:    data.user?.login ?? '',
-      name:        data.user?.login ?? '',
+      displayName: subscriberUsername,
+      username:    subscriberLogin,
+      name:        subscriberLogin,
       providerId:  data.user?.id ?? '12345',
-      tier:        '1000',
+      tier:        subTier,
       gifted:      false,
-      message:     data.systemMessage ?? ''
+      message:     message
     }
   });
+
+  dispatchSESessionUpdateEvent();
 });
 
 // subscriber-latest - Resub
 client.on('Twitch.ReSub', ({ event, data }) => {
+  const subscriberUsername = data.user?.name ?? '';
+  const subscriberLogin    = data.user?.login ?? '';
+  const durationMonths      = data.durationMonths ?? 1;
+  const subTier            = data.subTier ?? '1000';
+  const message            = data.text ?? data.systemMessage ?? '';
+
+  SESSION['subscriber-latest'] = {
+    name:    subscriberUsername,
+    amount:  durationMonths,
+    tier:    subTier,
+    message: message,
+    sender:  subscriberLogin
+  };
+
+  SESSION['subscriber-resub-latest'] = {
+    name:    subscriberUsername,
+    amount:  durationMonths,
+    message: message
+  };
+
+  SESSION['subscriber-session'].count       += 1;
+  SESSION['subscriber-resub-session'].count += 1;
+  SESSION['subscriber-total'].count         += 1;
+
   dispatchSEEvent('subscriber-latest', {
     service: 'twitch',
     data: {
-      amount:      data.cumulativeMonths ?? 1,
+      amount:      durationMonths,
       avatar:      '',
-      displayName: data.user?.name ?? '',
-      username:    data.user?.login ?? '',
-      name:        data.user?.login ?? '',
+      displayName: subscriberUsername,
+      username:    subscriberLogin,
+      name:        subscriberLogin,
       providerId:  data.user?.id ?? '12345',
-      tier:        '1000',
+      tier:        subTier,
       gifted:      data.isGift ? 1 : 0,
-      message:     data.text ?? data.systemMessage ?? ''
+      message:     message
     }
   });
+
+  dispatchSESessionUpdateEvent();
 });
 
 // subscriber-latest - Individual Gift Sub
 client.on('Twitch.GiftSub', ({ event, data }) => {
+const senderUsername = data.user?.name ?? data.user?.login ?? '';
+
+  SESSION['subscriber-gifted-latest'] = {
+    name:   senderUsername,
+    amount: 1,
+  };
+
+  SESSION['subscriber-session'].count        += 1;
+  SESSION['subscriber-new-session'].count    += 1;
+  SESSION['subscriber-total'].count          += 1;
+  SESSION['subscriber-gifted-session'].count += 1;
+  SESSION['subscriber-new-session'].count    += 1;
+
   dispatchSEEvent('subscriber-latest', {
     service: 'twitch',
     data: {
@@ -274,7 +485,7 @@ client.on('Twitch.GiftSub', ({ event, data }) => {
       name:                  data.recipient?.name ?? '',
       providerId:            data.user?.id ?? '12345',
       tier:                  '1000',
-      sender:                data.user?.name ?? data.user?.login ?? '',
+      sender:                senderUsername,
       gifted:                true,
       message:               data.systemMessage ?? '',
       bulkGifted:            data.randomCommunitySubGift,
@@ -282,21 +493,37 @@ client.on('Twitch.GiftSub', ({ event, data }) => {
       playedAsCommunityGift: false
     }
   });
+
+  dispatchSESessionUpdateEvent();
 });
 
 // subscriber-latest - Gift Bomb (community mass gift)
 client.on('Twitch.GiftBomb', ({ event, data }) => {
+  const senderUsername = data.user?.name ?? data.user?.login ?? '';
+  const totalGifts     = data.gifts ?? 1;
+
+  SESSION['subscriber-gifted-latest'] = {
+    name:   senderUsername,
+    amount: totalGifts,
+  };
+
+  SESSION['subscriber-session'].count        += totalGifts;
+  SESSION['subscriber-new-session'].count    += totalGifts;
+  SESSION['subscriber-total'].count          += totalGifts;
+  SESSION['subscriber-gifted-session'].count += totalGifts;
+  SESSION['subscriber-new-session'].count    += totalGifts;
+
   dispatchSEEvent('subscriber-latest', {
     service: 'twitch',
     data: {
-      amount:                data.gifts ?? 1,
+      amount:                totalGifts,
       avatar:                '',
       displayName:           data.recipient?.name ?? '',
       username:              data.recipient?.name ?? '',
       name:                  data.recipient?.name ?? '',
       providerId:            data.user?.id ?? '12345',
       tier:                  '1000',
-      sender:                data.user?.name ?? data.user?.login ?? '',
+      sender:                senderUsername,
       gifted:                true,
       message:               data.systemMessage ?? '',
       bulkGifted:            true,
@@ -304,22 +531,40 @@ client.on('Twitch.GiftBomb', ({ event, data }) => {
       playedAsCommunityGift: true
     }
   });
+
+  dispatchSESessionUpdateEvent();
 });
 
 // cheer-latest - Bits cheer
 client.on('Twitch.Cheer', ({ event, data }) => {
+  const username =  data.anonymous ? 'anonymous' : data.recipient?.name ?? '';
+  const bits     = data.bits ?? 0;
+  const message  = data.text ?? '';
+
+  SESSION['cheer-latest'] = {
+    name:    username,
+    amount:  bits,
+    message: message
+  };
+
+  SESSION['cheer-session'].amount += bits;
+  SESSION['cheer-total'].amount   += bits;
+  SESSION['cheer-count'].count    += bits;
+
   dispatchSEEvent('cheer-latest', {
     service: 'twitch',
     data: {
-      amount:      data.bits ?? 0,
+      amount:      bits,
       avatar:      '',
-      displayName: data.anonymous ? 'anonymous' : data.recipient?.name ?? '',
-      username:    data.anonymous ? 'anonymous' : data.recipient?.name ?? '',
-      name:        data.anonymous ? 'anonymous' : data.recipient?.name ?? '',
-      providerId:  data.anonymous ? '12345'     : data.user?.id        ?? '12345',
-      message:     data.text ?? ''
+      displayName: username,
+      username:    username,
+      name:        username,
+      providerId:  data.anonymous ? '12345' : data.user?.id ?? '12345',
+      message:     message
     }
   });
+
+  dispatchSESessionUpdateEvent();
 });
 
 // raid-latest - Incoming raid
@@ -360,6 +605,24 @@ client.on('Twitch.RewardRedemption', ({ event, data }) => {
     activityId:         generateUuid(),
     sessionEventsCount: 1
   });
+});
+
+client.on('Twitch.GoalBegin', ({ event, data }) => {
+  switch (data.type) {
+    case 'follower':
+      SESSION['follower-goal'].amount   = data.targetAmount  ?? 0;
+      break;
+    case 'subscription':
+      SESSION['subscriber-goal'].amount = data.targetAmount  ?? 0;
+      break;
+    case 'new_bit':
+      SESSION['cheer-goal'].amount      = data.targetAmount  ?? 0;
+      break;
+    default:
+      console.warn(`Unhandled Twitch goal type on GoalBegin: ${data.type}`);
+  }
+
+  dispatchSESessionUpdateEvent();
 });
 
 // bot:counter & kvstore:update - Updated global variables for counters and key-value pairs
