@@ -13,7 +13,6 @@ public static class TemplateFiles
   <script src=""https://cdn.jsdelivr.net/npm/@streamerbot/client@1.12.2/dist/streamerbot-client.js""></script>
   <script src=""https://cdn.jsdelivr.net/npm/profanity-cleaner@0.0.3/dist/profanity-cleaner.min.js""></script>
   <script src=""config.js""></script>
-  <script src=""sessionData.js""></script>
   <script src=""index.js""></script>
   <script src=""streamerBotApiAndEventBridge.js""></script>
 </head>
@@ -23,7 +22,8 @@ public static class TemplateFiles
 </body>
 </html>";
 
-    public const string JavascriptDataFile = "const CONFIG = {0}";
+    public const string JavascriptDataFile = "const CONFIG = {0}"
+        + "\n\n" + SessionDataFile;
 
     public const string SessionDataFile = @"// SE Session Data - Stores the session data for the widget in-memory; automatically cleared on refresh
 const SESSION = {
