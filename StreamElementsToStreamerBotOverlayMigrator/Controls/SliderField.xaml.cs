@@ -52,6 +52,22 @@ public partial class SliderField: UserControl
 
     private bool _updating;
 
+    public void SetRange(double minimum, double maximum, double? step = null)
+    {
+        if (minimum > maximum)
+            throw new ArgumentException($"Minimum ({minimum}) cannot exceed Maximum ({maximum}).");
+
+        _updating = true;
+        SetValue(MinimumProperty, minimum);
+        SetValue(MaximumProperty, maximum);
+
+        if (step is not null)
+            SetValue(StepProperty, step.Value);
+
+        _updating = false;
+        SyncSlider();
+    }
+
     public SliderField()
     {
         InitializeComponent();
@@ -82,7 +98,7 @@ public partial class SliderField: UserControl
 
     private static void OnRangeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is not SliderField control)
+        if (d is not SliderField control || control._updating)
             return;
 
         control.SyncSlider();
@@ -95,11 +111,14 @@ public partial class SliderField: UserControl
 
         _updating = true;
 
-        TrackSlider.Minimum           = Minimum;
-        TrackSlider.Maximum           = Maximum;
-        TrackSlider.TickFrequency     = Step;
+        double min = Minimum;
+        double max = Math.Max(Maximum, min); // never let max < min reach the Slider/Clamp
+
+        TrackSlider.Minimum             = min;
+        TrackSlider.Maximum             = max;
+        TrackSlider.TickFrequency       = Step;
         TrackSlider.IsSnapToTickEnabled = Step >= 1;
-        TrackSlider.Value             = Math.Clamp(Value, Minimum, Maximum);
+        TrackSlider.Value               = Math.Clamp(Value, min, max);
 
         _updating = false;
 

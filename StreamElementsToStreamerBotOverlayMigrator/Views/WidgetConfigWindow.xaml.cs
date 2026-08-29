@@ -229,21 +229,29 @@ public partial class WidgetConfigWindow: Window
     {
         string valueStr = field.Value?.ToString() ?? string.Empty;
 
-        return field.Type.ToLowerInvariant() switch
+        try
         {
-            "text"        => BuildTextControl       (field, valueStr),
-            "checkbox"    => BuildCheckboxControl   (field, valueStr),
-            "colorpicker" => BuildColorPickerControl(field, valueStr),
-            "number"      => BuildNumberControl     (field, valueStr),
-            "slider"      => BuildSliderControl     (field, valueStr),
-            "dropdown"    => BuildDropdownControl   (field, valueStr),
-            "image-input" => BuildImageInputControl (field, valueStr),
-            "video-input" => BuildVideoInputControl (field, valueStr),
-            "sound-input" => BuildAudioInputControl (field, valueStr),
-            "googlefont"  => BuildGoogleFontControl (field, valueStr),
-            "button"      => BuildButtonControl     (field),
-            _             => BuildUnsupportedControl(field)
-        };
+            return field.Type.ToLowerInvariant() switch
+            {
+                "text"        => BuildTextControl       (field, valueStr),
+                "checkbox"    => BuildCheckboxControl   (field, valueStr),
+                "colorpicker" => BuildColorPickerControl(field, valueStr),
+                "number"      => BuildNumberControl     (field, valueStr),
+                "slider"      => BuildSliderControl     (field, valueStr),
+                "dropdown"    => BuildDropdownControl   (field, valueStr),
+                "image-input" => BuildImageInputControl (field, valueStr),
+                "video-input" => BuildVideoInputControl (field, valueStr),
+                "sound-input" => BuildAudioInputControl (field, valueStr),
+                "googlefont"  => BuildGoogleFontControl (field, valueStr),
+                "button"      => BuildButtonControl     (field),
+                _             => BuildUnsupportedControl(field)
+            };
+        }
+        catch (Exception exception)
+        {
+            SetStatus($"[ERROR] Failed to build control for '{field.Key}': {exception.Message}", error: true);
+            return BuildUnsupportedControl(field, "failed to build");
+        }
     }
 
     private void ShowNoFieldsMessage(string message)
@@ -395,16 +403,18 @@ public partial class WidgetConfigWindow: Window
 
     private SliderField BuildSliderControl(WidgetDataField field, string valueStr)
     {
+        if (field.Min is double mn && field.Max is double mx && mn > mx)
+            throw new InvalidOperationException($"Field '{field.Key}': Min ({mn}) > Max ({mx}).");
+
         var sliderField = new SliderField
         {
-            Minimum = field.Min  ?? 0,
-            Maximum = field.Max  ?? 100,
-            Step    = field.Step ?? 1,
-            Value   = double.TryParse(valueStr, out double initialSlider)
-                ? initialSlider
-                : field.Min ?? 0,
-            Tag     = field.Key
+            Tag = field.Key
         };
+
+        sliderField.SetRange(field.Min ?? 0, field.Max ?? 100, field.Step ?? 1);
+        sliderField.Value = double.TryParse(valueStr, out double initialSlider)
+            ? initialSlider
+            : field.Min ?? 0;
         sliderField.ValueChanged += OnControlChanged;
 
         return sliderField;
@@ -619,10 +629,10 @@ public partial class WidgetConfigWindow: Window
         return button;
     }
 
-    private TextBlock BuildUnsupportedControl(WidgetDataField field)
+    private TextBlock BuildUnsupportedControl(WidgetDataField field, string reason = "is not yet supported in the config UI")
         => new TextBlock
         {
-            Text       = $"'{field.Type}' is not yet supported in the config UI.",
+            Text       = $"'{field.Type}' {reason}.",
             Style      = (Style) FindResource("FieldLabel"),
             FontStyle  = FontStyles.Italic,
             Foreground = AppColors.StatusError
