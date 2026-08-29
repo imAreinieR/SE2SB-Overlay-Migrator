@@ -138,7 +138,7 @@ public static class WidgetFileImportAndExportService
             if (currentSection is null)
                 continue;
 
-            Match match = Regex.Match(line, @"^path\s*=\s*""(?<path>.*)""\s*$", RegexOptions.IgnoreCase);
+            Match match = Regex.Match(line, @"^path\s*=\s*""(?<path>.*)""\s*$", RegexOptions.IgnoreCase, _defaultRegexTimeout);
 
             if (match.Success)
                 result[currentSection] = match.Groups["path"].Value.Trim();
