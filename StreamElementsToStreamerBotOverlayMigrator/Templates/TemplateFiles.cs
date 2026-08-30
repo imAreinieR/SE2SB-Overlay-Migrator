@@ -162,7 +162,7 @@ const client = new StreamerbotClient({
   retries: -1,
   onConnect: async (data) => {
     console.log('Streamer.bot Client Connected!');
-    sendOnWidgetLoadEvent();
+    requestEmitTwitchChannelStats();
   },
   onDisconnect: (data) => {
     console.log('Streamer.bot Client Disconnected!');
@@ -199,6 +199,35 @@ async function sendOnWidgetLoadEvent() {
   });
   window.dispatchEvent(seEvent);
 }
+
+async function requestEmitTwitchChannelStats() {
+  try {
+    const response = await client.doAction(
+        action = { name: 'EmitTwitchChannelStats' }
+    );
+  } catch (error) {
+    console.error('Failed requestEmitTwitchChannelStats:', error);
+  }
+}
+
+client.on('General.Custom', ({ event, data }) => {
+  if (data.event != 'channel-stats')
+    return;
+
+  if (data !== null && typeof data === 'object') {
+    SESSION['follower-total'].count   = data.followerCount;
+    SESSION['follower-latest'].name   = data.latestFollower;
+    
+    SESSION['subscriber-total'].count = data.subscriberCount;
+    SESSION['subscriber-latest'].name = data.latestSubscriber;
+    
+    SESSION['follower-goal'].amount   = data.goals.followGoalTarget;
+    SESSION['subscriber-goal'].amount = data.goals.subscriptionGoalTarget;
+    SESSION['cheer-goal'].amount      = data.goals.bitGoalTarget;
+  }
+
+  sendOnWidgetLoadEvent();
+});
 
 function generateUuid() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -256,7 +285,6 @@ async function setGlobal(variableName, variableValue, persistVariable = true) {
             value: variableValue
         }
     );
-    console.log('Global set successfully:', response);
   } catch (error) {
     console.error('Failed to set global variable:', error);
   }
