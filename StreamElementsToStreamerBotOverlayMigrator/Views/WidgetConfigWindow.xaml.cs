@@ -246,7 +246,7 @@ public partial class WidgetConfigWindow: Window
                 "sound-input" => BuildAudioInputControl (field, valueStr),
                 "googlefont"  => BuildGoogleFontControl (field, valueStr),
                 "button"      => BuildButtonControl     (field),
-                _             => BuildUnsupportedControl(field)
+                _             => BuildTextControl       (field, valueStr)
             };
         }
         catch (Exception exception)
