@@ -120,6 +120,8 @@ public partial class WidgetConfigWindow: Window
         _fileNameAndContents.Clear();
 
         string dataJson = BuildDataJson();
+
+        _fileNameAndContents["sessionData.js"] = TemplateFiles.SessionDataFile;
         _fileNameAndContents["streamerBotApiAndEventBridge.js"] = DummyWidgetOnLoadEvent()
             + Environment.NewLine
             + TemplateFiles.ApiAndEventBridgeFile;

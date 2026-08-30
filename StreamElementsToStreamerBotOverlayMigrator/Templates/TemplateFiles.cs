@@ -12,9 +12,10 @@ public static class TemplateFiles
   <script src=""https://code.jquery.com/jquery-4.0.0.min.js"" integrity=""sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao="" crossorigin=""anonymous""></script>
   <script src=""https://cdn.jsdelivr.net/npm/@streamerbot/client@1.12.2/dist/streamerbot-client.js""></script>
   <script src=""https://cdn.jsdelivr.net/npm/profanity-cleaner@0.0.3/dist/profanity-cleaner.min.js""></script>
-  <script src=""config.js""></script>
-  <script src=""index.js""></script>
-  <script src=""streamerBotApiAndEventBridge.js""></script>
+  <script src=""sessionData.js"" defer></script>
+  <script src=""config.js"" defer></script>
+  <script src=""index.js"" defer></script>
+  <script src=""streamerBotApiAndEventBridge.js"" defer></script>
 </head>
 <body>
   <!-- Widget Body -->
@@ -22,8 +23,7 @@ public static class TemplateFiles
 </body>
 </html>";
 
-    public const string JavascriptDataFile = "const CONFIG = {0}"
-        + "\n\n" + SessionDataFile;
+    public const string JavascriptDataFile = "const CONFIG = {0}";
 
     public const string SessionDataFile = @"// SE Session Data - Stores the session data for the widget in-memory; automatically cleared on refresh
 const SESSION = {
@@ -182,7 +182,7 @@ async function sendOnWidgetLoadEvent() {
         name:   'U.S. Dollar',
         code:   'USD',
         symbol: '$'
-      }
+      },
       channel: {
         username:   broadcaster.platforms['twitch'].broadcastUser,
         apiToken:   '', // this is StreamElements API token
