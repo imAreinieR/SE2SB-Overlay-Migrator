@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         Title="Widget Configuration"
-        Width="960" Height="640"
+        Width="1005" Height="670"
         MinWidth="700" MinHeight="440"
         WindowStartupLocation="CenterOwner"
         Background="{StaticResource AppBgBrush}"
@@ -516,6 +516,30 @@
                                                 HorizontalAlignment="Stretch"
                                                 Click="SimulateGiftedSubs_Click">
                                             Gifted Subs
+                                        </Button>
+                                    </Border>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- ── Group: Bits ── -->
+                            <StackPanel Margin="0,0,0,4">
+                                <ToggleButton Style="{StaticResource GroupHeaderBtn}"
+                                              IsChecked="False"
+                                              x:Name="SimGroupBits">
+                                    <TextBlock Text="BITS"
+                                               FontFamily="IBM Plex Mono, Consolas"
+                                               FontSize="10"
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </ToggleButton>
+                                <StackPanel x:Name="SimGroupBitsFields"
+                                            Background="{StaticResource PanelBgBrush}">
+                                    <Border BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="14,10">
+                                        <Button Style="{StaticResource FieldButton}"
+                                                HorizontalAlignment="Stretch"
+                                                Click="SimulateBits_Click">
+                                            Bits
                                         </Button>
                                     </Border>
                                 </StackPanel>

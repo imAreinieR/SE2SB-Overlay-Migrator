@@ -25,7 +25,7 @@ public partial class WidgetConfigWindow: Window
     private const    string                               SimulatedUsername       = "AmiElements";
     private const    string                               SimulatedUserId         = "123456";
     private const    string                               SimulatedGifterUsername = "CatGod";
-    private const    string                               SimulatedGifterId       = "676767";
+    private const    string                               FunnyNumberAmount       = "67";
 
     private readonly Widget                               _widget;
     private readonly Dictionary<string, FrameworkElement> _fieldControls          = new ();
@@ -929,7 +929,7 @@ public partial class WidgetConfigWindow: Window
             "subscriber-latest",
             new
             {
-                amount      = 67,
+                amount      = FunnyNumberAmount,
                 avatar      = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName = SimulatedUsername,
                 username    = SimulatedUsername,
@@ -973,7 +973,7 @@ public partial class WidgetConfigWindow: Window
             "subscriber-latest",
             new
             {
-                amount                = 67,
+                amount                = FunnyNumberAmount,
                 avatar                = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName           = SimulatedUsername,
                 username              = SimulatedUsername,
@@ -990,19 +990,20 @@ public partial class WidgetConfigWindow: Window
         );
     }
 
-    private async void SimulateRaid_Click(object sender, RoutedEventArgs e)
+    private async void SimulateBits_Click(object sender, RoutedEventArgs e)
     {
         await DispatchWidgetEvent
         (
-            "raid-latest",
+            "cheer-latest",
             new
             {
-                amount      = 67,
+                amount      = FunnyNumberAmount,
                 avatar      = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
                 displayName = SimulatedUsername,
                 username    = SimulatedUsername,
                 name        = SimulatedUsername,
                 providerId  = SimulatedUserId,
+                message     = "Cheer100 Nice stream!",
             }
         );
     }
@@ -1036,6 +1037,23 @@ public partial class WidgetConfigWindow: Window
                 updatedAt          = DateTimeForJavascriptCode(now),
                 activityId         = GenerateGuidForJavascriptCode(),
                 sessionEventsCount = 1,
+            }
+        );
+    }
+
+    private async void SimulateRaid_Click(object sender, RoutedEventArgs e)
+    {
+        await DispatchWidgetEvent
+        (
+            "raid-latest",
+            new
+            {
+                amount      = FunnyNumberAmount,
+                avatar      = JavascriptFunctionCallForAvatarUrl(SimulatedUsername),
+                displayName = SimulatedUsername,
+                username    = SimulatedUsername,
+                name        = SimulatedUsername,
+                providerId  = SimulatedUserId,
             }
         );
     }
