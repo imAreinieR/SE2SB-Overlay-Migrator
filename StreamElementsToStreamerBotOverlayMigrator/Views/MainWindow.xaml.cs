@@ -214,6 +214,39 @@ public partial class MainWindow: Window
         SetStatus("Widget saved.");
     }
 
+    private void UndoWidget_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedWidget is null)
+            return;
+
+        MessageBoxResult messageBoxResult = MessageBox.Show
+        (
+            "Are you sure you want to undo your changes?",
+            "Confirm Undo",
+            MessageBoxButton.OKCancel,
+            MessageBoxImage.Warning
+        );
+
+        if (messageBoxResult != MessageBoxResult.OK)
+            return;
+
+        Widget? savedWidget = WidgetManager.GetById(_selectedWidget.Id);
+
+        if (savedWidget is null)
+        {
+            SetStatus("Nothing to undo", error: true);
+            return;
+        }
+
+        int index = _widgets.IndexOf(_selectedWidget);
+
+        if (index >= 0)
+            _widgets[index] = savedWidget;
+
+        SelectWidget(savedWidget);
+        SetStatus("Changes undone.");
+    }
+
     private void Import_Click(object sender, RoutedEventArgs e)
     {
         if (_selectedWidget is null)
@@ -465,6 +498,7 @@ public partial class MainWindow: Window
         EmptyStatePanel.Visibility    = Visibility.Collapsed;
         DetailContentPanel.Visibility = Visibility.Visible;
         SaveChangesBtn.IsEnabled      = true;
+        UndoBtn.IsEnabled             = true;
 
         UpdateWidgetInfoPanel(widget);
 
@@ -512,6 +546,7 @@ public partial class MainWindow: Window
         FolderPathBox.Text         = string.Empty;
         GenerateBtn.IsEnabled      = false;
         SaveChangesBtn.IsEnabled   = false;
+        UndoBtn.IsEnabled          = false;
         WidgetInfoPanel.Visibility = Visibility.Collapsed;
         HideWarning();
         SetStatus("Select or create a widget to begin.");
@@ -542,6 +577,7 @@ public partial class MainWindow: Window
             .Files
             .Any(file => file.WidgetFileType == Common.WidgetFileType.FieldJson);
         SaveChangesBtn.IsEnabled = _selectedWidget.IsDirty;
+        UndoBtn.IsEnabled        = _selectedWidget.IsDirty;
 
         _selectedWidget.NotifyStatusChanges();
 

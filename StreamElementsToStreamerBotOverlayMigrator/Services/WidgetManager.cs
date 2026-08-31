@@ -58,6 +58,24 @@ public static class WidgetManager
         return widget;
     }
 
+    public static Widget? GetById(int id)
+    {
+        using var connection = new SqliteConnection(ConnectionString);
+        connection.Open();
+
+        Widget? widget = WidgetManagerDb
+            .GetAll(connection)
+            .FirstOrDefault(existingWidget => existingWidget.Id == id);
+
+        if (widget != null)
+        {
+            widget.AddWidgetFiles(WidgetFileManagerDb.GetByWidgetId(connection, widget.Id));
+            widget.AcceptChanges();
+        }
+
+        return widget;
+    }
+
     public static void Save(Widget widget)
     {
         using var connection = new SqliteConnection(ConnectionString);
