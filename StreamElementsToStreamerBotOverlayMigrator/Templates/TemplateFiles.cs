@@ -642,24 +642,6 @@ client.on('Twitch.RewardRedemption', ({ event, data }) => {
   });
 });
 
-client.on('Twitch.GoalBegin', ({ event, data }) => {
-  switch (data.type) {
-    case 'follower':
-      SESSION['follower-goal'].amount   = data.targetAmount  ?? 0;
-      break;
-    case 'subscription':
-      SESSION['subscriber-goal'].amount = data.targetAmount  ?? 0;
-      break;
-    case 'new_bit':
-      SESSION['cheer-goal'].amount      = data.targetAmount  ?? 0;
-      break;
-    default:
-      console.warn(`Unhandled Twitch goal type on GoalBegin: ${data.type}`);
-  }
-
-  dispatchSESessionUpdateEvent();
-});
-
 // bot:counter & kvstore:update - Updated global variables for counters and key-value pairs
 client.on('Misc.GlobalVariableUpdated', ({ event, data }) => {
   try {
