@@ -341,7 +341,27 @@ public partial class MainWindow: Window
         DetailContentPanel.Visibility = Visibility.Visible;
         SaveChangesBtn.IsEnabled      = true;
 
+        UpdateWidgetInfoPanel(widget);
+
         OnChanged();
+    }
+
+    private void UpdateWidgetInfoPanel(Widget widget)
+    {
+        string? name   = widget.WidgetName;
+        string? author = widget.WidgetAuthor;
+
+        if (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(author))
+        {
+            WidgetInfoPanel.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        WidgetNameText.Text         = string.IsNullOrEmpty(name)   ? "(Unnamed widget)"   : name;
+        WidgetAuthorText.Text       = string.IsNullOrEmpty(author) ? string.Empty         : $"by {author}";
+        WidgetAuthorText.Visibility = string.IsNullOrEmpty(author) ? Visibility.Collapsed : Visibility.Visible;
+
+        WidgetInfoPanel.Visibility = Visibility.Visible;
     }
 
     private void AddWidgetFilesToFromPaths(Widget widget, IEnumerable<string> paths)
@@ -364,9 +384,10 @@ public partial class MainWindow: Window
 
     private void ClearDetail()
     {
-        FolderPathBox.Text       = string.Empty;
-        GenerateBtn.IsEnabled    = false;
-        SaveChangesBtn.IsEnabled = false;
+        FolderPathBox.Text         = string.Empty;
+        GenerateBtn.IsEnabled      = false;
+        SaveChangesBtn.IsEnabled   = false;
+        WidgetInfoPanel.Visibility = Visibility.Collapsed;
         HideWarning();
         SetStatus("Select or create a widget to begin.");
         UpdateEmptyState();
@@ -376,6 +397,8 @@ public partial class MainWindow: Window
     {
         if (_selectedWidget is null)
             return;
+
+        UpdateWidgetInfoPanel(_selectedWidget);
 
         bool hasFiles = _selectedWidget.Files.Any();
 

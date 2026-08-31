@@ -685,7 +685,30 @@
                             ToolTip="Configure widget fields">
                         ⚙  Edit Configuration
                     </Button>
-                    
+
+                    <!-- Widget name / author, parsed from data.json. Hidden when neither is available. -->
+                    <StackPanel x:Name="WidgetInfoPanel"
+                                HorizontalAlignment="Right"
+                                Margin="0,10,0,0"
+                                Visibility="Collapsed"
+                                ToolTip="From data.json">
+                        <TextBlock x:Name="WidgetNameText"
+                                   FontFamily="Segoe UI"
+                                   FontSize="12"
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   HorizontalAlignment="Right"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock x:Name="WidgetAuthorText"
+                                   FontFamily="Segoe UI"
+                                   FontSize="10"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   HorizontalAlignment="Right"
+                                   Margin="0,2,0,0"
+                                   TextTrimming="CharacterEllipsis"
+                                   Visibility="Collapsed"/>
+                    </StackPanel>
+
                 </StackPanel>
             </ScrollViewer>
 

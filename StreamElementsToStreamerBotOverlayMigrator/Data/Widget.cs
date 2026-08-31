@@ -4,6 +4,7 @@ using StreamElementsToStreamerBotOverlayMigrator.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Text.Json;
 
 namespace StreamElementsToStreamerBotOverlayMigrator.Data;
 
@@ -84,6 +85,53 @@ public class Widget: INotifyPropertyChanged
     public bool IsGenerated
         => File.Exists(HtmlFilePath);
 
+    public string? WidgetName
+        => GetDataJsonStringValue("widgetName");
+
+    public string? WidgetAuthor
+        => GetDataJsonStringValue("widgetAuthor");
+
+    public bool HasWidgetInfo
+        => WidgetName != null || WidgetAuthor != null;
+
+    private string? GetDataJsonStringValue(string propertyName)
+    {
+        WidgetFile? dataFile = Files.FirstOrDefault(file => file.WidgetFileType == WidgetFileType.DataJson);
+
+        if (dataFile?.Content is not string content || string.IsNullOrWhiteSpace(content))
+            return null;
+
+        try
+        {
+            using JsonDocument jsonDocument = JsonDocument.Parse
+            (
+                content,
+                new JsonDocumentOptions
+                {
+                    AllowTrailingCommas = true
+                }
+            );
+
+            if
+            (
+                jsonDocument.RootElement.TryGetProperty(propertyName, out JsonElement value)
+                    && value.ValueKind == JsonValueKind.String
+            )
+            {
+                string? stringValue = value.GetString();
+                return string.IsNullOrWhiteSpace(stringValue)
+                    ? null
+                    : stringValue;
+            }
+        }
+        catch (JsonException)
+        {
+            // Malformed data.json — treat as if no widget info is available.
+        }
+
+        return null;
+    }
+
     public System.Windows.Media.SolidColorBrush StatusColor
         => new System.Windows.Media.SolidColorBrush
         (
@@ -113,6 +161,9 @@ public class Widget: INotifyPropertyChanged
         OnPropertyChanged(nameof(HasValidFileSet));
         OnPropertyChanged(nameof(IsGenerated));
         OnPropertyChanged(nameof(StatusColor));
+        OnPropertyChanged(nameof(WidgetName));
+        OnPropertyChanged(nameof(WidgetAuthor));
+        OnPropertyChanged(nameof(HasWidgetInfo));
     }
 
     private void OnChanged()
