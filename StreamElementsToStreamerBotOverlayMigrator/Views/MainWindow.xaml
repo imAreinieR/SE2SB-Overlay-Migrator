@@ -151,7 +151,8 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
-                        <Border Background="{TemplateBinding Background}"
+                        <Border x:Name="PathBoxBorder"
+                                Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="5">
@@ -161,6 +162,13 @@
                                           VerticalScrollBarVisibility="Hidden"
                                           HorizontalScrollBarVisibility="Hidden"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PathBoxBorder" Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource AccentBlueBrush}"/>
+                                <Setter Property="TextDecorations" Value="Underline"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -824,7 +832,10 @@
                         <TextBox Grid.Column="0"
                                  x:Name="FolderPathBox"
                                  Style="{StaticResource PathBox}"
-                                 Height="34"/>
+                                 Height="34"
+                                 Cursor="Hand"
+                                 ToolTip="Click to open folder in File Explorer"
+                                 PreviewMouseLeftButtonDown="FolderPathBox_Click"/>
 
                         <Button Grid.Column="2"
                                 Style="{StaticResource CopyBtn}"

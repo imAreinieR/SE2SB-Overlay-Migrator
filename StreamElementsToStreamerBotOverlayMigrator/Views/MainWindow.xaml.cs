@@ -6,6 +6,7 @@ using StreamElementsToStreamerBotOverlayMigrator.Services;
 using StreamElementsToStreamerBotOverlayMigrator.Themes;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -316,6 +317,48 @@ public partial class MainWindow: Window
 
         Clipboard.SetText(_selectedWidget.FolderLocation);
         SetStatus("Path copied to clipboard.");
+    }
+
+    private void FolderPathBox_Click(object sender, MouseButtonEventArgs e)
+    {
+        string? path = _selectedWidget?.FolderLocation;
+
+        if (string.IsNullOrEmpty(path))
+            return;
+
+        try
+        {
+            if (Directory.Exists(path))
+            {
+                Process.Start(new ProcessStartInfo("explorer.exe", $"\"{path}\"")
+                {
+                    UseShellExecute = true
+                });
+            }
+            else
+            {
+                string? parent = Path.GetDirectoryName(path);
+                while (!string.IsNullOrEmpty(parent) && !Directory.Exists(parent))
+                    parent = Path.GetDirectoryName(parent);
+
+                if (!string.IsNullOrEmpty(parent) && Directory.Exists(parent))
+                {
+                    Process.Start(new ProcessStartInfo("explorer.exe", $"\"{parent}\"")
+                    {
+                        UseShellExecute = true
+                    });
+                    SetStatus("Folder doesn't exist yet - opened nearest parent folder.");
+                }
+                else
+                {
+                    SetStatus("Folder location could not be found.", error: true);
+                }
+            }
+        }
+        catch (Exception exception)
+        {
+            SetStatus($"Could not open folder: {exception.Message}", error: true);
+        }
     }
 
     private void Generate_Click(object sender, RoutedEventArgs e)
