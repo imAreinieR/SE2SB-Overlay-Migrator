@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.9.12112.369 stable
+VisualStudioVersion = 18.9.12112.369
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamElementsToStreamerBotOverlayMigrator", "StreamElementsToStreamerBotOverlayMigrator\StreamElementsToStreamerBotOverlayMigrator.csproj", "{EA21EA17-6118-4964-B996-790C55652768}"
 EndProject
@@ -22,6 +22,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{ACF2A7
 		Images\export_streamelements_widget_files_1.png = Images\export_streamelements_widget_files_1.png
 		Images\export_streamelements_widget_files_2.png = Images\export_streamelements_widget_files_2.png
 		Images\obs_browser_source.png = Images\obs_browser_source.png
+		Images\streamerbot_action_setglobal.png = Images\streamerbot_action_setglobal.png
+		Images\streamerbot_import_actions.png = Images\streamerbot_import_actions.png
 		Images\streamerbot_select_server.png = Images\streamerbot_select_server.png
 		Images\streamerbot_websocket_started.png = Images\streamerbot_websocket_started.png
 		Images\streamerbot_websocket_stopped.png = Images\streamerbot_websocket_stopped.png
