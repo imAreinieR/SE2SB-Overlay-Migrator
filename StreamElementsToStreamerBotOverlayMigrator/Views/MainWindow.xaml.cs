@@ -276,10 +276,7 @@ public partial class MainWindow: Window
 
     private void ExportRawFiles_Click(object sender, RoutedEventArgs e)
     {
-        if (_selectedWidget is null)
-            return;
-
-        if (!_selectedWidget.Files.Any())
+        if (_selectedWidget is null || !_selectedWidget.Files.Any())
         {
             SetStatus("No files to export.", error: true);
             return;
@@ -287,11 +284,11 @@ public partial class MainWindow: Window
 
         var dialog = new SaveFileDialog
         {
-            Title           = "Export raw widget files",
-            FileName        = $"{_selectedWidget.Name.Replace(" ", "-")}-raw-files.zip",
-            DefaultExt      = ".zip",
-            Filter          = "Zip archive (*.zip)|*.zip",
-            AddExtension    = true
+            Title        = "Export raw widget files",
+            FileName     = $"{_selectedWidget.Name.Replace(" ", "-")}-raw-files.zip",
+            DefaultExt   = ".zip",
+            Filter       = "Zip archive (*.zip)|*.zip",
+            AddExtension = true
         };
 
         if (dialog.ShowDialog() != true)
