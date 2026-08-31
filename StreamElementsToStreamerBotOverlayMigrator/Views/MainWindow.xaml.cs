@@ -314,9 +314,9 @@ public partial class MainWindow: Window
     {
         IsEditMode = !IsEditMode;
 
-        EditModeToggleText.Text = IsEditMode
-            ? "Done"
-            : "Edit";
+        EditModeToggleIcon.Text = IsEditMode
+            ? "\u2714"   // ✔ check mark
+            : "\u270E";  // ✎ pencil / edit icon
         EditModeToggleBtn.ToolTip = IsEditMode
             ? "Finish reordering"
             : "Reorder widgets";

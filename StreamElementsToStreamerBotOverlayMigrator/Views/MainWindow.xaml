@@ -101,6 +101,16 @@
             <Setter Property="Padding" Value="0,7"/>
         </Style>
 
+        <!-- Small square icon button (e.g. edit-mode toggle) -->
+        <Style x:Key="SquareIconBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderAccentBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+
         <!-- Remove X button — transparent, shown via trigger on parent -->
         <Style x:Key="RemoveWidgetBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
             <Setter Property="Background" Value="Transparent"/>
@@ -249,7 +259,6 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Column="0"
@@ -258,23 +267,8 @@
                                        Margin="0"
                                        VerticalAlignment="Center"/>
 
-                            <!-- Reorder / edit-mode toggle -->
-                            <Button x:Name="EditModeToggleBtn"
-                                    Grid.Column="1"
-                                    Style="{StaticResource SmallImportBtn}"
-                                    Padding="7,2"
-                                    Margin="0,0,8,0"
-                                    VerticalAlignment="Center"
-                                    ToolTip="Reorder widgets"
-                                    Click="EditModeToggle_Click">
-                                <TextBlock x:Name="EditModeToggleText"
-                                           Text="Edit"
-                                           FontFamily="Segoe UI"
-                                           FontSize="10"/>
-                            </Button>
-
                             <Button x:Name="ThemeToggleBtn"
-                                    Grid.Column="2"
+                                    Grid.Column="1"
                                     Background="Transparent"
                                     BorderThickness="0"
                                     Padding="4,0"
@@ -290,7 +284,7 @@
                             </Button>
 
                             <Button x:Name="VersionLabel"
-                                    Grid.Column="3"
+                                    Grid.Column="2"
                                     Background="Transparent"
                                     BorderThickness="0"
                                     Padding="0"
@@ -303,12 +297,36 @@
                                            Margin="0"/>
                             </Button>
                         </Grid>
-                        <Button Style="{StaticResource NewWidgetBtn}"
-                                Click="NewWidget_Click">
-                            <TextBlock Text="＋  New Widget"
-                                       FontFamily="Segoe UI"
-                                       FontSize="12"/>
-                        </Button>
+
+                        <!-- New Widget + edit-mode toggle row -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0"
+                                    Style="{StaticResource NewWidgetBtn}"
+                                    Click="NewWidget_Click">
+                                <TextBlock Text="＋  New Widget"
+                                           FontFamily="Segoe UI"
+                                           FontSize="12"/>
+                            </Button>
+
+                            <!-- Reorder / edit-mode toggle -->
+                            <Button x:Name="EditModeToggleBtn"
+                                    Grid.Column="1"
+                                    Style="{StaticResource SquareIconBtn}"
+                                    Margin="8,0,0,0"
+                                    ToolTip="Reorder widgets"
+                                    Click="EditModeToggle_Click">
+                                <TextBlock x:Name="EditModeToggleIcon"
+                                           Text="&#9998;"
+                                           Foreground="{StaticResource AccentBlueBrush}"
+                                           FontFamily="Segoe UI Symbol"
+                                           FontSize="14"/>
+                            </Button>
+                        </Grid>
                     </StackPanel>
                 </Border>
 
