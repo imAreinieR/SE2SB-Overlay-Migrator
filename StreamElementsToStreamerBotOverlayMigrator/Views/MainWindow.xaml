@@ -234,6 +234,63 @@
             <Setter Property="Margin" Value="0,0,0,8"/>
         </Style>
 
+        <!-- Small square "more options" button -->
+        <Style x:Key="MoreOptionsBtn" TargetType="Button" BasedOn="{StaticResource BaseBtn}">
+            <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Width" Value="26"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <!-- Dark dropdown menu item, used in the "more options" dropdown -->
+        <Style x:Key="DropdownMenuItem" TargetType="MenuItem">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="10,7"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="ItemBorder"
+                                Background="Transparent"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter ContentSource="Header"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Dark dropdown menu popup, used for the "more options" button -->
+        <Style x:Key="DropdownMenu" TargetType="ContextMenu">
+            <Setter Property="Placement" Value="Bottom"/>
+            <Setter Property="HasDropShadow" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Border Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="5"
+                                Padding="4"
+                                SnapsToDevicePixels="True">
+                            <ItemsPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Window.Resources>
 
     <!-- ══════════════════════════════════════════
@@ -602,12 +659,27 @@
                                    Style="{StaticResource SectionLabel}"
                                    Margin="0"
                                    VerticalAlignment="Center"/>
-                        <Button Grid.Column="1"
-                                Style="{StaticResource SmallImportBtn}"
-                                Height="22"
-                                Click="Import_Click">
-                            ＋ Import
-                        </Button>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Style="{StaticResource SmallImportBtn}"
+                                    Height="22"
+                                    Click="Import_Click">
+                                ＋ Import
+                            </Button>
+                            <Button x:Name="ImportMoreBtn"
+                                    Style="{StaticResource MoreOptionsBtn}"
+                                    Margin="4,0,0,0"
+                                    ToolTip="More file options"
+                                    Click="ImportMore_Click">
+                                <TextBlock Text="⋯" FontSize="14"/>
+                                <Button.ContextMenu>
+                                    <ContextMenu Style="{StaticResource DropdownMenu}">
+                                        <MenuItem Header="Export Raw Files"
+                                                  Style="{StaticResource DropdownMenuItem}"
+                                                  Click="ExportRawFiles_Click"/>
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                            </Button>
+                        </StackPanel>
                     </Grid>
                     <Grid Margin="0,0,0,20">
                         <Grid.ColumnDefinitions>

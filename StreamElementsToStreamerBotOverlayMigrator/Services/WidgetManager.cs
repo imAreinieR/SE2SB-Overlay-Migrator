@@ -170,6 +170,9 @@ public static class WidgetManager
     public static bool GenerateExportFiles(Widget widget, out string errorMessage)
         => WidgetFileImportAndExportService.GenerateExportFilesForWidget(widget, out errorMessage);
 
+    public static bool ExportRawFiles(Widget widget, string destinationZipPath, out string errorMessage)
+        => WidgetFileImportAndExportService.ExportRawFilesAsZip(widget, destinationZipPath, out errorMessage);
+
     private static bool IsPathWithinBaseDirectory(string baseDirectory, string candidatePath)
     {
         string fullBasePath = Path.GetFullPath(baseDirectory)

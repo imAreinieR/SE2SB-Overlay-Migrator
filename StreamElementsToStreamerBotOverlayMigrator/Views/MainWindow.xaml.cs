@@ -265,6 +265,44 @@ public partial class MainWindow: Window
         AddWidgetFilesToFromPaths(_selectedWidget, dialog.FileNames);
     }
 
+    private void ImportMore_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button || button.ContextMenu is null)
+            return;
+
+        button.ContextMenu.PlacementTarget = button;
+        button.ContextMenu.IsOpen          = true;
+    }
+
+    private void ExportRawFiles_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedWidget is null)
+            return;
+
+        if (!_selectedWidget.Files.Any())
+        {
+            SetStatus("No files to export.", error: true);
+            return;
+        }
+
+        var dialog = new SaveFileDialog
+        {
+            Title           = "Export raw widget files",
+            FileName        = $"{_selectedWidget.Name.Replace(" ", "-")}-raw-files.zip",
+            DefaultExt      = ".zip",
+            Filter          = "Zip archive (*.zip)|*.zip",
+            AddExtension    = true
+        };
+
+        if (dialog.ShowDialog() != true)
+            return;
+
+        if (WidgetManager.ExportRawFiles(_selectedWidget, dialog.FileName, out string errorMessage))
+            SetStatus(errorMessage, success: true);
+        else
+            SetStatus(errorMessage, error: true);
+    }
+
     private void RemoveFile_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button button || button.Tag is not WidgetFile file || _selectedWidget is null)

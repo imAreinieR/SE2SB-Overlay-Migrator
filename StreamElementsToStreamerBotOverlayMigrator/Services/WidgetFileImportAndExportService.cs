@@ -191,6 +191,43 @@ public static class WidgetFileImportAndExportService
         return true;
     }
 
+    public static bool ExportRawFilesAsZip(this Widget widget, string destinationZipPath, out string errorMessage)
+    {
+        try
+        {
+            if (File.Exists(destinationZipPath))
+                File.Delete(destinationZipPath);
+
+            using (FileStream zipStream = new FileStream(destinationZipPath, FileMode.Create))
+            using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Create))
+            {
+                foreach (WidgetFile widgetFile in widget.Files)
+                {
+                    ZipArchiveEntry entry = archive.CreateEntry(widgetFile.FileName, CompressionLevel.Optimal);
+
+                    using Stream entryStream = entry.Open();
+                    byte[]       fileBytes   = DecodeFileContentForExport(widgetFile);
+
+                    entryStream.Write(fileBytes, 0, fileBytes.Length);
+                }
+            }
+
+            errorMessage = $"Exported raw files to '{destinationZipPath}'";
+            return true;
+        }
+        catch (Exception exception)
+        {
+            errorMessage = $"Error: {exception.Message}";
+            Debug.WriteLine(exception);
+            return false;
+        }
+    }
+
+    private static byte[] DecodeFileContentForExport(WidgetFile widgetFile)
+        => widgetFile.WidgetFileType.IsTextBasedFile()
+            ? System.Text.Encoding.UTF8.GetBytes(widgetFile.Content)
+            : Convert.FromBase64String(widgetFile.Content);
+
     public static bool GenerateExportFilesForWidget(this Widget widget, out string errorMessage)
     {
         try
