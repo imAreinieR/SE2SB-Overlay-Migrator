@@ -231,10 +231,10 @@ public partial class MainWindow: Window
 
     private void CopyPath_Click(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrEmpty(_selectedWidget?.HtmlFilePath))
+        if (string.IsNullOrEmpty(_selectedWidget?.FolderLocation))
             return;
 
-        Clipboard.SetText(_selectedWidget.HtmlFilePath);
+        Clipboard.SetText(_selectedWidget.FolderLocation);
         SetStatus("Path copied to clipboard.");
     }
 
