@@ -162,6 +162,7 @@ const client = new StreamerbotClient({
   retries: -1,
   onConnect: async (data) => {
     console.log('Streamer.bot Client Connected!');
+    sendOnWidgetLoadEvent();
     requestEmitTwitchChannelStats();
   },
   onDisconnect: (data) => {
@@ -173,6 +174,8 @@ const client = new StreamerbotClient({
 });
 
 async function sendOnWidgetLoadEvent() {
+ console.log('Sending OnWidgetLoadEvent...');
+
   const broadcaster = await client.getBroadcaster();
   const seEvent = new CustomEvent('onWidgetLoad', {
     detail: {
@@ -201,6 +204,8 @@ async function sendOnWidgetLoadEvent() {
 }
 
 async function requestEmitTwitchChannelStats() {
+ console.log('Requesting StreamerBot to Emit Twitch channel stats...');
+
   try {
     const response = await client.doAction(
         action = { name: 'EmitTwitchChannelStats' }
@@ -226,7 +231,7 @@ client.on('General.Custom', ({ event, data }) => {
     SESSION['cheer-goal'].amount      = data.goals.bitGoalTarget;
   }
 
-  sendOnWidgetLoadEvent();
+  dispatchSESessionUpdateEvent();
 });
 
 function generateUuid() {
@@ -370,6 +375,8 @@ function dispatchSEEvent(listener, eventData) {
 }
 
 function dispatchSESessionUpdateEvent() {
+ console.log('Sending SessionUpdateEvent...');
+
   const seEvent = new CustomEvent('onSessionUpdate', {
     detail: {
       session: SESSION
