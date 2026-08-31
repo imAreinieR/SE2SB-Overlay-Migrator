@@ -16,7 +16,8 @@ public class Widget: INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public int  Id { get; set; }
+    public int  Id        { get; set; }
+    public int  SortOrder { get; set; }
     public bool IsDirty => _isDirty;
 
     public string Name
@@ -60,9 +61,10 @@ public class Widget: INotifyPropertyChanged
         _isDirty                 = true;
     }
 
-    public Widget(int id, string name, string folderLocation, List<WidgetFile> files)
+    public Widget(int id, string name, string folderLocation, List<WidgetFile> files, int sortOrder = 0)
     {
         Id                       = id;
+        SortOrder                = sortOrder;
         _name                    = name;
         _rootFolderLocation      = folderLocation;
         Files                    = new ObservableCollection<WidgetFile>(files);

@@ -249,6 +249,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Column="0"
@@ -257,8 +258,23 @@
                                        Margin="0"
                                        VerticalAlignment="Center"/>
 
-                            <Button x:Name="ThemeToggleBtn"
+                            <!-- Reorder / edit-mode toggle -->
+                            <Button x:Name="EditModeToggleBtn"
                                     Grid.Column="1"
+                                    Style="{StaticResource SmallImportBtn}"
+                                    Padding="7,2"
+                                    Margin="0,0,8,0"
+                                    VerticalAlignment="Center"
+                                    ToolTip="Reorder widgets"
+                                    Click="EditModeToggle_Click">
+                                <TextBlock x:Name="EditModeToggleText"
+                                           Text="Edit"
+                                           FontFamily="Segoe UI"
+                                           FontSize="10"/>
+                            </Button>
+
+                            <Button x:Name="ThemeToggleBtn"
+                                    Grid.Column="2"
                                     Background="Transparent"
                                     BorderThickness="0"
                                     Padding="4,0"
@@ -274,7 +290,7 @@
                             </Button>
 
                             <Button x:Name="VersionLabel"
-                                    Grid.Column="2"
+                                    Grid.Column="3"
                                     Background="Transparent"
                                     BorderThickness="0"
                                     Padding="0"
@@ -305,6 +321,7 @@
                              BorderThickness="0"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              behaviors:ScrollPassthrough.IsEnabled="True"
+                             AllowDrop="True"
                              SelectionChanged="WidgetList_SelectionChanged">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
@@ -337,7 +354,11 @@
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid x:Name="WidgetRow" Margin="0,2">
+                                <Grid x:Name="WidgetRow"
+                                      Margin="0,2"
+                                      AllowDrop="True"
+                                      DragOver="WidgetRow_DragOver"
+                                      Drop="WidgetRow_Drop">
 
                                     <Border x:Name="ItemBorder"
                                             Padding="10,9"
@@ -345,22 +366,36 @@
                                             Cursor="Hand">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>  <!-- Drag handle -->
                                                 <ColumnDefinition Width="Auto"/>  <!-- Status dot -->
                                                 <ColumnDefinition Width="*"/>     <!-- Name -->
                                                 <ColumnDefinition Width="Auto"/>  <!-- Edit icon -->
                                                 <ColumnDefinition Width="Auto"/>  <!-- X -->
                                             </Grid.ColumnDefinitions>
 
+                                            <!-- Drag handle (edit mode only) -->
+                                            <TextBlock x:Name="DragHandle"
+                                                       Grid.Column="0"
+                                                       Text="⠿"
+                                                       FontSize="13"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,8,0"
+                                                       Cursor="SizeAll"
+                                                       Visibility="Collapsed"
+                                                       MouseLeftButtonDown="DragHandle_MouseLeftButtonDown"
+                                                       MouseMove="DragHandle_MouseMove"/>
+
                                             <!-- Status dot -->
                                             <Ellipse x:Name="WidgetStatusDot"
-                                                     Grid.Column="0"
+                                                     Grid.Column="1"
                                                      Width="6" Height="6"
                                                      Margin="0,0,8,0"
                                                      VerticalAlignment="Center"
                                                      Fill="{Binding StatusColor}" />
 
                                             <!-- Widget name display + edit toggle -->
-                                            <Grid Grid.Column="1">
+                                            <Grid Grid.Column="2">
                                                 <!-- Display mode -->
                                                 <StackPanel x:Name="NameDisplayPanel"
                                                             Orientation="Horizontal"
@@ -385,7 +420,7 @@
 
                                             <!-- Edit icon (hidden, shown on row hover) -->
                                             <TextBlock x:Name="EditIcon"
-                                                       Grid.Column="2"
+                                                       Grid.Column="3"
                                                        Text="✎"
                                                        FontSize="11"
                                                        Foreground="{StaticResource TextSecondaryBrush}"
@@ -396,7 +431,7 @@
                                                        MouseLeftButtonUp="EditWidgetName_MouseUp"/>
 
                                             <!-- Remove X (hidden, shown on row hover) -->
-                                            <Button Grid.Column="3"
+                                            <Button Grid.Column="4"
                                                     x:Name="RemoveBtn"
                                                     Content="✕"
                                                     Tag="{Binding}"
@@ -433,6 +468,15 @@
                                         </EventTrigger>
                                     </Grid.Triggers>
                                 </Grid>
+
+                                <!-- Swap rename/remove for the drag handle while in edit mode -->
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsEditMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                                        <Setter TargetName="DragHandle" Property="Visibility" Value="Visible"/>
+                                        <Setter TargetName="EditIcon" Property="Visibility" Value="Collapsed"/>
+                                        <Setter TargetName="RemoveBtn" Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>

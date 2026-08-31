@@ -20,6 +20,17 @@ public partial class MainWindow: Window
     private        readonly ObservableCollection<Widget> _widgets;
     private                 Widget?                      _selectedWidget;
 
+    private                 Point                        _dragStartPoint;
+    private                 Widget?                      _draggedWidget;
+
+    public  static readonly DependencyProperty           IsEditModeProperty = DependencyProperty.Register(nameof(IsEditMode), typeof(bool), typeof(MainWindow), new PropertyMetadata(false));
+
+    public bool IsEditMode
+    {
+        get => (bool) GetValue(IsEditModeProperty);
+        set => SetValue(IsEditModeProperty, value);
+    }
+
     public MainWindow()
     {
         InitializeComponent();
@@ -296,6 +307,74 @@ public partial class MainWindow: Window
             Owner = this
         };
         configWindow.ShowDialog();
+    }
+
+    private void EditModeToggle_Click(object sender, RoutedEventArgs e)
+    {
+        IsEditMode = !IsEditMode;
+
+        EditModeToggleText.Text = IsEditMode
+            ? "Done"
+            : "Edit";
+        EditModeToggleBtn.ToolTip = IsEditMode
+            ? "Finish reordering"
+            : "Reorder widgets";
+    }
+
+    private void DragHandle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not FrameworkElement element || element.DataContext is not Widget widget)
+            return;
+
+        _dragStartPoint = e.GetPosition(null);
+        _draggedWidget  = widget;
+    }
+
+    private void DragHandle_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton != MouseButtonState.Pressed || _draggedWidget is null || sender is not FrameworkElement element)
+            return;
+
+        Vector diff = _dragStartPoint - e.GetPosition(null);
+
+        if
+        (
+            Math.Abs(diff.X) < SystemParameters.MinimumHorizontalDragDistance
+                && Math.Abs(diff.Y) < SystemParameters.MinimumVerticalDragDistance
+        )
+            return;
+
+        Widget draggedWidget = _draggedWidget;
+        _draggedWidget = null;
+
+        DragDrop.DoDragDrop(element, draggedWidget, DragDropEffects.Move);
+    }
+
+    private void WidgetRow_DragOver(object sender, DragEventArgs e)
+    {
+        e.Effects = IsEditMode && e.Data.GetDataPresent(typeof(Widget))
+            ? DragDropEffects.Move
+            : DragDropEffects.None;
+
+        e.Handled = true;
+    }
+
+    private void WidgetRow_Drop(object sender, DragEventArgs e)
+    {
+        if (!IsEditMode || e.Data.GetData(typeof(Widget)) is not Widget draggedWidget)
+            return;
+
+        if (sender is not FrameworkElement element || element.DataContext is not Widget targetWidget || draggedWidget == targetWidget)
+            return;
+
+        int oldIndex = _widgets.IndexOf(draggedWidget);
+        int newIndex = _widgets.IndexOf(targetWidget);
+
+        if (oldIndex < 0 || newIndex < 0)
+            return;
+
+        _widgets.Move(oldIndex, newIndex);
+        WidgetManager.SaveOrder(_widgets);
     }
 
     private void ThemeToggle_Click(object sender, RoutedEventArgs e)

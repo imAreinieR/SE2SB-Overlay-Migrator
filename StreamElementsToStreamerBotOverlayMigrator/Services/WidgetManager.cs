@@ -2,7 +2,6 @@
 using StreamElementsToStreamerBotOverlayMigrator.Data;
 using StreamElementsToStreamerBotOverlayMigrator.DataServices;
 using StreamElementsToStreamerBotOverlayMigrator.Services;
-using System.Diagnostics;
 using System.IO;
 
 namespace StreamElementsToStreamerBotOverlayMigrator.Managers;
@@ -104,6 +103,29 @@ public static class WidgetManager
 
             WidgetManagerDb.Update(connection, widget);
         }
+    }
+
+    public static void SaveOrder(IEnumerable<Widget> widgets)
+    {
+        List<Widget> orderedWidgets = widgets.ToList();
+
+        using var connection = new SqliteConnection(ConnectionString);
+        connection.Open();
+
+        using SqliteTransaction transaction = connection.BeginTransaction();
+
+        for (int index = 0; index < orderedWidgets.Count; index++)
+        {
+            Widget widget = orderedWidgets[index];
+
+            if (widget.Id == 0)
+                continue;
+
+            widget.SortOrder = index;
+            WidgetManagerDb.UpdateSortOrder(connection, transaction, widget.Id, index);
+        }
+
+        transaction.Commit();
     }
 
     public static void Delete(Widget widget)
