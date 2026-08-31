@@ -22,6 +22,7 @@ public partial class MainWindow: Window
 
     private                 Point                        _dragStartPoint;
     private                 Widget?                      _draggedWidget;
+    private                 Border?                      _activeDropIndicator;
 
     public  static readonly DependencyProperty           IsEditModeProperty = DependencyProperty.Register(nameof(IsEditMode), typeof(bool), typeof(MainWindow), new PropertyMetadata(false));
 
@@ -348,29 +349,74 @@ public partial class MainWindow: Window
         _draggedWidget = null;
 
         DragDrop.DoDragDrop(element, draggedWidget, DragDropEffects.Move);
+
+        ClearDropIndicator();
     }
 
     private void WidgetRow_DragOver(object sender, DragEventArgs e)
     {
-        e.Effects = IsEditMode && e.Data.GetDataPresent(typeof(Widget))
-            ? DragDropEffects.Move
-            : DragDropEffects.None;
+        bool isValidDrop = IsEditMode && e.Data.GetDataPresent(typeof(Widget));
 
+        e.Effects = isValidDrop ? DragDropEffects.Move : DragDropEffects.None;
         e.Handled = true;
+
+        if (!isValidDrop || sender is not FrameworkElement element)
+        {
+            ClearDropIndicator();
+            return;
+        }
+
+        bool isTopHalf = e.GetPosition(element).Y < element.ActualHeight / 2;
+
+        if (element.FindName(isTopHalf ? "DropIndicatorTop" : "DropIndicatorBottom") is not Border indicator)
+            return;
+
+        if (_activeDropIndicator == indicator)
+            return;
+
+        ClearDropIndicator();
+
+        indicator.Visibility = Visibility.Visible;
+        _activeDropIndicator = indicator;
+    }
+
+    private void WidgetList_DragLeave(object sender, DragEventArgs e)
+        => ClearDropIndicator();
+
+    private void ClearDropIndicator()
+    {
+        if (_activeDropIndicator == null)
+            return;
+
+        _activeDropIndicator.Visibility = Visibility.Collapsed;
+        _activeDropIndicator            = null;
     }
 
     private void WidgetRow_Drop(object sender, DragEventArgs e)
     {
+        ClearDropIndicator();
+
         if (!IsEditMode || e.Data.GetData(typeof(Widget)) is not Widget draggedWidget)
             return;
 
         if (sender is not FrameworkElement element || element.DataContext is not Widget targetWidget || draggedWidget == targetWidget)
             return;
 
-        int oldIndex = _widgets.IndexOf(draggedWidget);
-        int newIndex = _widgets.IndexOf(targetWidget);
+        int oldIndex    = _widgets.IndexOf(draggedWidget);
+        int targetIndex = _widgets.IndexOf(targetWidget);
 
-        if (oldIndex < 0 || newIndex < 0)
+        if (oldIndex < 0 || targetIndex < 0)
+            return;
+
+        bool isTopHalf = e.GetPosition(element).Y < element.ActualHeight / 2;
+        int  newIndex  = isTopHalf
+            ? targetIndex
+            : targetIndex + 1;
+
+        if (oldIndex < newIndex)
+            newIndex--;
+
+        if (newIndex == oldIndex)
             return;
 
         _widgets.Move(oldIndex, newIndex);
@@ -388,8 +434,8 @@ public partial class MainWindow: Window
 
     private void SyncThemeIcon()
     {
-        ThemeToggleIcon.Text    = ThemeManager.Current == Theme.Dark ? "☀" : "☾";
-        ThemeToggleBtn.ToolTip  = ThemeManager.Current == Theme.Dark
+        ThemeToggleIcon.Text   = ThemeManager.Current == Theme.Dark ? "☀" : "☾";
+        ThemeToggleBtn.ToolTip = ThemeManager.Current == Theme.Dark
             ? "Switch to light mode"
             : "Switch to dark mode";
     }

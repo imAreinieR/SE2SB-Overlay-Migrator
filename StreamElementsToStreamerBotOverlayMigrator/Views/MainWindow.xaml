@@ -322,7 +322,8 @@
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              behaviors:ScrollPassthrough.IsEnabled="True"
                              AllowDrop="True"
-                             SelectionChanged="WidgetList_SelectionChanged">
+                             SelectionChanged="WidgetList_SelectionChanged"
+                             DragLeave="WidgetList_DragLeave">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="Padding" Value="0"/>
@@ -439,6 +440,24 @@
                                                     Click="RemoveWidget_Click"/>
                                         </Grid>
                                     </Border>
+
+                                    <!-- Drop position indicator — shown above/below this row while dragging -->
+                                    <Border x:Name="DropIndicatorTop"
+                                            Height="2"
+                                            Margin="10,-2,10,0"
+                                            VerticalAlignment="Top"
+                                            Background="{StaticResource AccentBlueBrush}"
+                                            CornerRadius="1"
+                                            IsHitTestVisible="False"
+                                            Visibility="Collapsed"/>
+                                    <Border x:Name="DropIndicatorBottom"
+                                            Height="2"
+                                            Margin="10,0,10,-2"
+                                            VerticalAlignment="Bottom"
+                                            Background="{StaticResource AccentBlueBrush}"
+                                            CornerRadius="1"
+                                            IsHitTestVisible="False"
+                                            Visibility="Collapsed"/>
 
                                     <!-- Hover/active triggers -->
                                     <Grid.Triggers>
