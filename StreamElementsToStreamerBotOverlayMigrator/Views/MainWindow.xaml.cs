@@ -275,6 +275,33 @@ public partial class MainWindow: Window
         button.ContextMenu.IsOpen          = true;
     }
 
+    private void DuplicateWidget_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedWidget is null)
+            return;
+
+        var duplicate = new Widget($"{_selectedWidget.Name} (copy)", DefaultRootFolderPath);
+
+        if (_selectedWidget.Files.Any())
+        {
+            List<string> sourcePaths = _selectedWidget.Files
+                .Select(file => Path.Combine(_selectedWidget.FolderLocation, file.FileName))
+                .Where(File.Exists)
+                .ToList();
+
+            if (sourcePaths.Any())
+                AddWidgetFilesToFromPaths(duplicate, sourcePaths);
+        }
+
+        WidgetManager.Save(duplicate);
+
+        _widgets.Add(duplicate);
+        WidgetList.SelectedItem = duplicate;
+
+        UpdateEmptyState();
+        SetStatus($"Duplicated as '{duplicate.Name}'.");
+    }
+
     private void ExportRawFiles_Click(object sender, RoutedEventArgs e)
     {
         if (_selectedWidget is null || !_selectedWidget.Files.Any())

@@ -681,6 +681,9 @@
                                 <TextBlock Text="⋯" FontSize="14"/>
                                 <Button.ContextMenu>
                                     <ContextMenu Style="{StaticResource DropdownMenu}">
+                                        <MenuItem Header="Duplicate as New"
+                                                  Style="{StaticResource DropdownMenuItem}"
+                                                  Click="DuplicateWidget_Click"/>
                                         <MenuItem Header="Export Raw Files"
                                                   Style="{StaticResource DropdownMenuItem}"
                                                   Click="ExportRawFiles_Click"/>
