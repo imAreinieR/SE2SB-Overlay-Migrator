@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:behaviors="clr-namespace:StreamElementsToStreamerBotOverlayMigrator.Behaviors"
         Title="SE Overlay Migration Tool"
-        Width="780" Height="520"
-        MinWidth="680" MinHeight="460"
+        Width="820" Height="547"
+        MinWidth="720" MinHeight="480"
         ResizeMode="CanMinimize"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource AppBgBrush}">
@@ -306,12 +306,12 @@
     ═══════════════════════════════════════════════ -->
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="240"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- ── LEFT SIDEBAR ── -->
-        <Border Grid.Column="0"
+        <Border Grid.Column="0" Grid.Row="0"
                 Background="{StaticResource SidebarBgBrush}"
                 BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="0,0,1,0">
@@ -319,6 +319,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>  <!-- Header -->
                     <RowDefinition Height="*"/>     <!-- Widget list -->
+                    <RowDefinition Height="Auto"/>  <!-- Legend -->
                 </Grid.RowDefinitions>
 
                 <!-- Sidebar header -->
@@ -591,6 +592,48 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                 </ScrollViewer>
+
+                <!-- Status legend -->
+                <Border Grid.Row="2"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="0,1,0,0"
+                        Padding="14,10">
+                    <StackPanel Orientation="Horizontal">
+
+                        <Ellipse Width="7" Height="7"
+                                 Fill="#3FB950"
+                                 VerticalAlignment="Center"
+                                 Margin="0,0,6,0"/>
+                        <TextBlock Text="Ready"
+                                   FontFamily="Segoe UI"
+                                   FontSize="11"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,14,0"/>
+
+                        <Ellipse Width="7" Height="7"
+                                 Fill="#D9A72E"
+                                 VerticalAlignment="Center"
+                                 Margin="0,0,6,0"/>
+                        <TextBlock Text="Modified"
+                                   FontFamily="Segoe UI"
+                                   FontSize="11"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,14,0"/>
+
+                        <Ellipse Width="7" Height="7"
+                                 Fill="#E5484D"
+                                 VerticalAlignment="Center"
+                                 Margin="0,0,6,0"/>
+                        <TextBlock Text="Missing Files"
+                                   FontFamily="Segoe UI"
+                                   FontSize="11"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+
+                    </StackPanel>
+                </Border>
 
             </Grid>
         </Border>
