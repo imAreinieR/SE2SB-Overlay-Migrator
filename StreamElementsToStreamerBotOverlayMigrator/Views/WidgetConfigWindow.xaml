@@ -155,6 +155,40 @@
             </Setter>
         </Style>
 
+        <!-- Expand/collapse-all toolbar button -->
+        <Style x:Key="ExpandCollapseAllBtn" TargetType="Button">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.82"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.65"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Footer save button -->
         <Style x:Key="SaveBtn" TargetType="Button">
             <Setter Property="Background" Value="{StaticResource AccentGreenBrush}"/>
@@ -375,17 +409,54 @@
                 <!-- ── Tab: Widget Configuration ── -->
                 <Grid x:Name="LeftPanelConfig" Visibility="Visible">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <ScrollViewer Grid.Row="0"
+                    <!-- Toolbar: expand/collapse-all + search -->
+                    <Border Grid.Row="0"
+                            Background="{StaticResource SidebarBgBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="0,0,0,1"
+                            Padding="10,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button x:Name="ExpandCollapseAllBtn"
+                                    Grid.Column="0"
+                                    Style="{StaticResource ExpandCollapseAllBtn}"
+                                    Content="▾"
+                                    ToolTip="Collapse all"
+                                    Click="ExpandCollapseAllBtn_Click"/>
+
+                            <Grid Grid.Column="2">
+                                <TextBox x:Name="ConfigSearchBox"
+                                         Style="{StaticResource FieldInput}"
+                                         TextChanged="ConfigSearchBox_TextChanged"/>
+                                <TextBlock x:Name="ConfigSearchPlaceholder"
+                                           Text="Search…"
+                                           Foreground="{StaticResource TextDimBrush}"
+                                           FontFamily="Segoe UI"
+                                           FontSize="12"
+                                           Margin="9,0,0,0"
+                                           VerticalAlignment="Center"
+                                           IsHitTestVisible="False"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <ScrollViewer Grid.Row="1"
                                   VerticalScrollBarVisibility="Auto"
                                   Padding="0,8,0,8">
                         <StackPanel x:Name="GroupsPanel"/>
                     </ScrollViewer>
 
-                    <Border Grid.Row="1"
+                    <Border Grid.Row="2"
                             Background="{StaticResource SidebarBgBrush}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="0,1,0,0"

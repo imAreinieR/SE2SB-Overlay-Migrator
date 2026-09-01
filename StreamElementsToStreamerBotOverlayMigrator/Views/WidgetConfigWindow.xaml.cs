@@ -22,6 +22,15 @@ namespace StreamElementsToStreamerBotOverlayMigrator;
 
 public partial class WidgetConfigWindow: Window
 {
+        private sealed class ConfigGroupUi
+    {
+        public StackPanel                                   Container                = null!;
+        public ToggleButton                                 Header                   = null!;
+        public StackPanel                                   FieldsPanel              = null!;
+        public List<(Border Row, string Label, string Key)> Rows                     = null!;
+        public bool                                         WasCollapsedBeforeSearch;
+    }
+
     private const    string                               SimulatedUsername       = "AmiElements";
     private const    string                               SimulatedUserId         = "123456";
     private const    string                               SimulatedGifterUsername = "CatGod";
@@ -32,9 +41,11 @@ public partial class WidgetConfigWindow: Window
     private readonly List<WidgetDataField>                _allFields              = new ();
     private readonly Dictionary<string, string>           _fileNameAndContents    = new ();
     private readonly List<AssetFieldControl>              _assetFieldControls     = new ();
+    private readonly List<ConfigGroupUi>                  _configGroups           = new ();
     private          Dictionary<string, JsonElement>?     _dataValues;
     private          bool                                 _isDirty;
     private          bool                                 _webViewReady           = false;
+    private          bool                                 _isConfigSearchActive   = false;
 
     private          StyledDropdown                       _settingsCanvasSize     = null!;
     private          NumericSpinner                       _settingsWidgetWidth    = null!;
@@ -64,6 +75,7 @@ public partial class WidgetConfigWindow: Window
 
         LoadConfigurationData();
         LoadConfigurationFields();
+        UpdateExpandCollapseAllButtonState();
 
         SetupSimulateGroups();
         BuildSettingsControls();
@@ -178,21 +190,131 @@ public partial class WidgetConfigWindow: Window
             Margin     = new Thickness(0, 0, 0, 4)
         };
 
+        var rows = new List<(Border Row, string Label, string Key)>();
+
         foreach (WidgetDataField widgetDataField in widgetDataFieldGroup.Fields)
         {
             Border? row = BuildFieldRow(widgetDataField);
 
             if (row is not null)
+            {
                 fieldsPanel.Children.Add(row);
+                rows.Add((row, widgetDataField.Label, widgetDataField.Key));
+            }
         }
 
-        header.Checked   += (_, _) => fieldsPanel.Visibility = Visibility.Collapsed;
-        header.Unchecked += (_, _) => fieldsPanel.Visibility = Visibility.Visible;
+        header.Checked   += (_, _) => { fieldsPanel.Visibility = Visibility.Collapsed; UpdateExpandCollapseAllButtonState(); };
+        header.Unchecked += (_, _) => { fieldsPanel.Visibility = Visibility.Visible;   UpdateExpandCollapseAllButtonState(); };
 
         container.Children.Add(header);
         container.Children.Add(fieldsPanel);
 
+        _configGroups.Add(new ConfigGroupUi
+        {
+            Container   = container,
+            Header      = header,
+            FieldsPanel = fieldsPanel,
+            Rows        = rows
+        });
+
         return container;
+    }
+
+    private void ExpandCollapseAllBtn_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_configGroups.Any())
+            return;
+
+        bool shouldCollapse = _configGroups.Any(group => group.Header.IsChecked != true);
+
+        foreach (ConfigGroupUi group in _configGroups)
+            group.Header.IsChecked = shouldCollapse;
+
+        UpdateExpandCollapseAllButtonState();
+    }
+
+    private void UpdateExpandCollapseAllButtonState()
+    {
+        if (!_configGroups.Any())
+            return;
+
+        bool allCollapsed = _configGroups.All(group => group.Header.IsChecked == true);
+
+        ExpandCollapseAllBtn.Content = allCollapsed ? "▸" : "▾";
+        ExpandCollapseAllBtn.ToolTip = allCollapsed ? "Expand all" : "Collapse all";
+    }
+
+    private void ConfigSearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        string query = ConfigSearchBox.Text.Trim();
+
+        ConfigSearchPlaceholder.Visibility = query.Length == 0
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+        ApplyConfigSearchFilter(query);
+    }
+
+    private void ApplyConfigSearchFilter(string query)
+    {
+        bool isSearching = query.Length > 0;
+
+        if (isSearching && !_isConfigSearchActive)
+        {
+            foreach (ConfigGroupUi group in _configGroups)
+                group.WasCollapsedBeforeSearch = group.Header.IsChecked == true;
+        }
+
+        foreach (ConfigGroupUi group in _configGroups)
+        {
+            bool groupHasMatch = false;
+
+            foreach ((Border row, string label, string key) in group.Rows)
+            {
+                bool matches = !isSearching
+                    || label.Contains(query, StringComparison.OrdinalIgnoreCase)
+                    || GetFieldValueText(key).Contains(query, StringComparison.OrdinalIgnoreCase);
+
+                row.Visibility = matches ? Visibility.Visible : Visibility.Collapsed;
+
+                if (matches)
+                    groupHasMatch = true;
+            }
+
+            group.Container.Visibility = !isSearching || groupHasMatch
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+
+            if (isSearching)
+            {
+                if (groupHasMatch && group.Header.IsChecked == true)
+                    group.Header.IsChecked = false;
+            }
+            else if (_isConfigSearchActive)
+            {
+                group.Header.IsChecked = group.WasCollapsedBeforeSearch;
+            }
+        }
+
+        _isConfigSearchActive = isSearching;
+        UpdateExpandCollapseAllButtonState();
+    }
+
+    private string GetFieldValueText(string key)
+    {
+        if (!_fieldControls.TryGetValue(key, out FrameworkElement? control))
+            return string.Empty;
+
+        return control switch
+        {
+            TextBox           textBox     => textBox.Text,
+            NumericSpinner    spinner     => spinner.Value.ToString(),
+            ColorSwatchPicker picker      => picker.RgbaString,
+            StyledDropdown    comboBox    => (comboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty,
+            CheckBox          checkBox    => checkBox.IsChecked == true ? "true" : "false",
+            SliderField       sliderField => sliderField.Value.ToString(),
+            _                             => string.Empty
+        };
     }
 
     private Border? BuildFieldRow(WidgetDataField widgetDataField)
