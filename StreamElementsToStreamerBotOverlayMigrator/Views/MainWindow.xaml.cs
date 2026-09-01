@@ -206,15 +206,6 @@ public partial class MainWindow: Window
             CommitWidgetRename(textBox);
     }
 
-    private void SaveWidget_Click(object sender, RoutedEventArgs e)
-    {
-        if (_selectedWidget is null)
-            return;
-
-        WidgetManager.Save(_selectedWidget);
-        SetStatus("Widget saved.");
-    }
-
     private void UndoWidget_Click(object sender, RoutedEventArgs e)
     {
         if (_selectedWidget is null)
@@ -388,10 +379,13 @@ public partial class MainWindow: Window
         }
     }
 
-    private void Generate_Click(object sender, RoutedEventArgs e)
+    private void SaveAndGenerate_Click(object sender, RoutedEventArgs e)
     {
         if (_selectedWidget is null)
             return;
+
+        if (_selectedWidget.IsDirty)
+            WidgetManager.Save(_selectedWidget);
 
         if (WidgetManager.GenerateExportFiles(_selectedWidget, out string errorMessage))
             SetStatus(errorMessage, success: true);
@@ -621,7 +615,6 @@ public partial class MainWindow: Window
 
         EmptyStatePanel.Visibility    = Visibility.Collapsed;
         DetailContentPanel.Visibility = Visibility.Visible;
-        SaveChangesBtn.IsEnabled      = true;
         UndoBtn.IsEnabled             = true;
 
         UpdateWidgetInfoPanel(widget);
@@ -669,7 +662,6 @@ public partial class MainWindow: Window
     {
         FolderPathBox.Text         = string.Empty;
         GenerateBtn.IsEnabled      = false;
-        SaveChangesBtn.IsEnabled   = false;
         UndoBtn.IsEnabled          = false;
         ImportMoreBtn.IsEnabled    = false;
         WidgetInfoPanel.Visibility = Visibility.Collapsed;
@@ -701,9 +693,8 @@ public partial class MainWindow: Window
         ConfigureBtn.IsEnabled = _selectedWidget
             .Files
             .Any(file => file.WidgetFileType == Common.WidgetFileType.FieldJson);
-        SaveChangesBtn.IsEnabled = _selectedWidget.IsDirty;
-        UndoBtn.IsEnabled        = _selectedWidget.IsDirty;
-        ImportMoreBtn.IsEnabled  = hasFiles;
+        UndoBtn.IsEnabled       = _selectedWidget.IsDirty;
+        ImportMoreBtn.IsEnabled = hasFiles;
 
         _selectedWidget.NotifyStatusChanges();
 
