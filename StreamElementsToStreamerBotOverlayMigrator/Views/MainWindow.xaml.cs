@@ -454,7 +454,7 @@ public partial class MainWindow: Window
 
         EditModeToggleIcon.Text = IsEditMode
             ? "\u2714"   // ✔ check mark
-            : "\u270E";  // ✎ pencil / edit icon
+            : "\u283F";  // ⠿ grip/drag icon
         EditModeToggleBtn.ToolTip = IsEditMode
             ? "Finish reordering"
             : "Reorder widgets";

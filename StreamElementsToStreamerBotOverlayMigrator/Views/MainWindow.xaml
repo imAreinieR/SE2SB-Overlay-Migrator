@@ -394,7 +394,7 @@
                                     ToolTip="Reorder widgets"
                                     Click="EditModeToggle_Click">
                                 <TextBlock x:Name="EditModeToggleIcon"
-                                           Text="&#9998;"
+                                           Text="&#10303;"
                                            Foreground="{StaticResource AccentBlueBrush}"
                                            FontFamily="Segoe UI Symbol"
                                            FontSize="14"/>
