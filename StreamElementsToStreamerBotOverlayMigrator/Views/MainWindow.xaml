@@ -677,6 +677,7 @@
                                     Style="{StaticResource MoreOptionsBtn}"
                                     Margin="4,0,0,0"
                                     ToolTip="More file options"
+                                    IsEnabled="False"
                                     Click="ImportMore_Click">
                                 <TextBlock Text="⋯" FontSize="14"/>
                                 <Button.ContextMenu>

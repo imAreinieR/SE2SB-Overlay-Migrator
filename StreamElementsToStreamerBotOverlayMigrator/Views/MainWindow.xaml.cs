@@ -652,6 +652,7 @@ public partial class MainWindow: Window
         GenerateBtn.IsEnabled      = false;
         SaveChangesBtn.IsEnabled   = false;
         UndoBtn.IsEnabled          = false;
+        ImportMoreBtn.IsEnabled    = false;
         WidgetInfoPanel.Visibility = Visibility.Collapsed;
         HideWarning();
         SetStatus("Select or create a widget to begin.");
@@ -683,6 +684,7 @@ public partial class MainWindow: Window
             .Any(file => file.WidgetFileType == Common.WidgetFileType.FieldJson);
         SaveChangesBtn.IsEnabled = _selectedWidget.IsDirty;
         UndoBtn.IsEnabled        = _selectedWidget.IsDirty;
+        ImportMoreBtn.IsEnabled  = hasFiles;
 
         _selectedWidget.NotifyStatusChanges();
 
