@@ -22,12 +22,12 @@ namespace StreamElementsToStreamerBotOverlayMigrator;
 
 public partial class WidgetConfigWindow: Window
 {
-        private sealed class ConfigGroupUi
+    private sealed class ConfigGroupUi
     {
-        public StackPanel                                   Container                = null!;
-        public ToggleButton                                 Header                   = null!;
-        public StackPanel                                   FieldsPanel              = null!;
-        public List<(Border Row, string Label, string Key)> Rows                     = null!;
+        public StackPanel                                   Container             = null!;
+        public ToggleButton                                 Header                = null!;
+        public StackPanel                                   FieldsPanel           = null!;
+        public List<(Border Row, string Label, string Key)> Rows                  = null!;
         public bool                                         WasCollapsedBeforeSearch;
     }
 
@@ -36,6 +36,7 @@ public partial class WidgetConfigWindow: Window
     private const    string                               SimulatedGifterUsername = "CatGod";
     private const    string                               FunnyNumberAmount       = "67";
 
+    private static readonly Color                         PreviewCanvasBackgroundColor = Colors.Black;
     private readonly Widget                               _widget;
     private readonly Dictionary<string, FrameworkElement> _fieldControls          = new ();
     private readonly List<WidgetDataField>                _allFields              = new ();
@@ -80,6 +81,14 @@ public partial class WidgetConfigWindow: Window
         SetupSimulateGroups();
         BuildSettingsControls();
 
+        PreviewCanvasBackground.Fill = new SolidColorBrush(PreviewCanvasBackgroundColor);
+
+        Loaded += WidgetConfigWindow_Loaded;
+    }
+
+    private void WidgetConfigWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        Loaded -= WidgetConfigWindow_Loaded;
         InitializeWebViewAsync();
     }
 
@@ -892,7 +901,8 @@ public partial class WidgetConfigWindow: Window
         if (!int.TryParse(parts[0], out int width) || !int.TryParse(parts[1], out int height))
             return;
 
-        // TODO: apply canvas dimensions to the preview WebView viewport
+        PreviewCanvas.Width  = width;
+        PreviewCanvas.Height = height;
     }
 
     private void SettingsWidget_Changed(object? sender, EventArgs e)

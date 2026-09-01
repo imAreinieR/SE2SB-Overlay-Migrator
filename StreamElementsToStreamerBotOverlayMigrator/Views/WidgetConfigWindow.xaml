@@ -814,8 +814,13 @@
                         </DrawingBrush.Drawing>
                     </DrawingBrush>
                 </Grid.Background>
-                <wv2:WebView2 x:Name="PreviewWebView"
-                              Visibility="Collapsed"/>
+                <Viewbox Stretch="Uniform">
+                    <Grid x:Name="PreviewCanvas" Width="1920" Height="1080">
+                        <Rectangle x:Name="PreviewCanvasBackground"/>
+                        <wv2:WebView2CompositionControl x:Name="PreviewWebView"
+                                                         Visibility="Hidden"/>
+                    </Grid>
+                </Viewbox>
 
                 <!-- Shown while WebView2 is initialising -->
                 <TextBlock x:Name="PreviewPlaceholder"
