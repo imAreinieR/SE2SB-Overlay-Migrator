@@ -96,6 +96,31 @@
             </Setter>
         </Style>
 
+        <!-- Text input with left icon gutter (search box) -->
+        <Style x:Key="SearchFieldInput" TargetType="TextBox" BasedOn="{StaticResource FieldInput}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="28,0,8,0"
+                                          VerticalAlignment="Center"
+                                          VerticalScrollBarVisibility="Hidden"
+                                          HorizontalScrollBarVisibility="Hidden"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Field button -->
         <Style x:Key="FieldButton" TargetType="Button">
             <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
@@ -436,14 +461,22 @@
 
                             <Grid Grid.Column="2">
                                 <TextBox x:Name="ConfigSearchBox"
-                                         Style="{StaticResource FieldInput}"
+                                         Style="{StaticResource SearchFieldInput}"
                                          TextChanged="ConfigSearchBox_TextChanged"/>
+                                <TextBlock Text="&#xE721;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="13"
+                                           Foreground="{StaticResource TextDimBrush}"
+                                           Margin="9,0,0,0"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Center"
+                                           IsHitTestVisible="False"/>
                                 <TextBlock x:Name="ConfigSearchPlaceholder"
                                            Text="Search…"
                                            Foreground="{StaticResource TextDimBrush}"
                                            FontFamily="Segoe UI"
                                            FontSize="12"
-                                           Margin="9,0,0,0"
+                                           Margin="29,0,0,0"
                                            VerticalAlignment="Center"
                                            IsHitTestVisible="False"/>
                             </Grid>
