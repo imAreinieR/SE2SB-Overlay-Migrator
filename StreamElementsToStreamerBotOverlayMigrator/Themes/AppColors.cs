@@ -29,7 +29,7 @@ public static class AppColors
         public static readonly Color DropZoneActiveFill   = Color.FromArgb(0x1A, 0x4F, 0x7E, 0xFF);
         public static readonly Color AccentBlue           = Color.FromRgb (0x4F, 0x7E, 0xFF);
         public static readonly Color AccentGreen          = Color.FromRgb (0x3E, 0xCF, 0x8E);
-        public static readonly Color TextSecondary        = Color.FromRgb (0x5A, 0x62, 0x80);
+        public static readonly Color TextSecondary        = Color.FromRgb (0x75, 0x81, 0xA5);
         public static readonly Color TextDim              = Color.FromRgb (0x3A, 0x40, 0x60);
         public static readonly Color Danger               = Color.FromRgb (0xFF, 0x6B, 0x6B);
     }

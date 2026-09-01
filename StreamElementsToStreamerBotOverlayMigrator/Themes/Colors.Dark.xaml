@@ -54,7 +54,7 @@
     <!-- Primary readable text (widget names, file names, input values) -->
     <Color x:Key="TextPrimaryColor">#D0D6F0</Color>
     <!-- Secondary / label text (section headers, copy button icon) -->
-    <Color x:Key="TextSecondaryColor">#5A6280</Color>
+    <Color x:Key="TextSecondaryColor">#7581A5</Color>
     <!-- Field label text -->
     <Color x:Key="TextFieldLabelColor">#8B94BD</Color>
     <!-- Muted text (drop zone icon) -->
