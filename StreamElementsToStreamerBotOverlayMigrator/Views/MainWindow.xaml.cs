@@ -84,7 +84,7 @@ public partial class MainWindow: Window
         WidgetManager.Save(widget);
 
         if (_selectedWidget == widget)
-            FolderPathBox.Text = widget.RootFolderLocation;
+            FolderPathBox.Text = ObscurePath(widget.RootFolderLocation);
 
         SetStatus($"Renamed to '{newName}'.");
 
@@ -591,10 +591,29 @@ public partial class MainWindow: Window
 
     #region Helpers
 
+    private static string ObscurePath(string? fullPath)
+    {
+        if (string.IsNullOrEmpty(fullPath))
+            return fullPath ?? string.Empty;
+
+        string[] segments = fullPath.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
+
+        int documentsIndex = Array.FindIndex
+        (
+            segments,
+            segment => segment.Equals("Documents", StringComparison.OrdinalIgnoreCase)
+        );
+
+        if (documentsIndex < 0)
+            return fullPath;
+
+        return ".../" + string.Join(Path.DirectorySeparatorChar, segments.Skip(documentsIndex));
+    }
+
     private void SelectWidget(Widget widget)
     {
         _selectedWidget      = widget;
-        FolderPathBox.Text   = widget.FolderLocation;
+        FolderPathBox.Text   = ObscurePath(widget.FolderLocation);
         FileList.ItemsSource = widget.Files;
 
         if (WidgetList.SelectedItem != widget)
