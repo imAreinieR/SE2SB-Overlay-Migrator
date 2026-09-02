@@ -432,7 +432,7 @@ public partial class WidgetConfigWindow: Window
                 }
             );
 
-        _settingsCanvasSize.SelectedIndex     = 2;
+        _settingsCanvasSize.SelectedIndex     = 3;
         _settingsCanvasSize.SelectionChanged += SettingsCanvasSize_Changed;
         SettingsCanvasSizeRow.Child           = MakeSettingsRow("Canvas Size", _settingsCanvasSize);
 
