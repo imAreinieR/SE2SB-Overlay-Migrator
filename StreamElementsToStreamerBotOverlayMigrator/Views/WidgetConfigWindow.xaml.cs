@@ -32,6 +32,7 @@ public partial class WidgetConfigWindow: Window
     }
 
     private const    string                               SimulatedUsername       = "AmiElements";
+    private const    string                               SimulatedUsernameColor  = "#7785ff";
     private const    string                               SimulatedUserId         = "123456";
     private const    string                               SimulatedGifterUsername = "CatGod";
     private const    string                               FunnyNumberAmount       = "67";
@@ -1002,11 +1003,26 @@ public partial class WidgetConfigWindow: Window
                 data = new
                 {
                     time         = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                    tags         = new { },
+                    tags         = new
+                    {
+                        badges      = Array.Empty<object>(),
+                        color       = SimulatedUsernameColor,
+                        displayName = SimulatedUsername,
+                        emotes      = Array.Empty<object>(),
+                        flags       = string.Empty,
+                        id          = Guid.NewGuid().ToString(),
+                        mod         = "0",
+                        roomId      = string.Empty,
+                        subscriber  = "0",
+                        tmiSentTs   = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
+                        turbo       = "0",
+                        userId      = SimulatedUserId,
+                        userType    = string.Empty
+                    },
                     nick         = SimulatedUsername,
                     userId       = SimulatedUserId,
                     displayName  = SimulatedUsername,
-                    displayColor = "#7785ff",
+                    displayColor = SimulatedUsernameColor,
                     badges       = Array.Empty<object>(),
                     channel      = SimulatedUsername,
                     text         = "Hello World~",
