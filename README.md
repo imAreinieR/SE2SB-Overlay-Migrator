@@ -153,7 +153,7 @@ flowchart TB
 ### Misc
 - Easily check for newer version and update!
 - Automatic backup of your data locally!
-- Switch between light and dark themes.
+- Switch between light and dark themes!
 
 ---
 
@@ -260,7 +260,7 @@ Click **Import** and select your overlay files. You'll typically need:
 > **Note:** Make sure to include any nessecary image, audio, or video files (see [supported formats](#notes))
 
 ### Step 3 — Fix any warnings
-If the warning banner appears, follow its instructions (e.g. add the missing HTML file, or remove a duplicate). The Generate button will remain disabled until the file set is ready.
+If the warning banner appears, follow its instructions (e.g. add the missing HTML file, or remove a duplicate). The **Save & Generate** button will remain disabled until the file set is ready.
 
 ### Step 4 — Save your work
 Click **Save**.
@@ -269,7 +269,7 @@ Click **Save**.
 Click **Edit Configuration**. Configure the widget settings as needed.
 
 ### Step 6 — Generate
-Click **Generate**. The tool writes the processed files to the path shown under **Deploy Location**.
+Click **Save & Generate**. The tool saves your chagnes and writes the processed files to the path shown under **Deploy Location**.
 
 ### Step 7 — Add to OBS
 Copy the URL and create a local browser source in OBS pointing to it.
