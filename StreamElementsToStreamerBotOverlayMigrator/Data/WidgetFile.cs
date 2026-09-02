@@ -1,4 +1,5 @@
 ﻿using StreamElementsToStreamerBotOverlayMigrator.Common;
+using StreamElementsToStreamerBotOverlayMigrator.Themes;
 using System.Text.Json;
 
 namespace StreamElementsToStreamerBotOverlayMigrator.Data;
@@ -84,19 +85,16 @@ public class WidgetFile
     }
 
     public System.Windows.Media.SolidColorBrush WidgetFileTypeColor
-        => new System.Windows.Media.SolidColorBrush
-        (
-            WidgetFileType switch
-            {
-                WidgetFileType.Html       => System.Windows.Media.Color.FromArgb(255, 255,  99, 132),
-                WidgetFileType.Javascript => System.Windows.Media.Color.FromArgb(255,  54, 162, 235),
-                WidgetFileType.Css        => System.Windows.Media.Color.FromArgb(255, 255, 206,  86),
-                WidgetFileType.FieldJson  => System.Windows.Media.Color.FromArgb(255, 108, 112, 122),
-                WidgetFileType.DataJson   => System.Windows.Media.Color.FromArgb(255, 255, 255, 255),
-                WidgetFileType.ImageAsset => System.Windows.Media.Color.FromArgb(255, 255, 159,  64),
-                WidgetFileType.AudioAsset => System.Windows.Media.Color.FromArgb(255,  75, 192, 192),
-                WidgetFileType.VideoAsset => System.Windows.Media.Color.FromArgb(255, 153, 102, 255),
-                _                         => System.Windows.Media.Color.FromArgb(255, 108, 112, 122)
-            }
-        );
+        => WidgetFileType switch
+        {
+            WidgetFileType.Html       => AppColors.FileTypeHtml,
+            WidgetFileType.Javascript => AppColors.FileTypeJavascript,
+            WidgetFileType.Css        => AppColors.FileTypeCss,
+            WidgetFileType.FieldJson  => AppColors.FileTypeFieldJson,
+            WidgetFileType.DataJson   => AppColors.FileTypeDataJson,
+            WidgetFileType.ImageAsset => AppColors.FileTypeImageAsset,
+            WidgetFileType.AudioAsset => AppColors.FileTypeAudioAsset,
+            WidgetFileType.VideoAsset => AppColors.FileTypeVideoAsset,
+            _                         => AppColors.FileTypeOther
+        };
 }

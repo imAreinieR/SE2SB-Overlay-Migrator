@@ -1,6 +1,7 @@
 using StreamElementsToStreamerBotOverlayMigrator.Common;
 using StreamElementsToStreamerBotOverlayMigrator.Common.ExtensionMethods;
 using StreamElementsToStreamerBotOverlayMigrator.Services;
+using StreamElementsToStreamerBotOverlayMigrator.Themes;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -135,14 +136,11 @@ public class Widget: INotifyPropertyChanged
     }
 
     public System.Windows.Media.SolidColorBrush StatusColor
-        => new System.Windows.Media.SolidColorBrush
-        (
-            HasValidFileSet
-                ? IsGenerated
-                    ? System.Windows.Media.Color.FromArgb(255, 60, 179, 113)
-                    : System.Windows.Media.Color.FromArgb(255, 245, 166, 35)
-                : System.Windows.Media.Color.FromArgb(255, 220, 20, 60)
-        );
+        => HasValidFileSet
+            ? IsGenerated
+                ? AppColors.WidgetStatusGenerated
+                : AppColors.WidgetStatusPending
+            : AppColors.WidgetStatusInvalid;
 
     public void AddWidgetFile(WidgetFile widgetFile)
         => Files.AddSorted(widgetFile, WidgetFileComparer.Instance);

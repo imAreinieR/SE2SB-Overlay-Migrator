@@ -32,6 +32,7 @@ public static class AppColors
         public static readonly Color TextSecondary        = Color.FromRgb (0x75, 0x81, 0xA5);
         public static readonly Color TextDim              = Color.FromRgb (0x3A, 0x40, 0x60);
         public static readonly Color Danger               = Color.FromRgb (0xFF, 0x6B, 0x6B);
+        public static readonly Color Warning              = Color.FromRgb (0xF0, 0xA0, 0x4B);
     }
 
     // ── Light palette ────────────────────────────────────────────────────────
@@ -51,6 +52,21 @@ public static class AppColors
         public static readonly Color TextSecondary        = Color.FromRgb (0x5A, 0x62, 0x80);
         public static readonly Color TextDim              = Color.FromRgb (0x9A, 0xA0, 0xBC);
         public static readonly Color Danger               = Color.FromRgb (0xD9, 0x36, 0x36);
+        public static readonly Color Warning              = Color.FromRgb (0xC0, 0x70, 0x10);
+    }
+
+    // ── File-type tag palette ───────────────────────────────────────────────
+    private static class FileType
+    {
+        public static readonly Color Html       = Color.FromRgb(0xFF,  0x63,  0x84);
+        public static readonly Color Javascript = Color.FromRgb(0x36,  0xA2,  0xEB);
+        public static readonly Color Css        = Color.FromRgb(0xFF,  0xCE,  0x56);
+        public static readonly Color FieldJson  = Color.FromRgb(0x6C,  0x70,  0x7A);
+        public static readonly Color DataJson   = Color.FromRgb(0xFF,  0xFF,  0xFF);
+        public static readonly Color ImageAsset = Color.FromRgb(0xFF,  0x9F,  0x40);
+        public static readonly Color AudioAsset = Color.FromRgb(0x4B,  0xC0,  0xC0);
+        public static readonly Color VideoAsset = Color.FromRgb(0x99,  0x66,  0xFF);
+        public static readonly Color Other      = Color.FromRgb(0x6C,  0x70,  0x7A);
     }
 
     // ── Theme-aware accessors ────────────────────────────────────────────────
@@ -70,6 +86,7 @@ public static class AppColors
     public static Color TextSecondary        => IsDark ? Dark.TextSecondary        : Light.TextSecondary;
     public static Color TextDim              => IsDark ? Dark.TextDim              : Light.TextDim;
     public static Color Danger               => IsDark ? Dark.Danger               : Light.Danger;
+    public static Color Warning              => IsDark ? Dark.Warning              : Light.Warning;
 
     // ── Convenience factory ──────────────────────────────────────────────────
     /// <summary>Creates a new <see cref="SolidColorBrush"/> from a palette color.</summary>
@@ -77,17 +94,34 @@ public static class AppColors
 
     // ── Pre-built brushes for the most frequent runtime usages ───────────────
     // SetStatus() foregrounds
-    public static SolidColorBrush StatusDefault        => Brush(TextSecondary);
-    public static SolidColorBrush StatusError          => Brush(Danger);
-    public static SolidColorBrush StatusSuccess        => Brush(AccentGreen);
+    public static SolidColorBrush StatusDefault         => Brush(TextSecondary);
+    public static SolidColorBrush StatusError           => Brush(Danger);
+    public static SolidColorBrush StatusSuccess         => Brush(AccentGreen);
+    public static SolidColorBrush StatusWarning         => Brush(Warning);
+
+    // Widget.StatusColor (file-set / generation state)
+    public static SolidColorBrush WidgetStatusInvalid   => StatusError;
+    public static SolidColorBrush WidgetStatusPending   => StatusWarning;
+    public static SolidColorBrush WidgetStatusGenerated => StatusSuccess;
+
+    // WidgetFile.WidgetFileTypeColor
+    public static SolidColorBrush FileTypeHtml          => Brush(FileType.Html);
+    public static SolidColorBrush FileTypeJavascript    => Brush(FileType.Javascript);
+    public static SolidColorBrush FileTypeCss           => Brush(FileType.Css);
+    public static SolidColorBrush FileTypeFieldJson     => Brush(FileType.FieldJson);
+    public static SolidColorBrush FileTypeDataJson      => Brush(FileType.DataJson);
+    public static SolidColorBrush FileTypeImageAsset    => Brush(FileType.ImageAsset);
+    public static SolidColorBrush FileTypeAudioAsset    => Brush(FileType.AudioAsset);
+    public static SolidColorBrush FileTypeVideoAsset    => Brush(FileType.VideoAsset);
+    public static SolidColorBrush FileTypeOther         => Brush(FileType.Other);
 
     // SetDropZoneHighlight() colors
-    public static SolidColorBrush DropZoneBorderIdle   => Brush(DropZoneBorder);
-    public static SolidColorBrush DropZoneBorderActive => Brush(DropZoneActiveBorder);
-    public static SolidColorBrush DropZoneFillIdle     => new (Colors.Transparent);
-    public static SolidColorBrush DropZoneFillActive   => Brush(DropZoneActiveFill);
+    public static SolidColorBrush DropZoneBorderIdle    => Brush(DropZoneBorder);
+    public static SolidColorBrush DropZoneBorderActive  => Brush(DropZoneActiveBorder);
+    public static SolidColorBrush DropZoneFillIdle      => new (Colors.Transparent);
+    public static SolidColorBrush DropZoneFillActive    => Brush(DropZoneActiveFill);
 
     // FileListBorder background states
-    public static SolidColorBrush FileListBgFilled     => Brush(Surface);
-    public static SolidColorBrush FileListBgEmpty      => new (Colors.Transparent);
+    public static SolidColorBrush FileListBgFilled      => Brush(Surface);
+    public static SolidColorBrush FileListBgEmpty       => new (Colors.Transparent);
 }
