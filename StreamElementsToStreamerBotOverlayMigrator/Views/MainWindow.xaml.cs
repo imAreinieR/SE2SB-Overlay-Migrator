@@ -601,7 +601,7 @@ public partial class MainWindow: Window
         if (documentsIndex < 0)
             return fullPath;
 
-        return ".../" + string.Join(Path.DirectorySeparatorChar, segments.Skip(documentsIndex));
+        return "...\\" + string.Join(Path.DirectorySeparatorChar, segments.Skip(documentsIndex));
     }
 
     private void SelectWidget(Widget widget)
