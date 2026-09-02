@@ -129,8 +129,8 @@ public partial class WidgetConfigWindow: Window
         }
         catch (Exception exception)
         {
-            PreviewPlaceholder.Text = $"WebView2 unavailable: {exception.Message}";
-            SetStatus($"[ERROR] WebView2 init failed: {exception.Message}", error: true);
+            PreviewPlaceholder.Text = $"Preview unavailable: {exception.Message}";
+            SetStatus($"Failed to load preview: {exception.Message}", error: true);
         }
     }
 
@@ -166,13 +166,13 @@ public partial class WidgetConfigWindow: Window
 
         if (!_fileNameAndContents.TryGetValue("index.html", out string? htmlContent))
         {
-            PreviewWebView.NavigateToString("<body style='background:#0e1017;color:#5a6280;font-family:Consolas;padding:32px'>No HTML file found in widget.</body>");
-            SetStatus("[WARN] No HTML file found – preview unavailable.", error: true);
+            PreviewWebView.NavigateToString("<body style='background:#0e1017;color:#5a6280;font-family:Consolas;padding:32px'>No HTML file found</body>");
+            SetStatus("No HTML file found", error: true);
             return;
         }
 
         PreviewWebView.NavigateToString(htmlContent);
-        SetStatus("[INFO] Preview loaded.");
+        SetStatus("Preview loaded.");
     }
 
     #region UI Elements
@@ -383,7 +383,7 @@ public partial class WidgetConfigWindow: Window
         }
         catch (Exception exception)
         {
-            SetStatus($"[ERROR] Failed to build control for '{field.Key}': {exception.Message}", error: true);
+            SetStatus($"Failed to load '{field.Key}': {exception.Message}", error: true);
             return BuildUnsupportedControl(field, "failed to build");
         }
     }
@@ -624,7 +624,7 @@ public partial class WidgetConfigWindow: Window
         var assetFieldControl = new AssetFieldControl(comboBox, setButton, assetWidgetFileType);
         _assetFieldControls.Add(assetFieldControl);
 
-        assetFieldControl.PlaybackError += (_, message) => SetStatus($"[ERROR] Couldn't play asset: {message}", error: true);
+        assetFieldControl.PlaybackError += (_, message) => SetStatus($"Couldn't play file: {message}", error: true);
         setButton.Click                 += (_, _)       => ImportAssetFile(assetFieldControl, assetWidgetFileType, field);
         comboBox.SelectionChanged       += (_, _)       => UpdateAssetSelection(assetFieldControl, assetWidgetFileType);
         comboBox.SelectionChanged       += OnControlChanged;
@@ -708,12 +708,10 @@ public partial class WidgetConfigWindow: Window
             string newTag = $"{assetWidgetFileType.GetSubFolderForWidgetFileType()}/{fileName}";
 
             PopulateAssetDropdown(assetFieldControl.Dropdown, assetWidgetFileType, newTag);
-
-            SetStatus($"[INFO] Imported '{fileName}'.", success: true);
         }
         catch (Exception exception)
         {
-            SetStatus($"[ERROR] Failed to import asset: {exception.Message}", error: true);
+            SetStatus($"Failed to import file: {exception.Message}", error: true);
         }
     }
 
@@ -782,7 +780,7 @@ public partial class WidgetConfigWindow: Window
         {
             _isDirty          = true;
             SaveBtn.IsEnabled = true;
-            SetStatus("Unsaved changes.");
+            SetStatus("Changes reverted.");
         }
 
         ReloadPreview();
@@ -828,7 +826,7 @@ public partial class WidgetConfigWindow: Window
         }
         catch (Exception exception)
         {
-            SetStatus($"Save failed: {exception.Message}", error: true);
+            SetStatus($"Failed to save: {exception.Message}", error: true);
         }
     }
 
@@ -1227,7 +1225,7 @@ public partial class WidgetConfigWindow: Window
         }
         catch (Exception exception)
         {
-            SetStatus($"Simulate failed: {exception.Message}", error: true);
+            SetStatus($"Failed to simlulate '{listener}': {exception.Message}", error: true);
         }
     }
 
