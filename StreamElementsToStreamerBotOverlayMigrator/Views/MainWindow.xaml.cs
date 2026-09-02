@@ -43,7 +43,6 @@ public partial class MainWindow: Window
             Topmost = true;
             Topmost = false;
             Focus();
-            SyncThemeIcon();
         };
 
         Version? version = GetType().Assembly.GetName().Version;
@@ -555,21 +554,20 @@ public partial class MainWindow: Window
         WidgetManager.SaveOrder(_widgets);
     }
 
-    private void ThemeToggle_Click(object sender, RoutedEventArgs e)
+    private void Settings_Click(object sender, RoutedEventArgs e)
     {
-        ThemeManager.Toggle();
+        var settingsWindow = new SettingsWindow
+        {
+            Owner = this
+        };
+        settingsWindow.ShowDialog();
 
-        var newWindow = new MainWindow();
-        newWindow.Show();
-        Close();
-    }
-
-    private void SyncThemeIcon()
-    {
-        ThemeToggleIcon.Text   = ThemeManager.Current == Theme.Dark ? "☀" : "☾";
-        ThemeToggleBtn.ToolTip = ThemeManager.Current == Theme.Dark
-            ? "Switch to light mode"
-            : "Switch to dark mode";
+        if (settingsWindow.ThemeChanged)
+        {
+            var newWindow = new MainWindow();
+            newWindow.Show();
+            Close();
+        }
     }
 
     private async void VersionLabel_Click(object sender, RoutedEventArgs e)
@@ -601,7 +599,7 @@ public partial class MainWindow: Window
         if (documentsIndex < 0)
             return fullPath;
 
-        return "...\\" + string.Join(Path.DirectorySeparatorChar, segments.Skip(documentsIndex));
+        return ".../" + string.Join(Path.DirectorySeparatorChar, segments.Skip(documentsIndex));
     }
 
     private void SelectWidget(Widget widget)

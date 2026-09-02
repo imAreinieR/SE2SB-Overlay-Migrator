@@ -333,19 +333,18 @@
                                        Margin="0"
                                        VerticalAlignment="Center"/>
 
-                            <Button x:Name="ThemeToggleBtn"
+                            <Button x:Name="SettingsBtn"
                                     Grid.Column="1"
                                     Background="Transparent"
                                     BorderThickness="0"
                                     Padding="4,0"
                                     Cursor="Hand"
                                     VerticalAlignment="Center"
-                                    ToolTip="Toggle light / dark mode"
-                                    Click="ThemeToggle_Click">
-                                <TextBlock x:Name="ThemeToggleIcon"
-                                           Text="☀"
+                                    ToolTip="Settings"
+                                    Click="Settings_Click">
+                                <TextBlock Text="⚙"
                                            Style="{StaticResource SectionLabel}"
-                                           FontSize="13"
+                                           FontSize="14"
                                            Margin="0"/>
                             </Button>
 
