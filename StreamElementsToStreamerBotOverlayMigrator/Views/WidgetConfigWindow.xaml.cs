@@ -146,7 +146,7 @@ public partial class WidgetConfigWindow: Window
         _fileNameAndContents["sessionData.js"] = TemplateFiles.SessionDataFile;
         _fileNameAndContents["streamerBotApiAndEventBridge.js"] = DummyWidgetOnLoadEvent()
             + Environment.NewLine
-            + TemplateFiles.ApiAndEventBridgeFile;
+            + TemplateFiles.GetApiAndEventBridgeFile(SettingsService.Current);
 
         _widget
             .Files

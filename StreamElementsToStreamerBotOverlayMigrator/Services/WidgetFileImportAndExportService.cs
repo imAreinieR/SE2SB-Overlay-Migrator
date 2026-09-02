@@ -262,7 +262,7 @@ public static class WidgetFileImportAndExportService
             }
 
             File.WriteAllText(Path.Combine(widget.FolderLocation, "sessionData.js"),                  TemplateFiles.SessionDataFile);
-            File.WriteAllText(Path.Combine(widget.FolderLocation, "streamerBotApiAndEventBridge.js"), TemplateFiles.ApiAndEventBridgeFile);
+            File.WriteAllText(Path.Combine(widget.FolderLocation, "streamerBotApiAndEventBridge.js"), TemplateFiles.GetApiAndEventBridgeFile(SettingsService.Current));
 
             errorMessage = $"Generated to '{widget.FolderLocation}'";
             return true;

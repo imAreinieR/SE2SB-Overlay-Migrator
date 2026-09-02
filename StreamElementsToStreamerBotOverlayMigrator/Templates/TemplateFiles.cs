@@ -1,7 +1,12 @@
-﻿namespace StreamElementsToStreamerBotOverlayMigrator.Templates;
+﻿using StreamElementsToStreamerBotOverlayMigrator.Data;
+using System.Text.Json;
+
+namespace StreamElementsToStreamerBotOverlayMigrator.Templates;
 
 public static class TemplateFiles
 {
+    private const string StreamerBotConnectionConfigPlaceholder = "{{STREAMERBOT_CONNECTION_CONFIG}}";
+    
     public const string HtmlFile = @"<!DOCTYPE html>
 <html>
 <head>
@@ -149,15 +154,19 @@ const SESSION = {
   'purchase-latest':                              { name: '', amount: 0, avatar: '', message: '', items: [] }
 };";
 
-    public const string ApiAndEventBridgeFile = @"// EventAndApiBridge - bridges StreamElements Widget with StreamerBot for both events and API calls"
+    private const string ApiAndEventBridgeFile = @"// EventAndApiBridge - bridges StreamElements Widget with StreamerBot for both events and API calls"
         + "\n\n" + ApiInterceptorsFile
         + "\n\n" + CachedApiInterceptorFile
         + "\n\n" + StreamElementsApiInterceptorFile
         + "\n\n" + StreamerBotEventHandlersFile
         + "\n\n" + StreamElementsSeApiFunctionFile;
 
+    public static string GetApiAndEventBridgeFile(AppSettings settings)
+        => ApiAndEventBridgeFile.Replace(StreamerBotConnectionConfigPlaceholder, BuildStreamerBotConnectionConfig(settings));
+
     public const string StreamerBotEventHandlersFile = @"// StreamerBotEventHandlers - bridges StreamerBot with StreamElements Widget
 const client = new StreamerbotClient({
+{{STREAMERBOT_CONNECTION_CONFIG}}
   autoReconnect: true,
   retries: -1,
   onConnect: async (data) => {
@@ -1002,4 +1011,19 @@ const SE_API = {
     }
   }
 };";
+
+    private static string BuildStreamerBotConnectionConfig(AppSettings settings)
+    {
+        var configLines = new List<string>
+        {
+            $"  host: {JsonSerializer.Serialize(settings.Host)},",
+            $"  port: {settings.Port},",
+            $"  endpoint: {JsonSerializer.Serialize(settings.Endpoint)},"
+        };
+
+        if (settings.EnableAuthentication && !string.IsNullOrEmpty(settings.Password))
+            configLines.Add($"  password: {JsonSerializer.Serialize(settings.Password)},");
+
+        return string.Join("\n", configLines);
+    }
 }
