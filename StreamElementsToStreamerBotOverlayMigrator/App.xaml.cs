@@ -1,3 +1,4 @@
+using StreamElementsToStreamerBotOverlayMigrator.Services;
 using StreamElementsToStreamerBotOverlayMigrator.Themes;
 using System.Windows;
 
@@ -8,6 +9,8 @@ public partial class App: Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        ThemeManager.DetectFromLoadedDictionary();
+
+        SettingsService.Initialize();
+        ThemeManager.Apply(SettingsService.Current.Theme);
     }
 }

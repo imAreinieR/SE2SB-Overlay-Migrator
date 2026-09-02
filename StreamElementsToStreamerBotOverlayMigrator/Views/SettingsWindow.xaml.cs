@@ -17,7 +17,7 @@ public partial class SettingsWindow: Window
     {
         InitializeComponent();
 
-        _settings = SettingsService.Load();
+        _settings = SettingsService.Current;
 
         LoadGeneralTab();
         LoadStreamerBotTab();
@@ -83,11 +83,12 @@ public partial class SettingsWindow: Window
             return;
         }
 
-        _settings.Host                 = HostBox.Text.Trim();
-        _settings.Port                 = port;
-        _settings.Endpoint             = string.IsNullOrWhiteSpace(EndpointBox.Text) ? "/" : EndpointBox.Text.Trim();
-        _settings.EnableAuthentication = EnableAuthToggle.IsChecked == true;
-        _settings.Password             = PasswordBox.Password;
+        _settings.Theme                 = ThemeManager.Current;
+        _settings.Host                  = HostBox.Text.Trim();
+        _settings.Port                  = port;
+        _settings.Endpoint              = string.IsNullOrWhiteSpace(EndpointBox.Text) ? "/" : EndpointBox.Text.Trim();
+        _settings.EnableAuthentication  = EnableAuthToggle.IsChecked == true;
+        _settings.Password              = PasswordBox.Password;
 
         SettingsService.Save(_settings);
 

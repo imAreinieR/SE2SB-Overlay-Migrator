@@ -1,40 +1,35 @@
+using Microsoft.Data.Sqlite;
 using StreamElementsToStreamerBotOverlayMigrator.Data;
 using System.IO;
-using System.Text.Json;
 
 namespace StreamElementsToStreamerBotOverlayMigrator.Services;
 
 public static class SettingsService
 {
-    private static readonly string SettingsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SE Overlay Migration Tool");
-    private static readonly string SettingsFilePath   = Path.Combine(SettingsFolderPath, "settings.json");
+    private static readonly string DatabaseFilePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "database.db"));
+    private static readonly string ConnectionString = $"Data Source={DatabaseFilePath}";
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    public static AppSettings Current { get; private set; } = new AppSettings();
+
+    public static void Initialize()
     {
-        WriteIndented = true
-    };
+        using SqliteConnection connection = new SqliteConnection(ConnectionString);
+        connection.Open();
 
-    public static AppSettings Load()
+        Current = AppSettingService.Load(connection);
+    }
+
+    public static void Save()
     {
-        try
-        {
-            if (!File.Exists(SettingsFilePath))
-                return new AppSettings();
+        using SqliteConnection connection = new SqliteConnection(ConnectionString);
+        connection.Open();
 
-            var json = File.ReadAllText(SettingsFilePath);
-            return JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
-        }
-        catch
-        {
-            return new AppSettings();
-        }
+        AppSettingService.Save(connection, Current);
     }
 
     public static void Save(AppSettings settings)
     {
-        Directory.CreateDirectory(SettingsFolderPath);
-
-        var json = JsonSerializer.Serialize(settings, JsonOptions);
-        File.WriteAllText(SettingsFilePath, json);
+        Current = settings;
+        Save();
     }
 }
