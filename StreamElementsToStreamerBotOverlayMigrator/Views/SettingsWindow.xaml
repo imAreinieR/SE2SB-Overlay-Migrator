@@ -84,6 +84,7 @@
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="8,0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
@@ -92,7 +93,7 @@
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="4">
                             <ScrollViewer x:Name="PART_ContentHost"
-                                          Margin="8,0"
+                                          Margin="{TemplateBinding Padding}"
                                           VerticalAlignment="Center"
                                           VerticalScrollBarVisibility="Hidden"
                                           HorizontalScrollBarVisibility="Hidden"/>
@@ -120,6 +121,7 @@
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="8,0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="PasswordBox">
@@ -128,7 +130,7 @@
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="4">
                             <ScrollViewer x:Name="PART_ContentHost"
-                                          Margin="8,0"
+                                          Margin="{TemplateBinding Padding}"
                                           VerticalAlignment="Center"
                                           VerticalScrollBarVisibility="Hidden"
                                           HorizontalScrollBarVisibility="Hidden"/>
@@ -180,6 +182,115 @@
             </Setter>
         </Style>
 
+        <!-- Small inline "reset to default" button, overlaid inside a TextBox -->
+        <Style x:Key="FieldClearButton" TargetType="Button">
+            <Setter Property="Width" Value="18"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextDimBrush}"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="ToolTip" Value="Reset to default"/>
+            <Setter Property="Content" Value="&#x2715;"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="9">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Small inline text toggle button, overlaid inside a field (e.g. Show/Hide password) -->
+        <Style x:Key="FieldToggleTextButton" TargetType="Button">
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextDimBrush}"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="10.5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Small inline "show/hide password" toggle, overlaid inside the password field -->
+        <Style x:Key="FieldRevealButton" TargetType="Button">
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextDimBrush}"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Content" Value="Show"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Footer save button (copied from WidgetConfigWindow) -->
         <Style x:Key="SaveBtn" TargetType="Button">
             <Setter Property="Background" Value="{StaticResource AccentGreenBrush}"/>
@@ -221,6 +332,9 @@
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="Padding" Value="14,10"/>
         </Style>
+
+        <!-- Shared error color for field-level validation -->
+        <SolidColorBrush x:Key="ErrorBrush" Color="#E06C75"/>
 
     </Window.Resources>
 
@@ -320,54 +434,134 @@
                     <StackPanel>
 
                         <Border Style="{StaticResource FieldRow}">
-                            <StackPanel>
-                                <TextBlock Text="Host" Style="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="HostBox" Style="{StaticResource FieldInput}" Text="127.0.0.1"/>
-                            </StackPanel>
-                        </Border>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="195"/>
+                                </Grid.ColumnDefinitions>
 
-                        <Border Style="{StaticResource FieldRow}">
-                            <StackPanel>
-                                <TextBlock Text="Port" Style="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="PortBox" Style="{StaticResource FieldInput}" Text="8080"/>
-                            </StackPanel>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Host" Style="{StaticResource FieldLabel}"/>
+                                    <Grid>
+                                        <TextBox x:Name="HostBox"
+                                                 Style="{StaticResource FieldInput}"
+                                                 Padding="8,0,26,0"
+                                                 Text="127.0.0.1"/>
+                                        <Button Style="{StaticResource FieldClearButton}"
+                                                Click="HostClear_Click"/>
+                                    </Grid>
+                                    <TextBlock x:Name="HostErrorText"
+                                               Style="{StaticResource FieldHint}"
+                                               Foreground="{StaticResource ErrorBrush}"
+                                               Visibility="Collapsed"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Port" Style="{StaticResource FieldLabel}"/>
+                                    <Grid>
+                                        <TextBox x:Name="PortBox"
+                                                 Style="{StaticResource FieldInput}"
+                                                 Padding="8,0,26,0"
+                                                 Text="8080"/>
+                                        <Button Style="{StaticResource FieldClearButton}"
+                                                Click="PortClear_Click"/>
+                                    </Grid>
+                                    <TextBlock x:Name="PortErrorText"
+                                               Style="{StaticResource FieldHint}"
+                                               Foreground="{StaticResource ErrorBrush}"
+                                               Visibility="Collapsed"/>
+                                </StackPanel>
+                            </Grid>
                         </Border>
 
                         <Border Style="{StaticResource FieldRow}">
                             <StackPanel>
                                 <TextBlock Text="Endpoint" Style="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="EndpointBox" Style="{StaticResource FieldInput}" Text="/"/>
+                                <Grid>
+                                    <TextBox x:Name="EndpointBox"
+                                             Style="{StaticResource FieldInput}"
+                                             Padding="8,0,26,0"
+                                             Text="/"/>
+                                    <Button Style="{StaticResource FieldClearButton}"
+                                            Click="EndpointClear_Click"/>
+                                </Grid>
                             </StackPanel>
                         </Border>
 
                         <Border Style="{StaticResource FieldRow}">
-                            <StackPanel>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0"
-                                               Text="Enable Authentication"
-                                               Style="{StaticResource FieldLabel}"
-                                               Margin="0"
-                                               VerticalAlignment="Center"/>
-                                    <CheckBox Grid.Column="1"
-                                              x:Name="EnableAuthToggle"
-                                              Style="{StaticResource FieldToggle}"
-                                              VerticalAlignment="Center"
-                                              Checked="EnableAuthToggle_Changed"
-                                              Unchecked="EnableAuthToggle_Changed"/>
-                                </Grid>
-                                <TextBlock Text="Only needed if authentication is enabled on the StreamerBot WebSocket server."
-                                           Style="{StaticResource FieldHint}"/>
-                            </StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="200"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="Enable Authentication"
+                                                   Style="{StaticResource FieldLabel}"
+                                                   Margin="0"
+                                                   VerticalAlignment="Center"/>
+                                        <CheckBox Grid.Column="1"
+                                                  x:Name="EnableAuthToggle"
+                                                  Style="{StaticResource FieldToggle}"
+                                                  VerticalAlignment="Center"
+                                                  Checked="EnableAuthToggle_Changed"
+                                                  Unchecked="EnableAuthToggle_Changed"/>
+                                    </Grid>
+                                    <TextBlock Text="Only needed if authentication is enabled on the StreamerBot WebSocket server."
+                                               Style="{StaticResource FieldHint}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Password" Style="{StaticResource FieldLabel}"/>
+                                    <Grid>
+                                        <PasswordBox x:Name="PasswordBox"
+                                                     Style="{StaticResource FieldPasswordInput}"
+                                                     Padding="8,0,44,0"/>
+                                        <TextBox x:Name="PasswordRevealBox"
+                                                 Style="{StaticResource FieldInput}"
+                                                 Padding="8,0,44,0"
+                                                 Visibility="Collapsed"/>
+                                        <Button x:Name="PasswordVisibilityToggleBtn"
+                                                Style="{StaticResource FieldRevealButton}"
+                                                Click="PasswordVisibilityToggle_Click"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
                         </Border>
 
                         <Border Style="{StaticResource FieldRow}" BorderThickness="0">
                             <StackPanel>
-                                <TextBlock Text="Password" Style="{StaticResource FieldLabel}"/>
-                                <PasswordBox x:Name="PasswordBox" Style="{StaticResource FieldPasswordInput}"/>
+                                <TextBlock Text="Connection Test" Style="{StaticResource FieldLabel}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0"
+                                            x:Name="TestConnectionBtn"
+                                            Style="{StaticResource FieldButton}"
+                                            Click="TestConnection_Click">
+                                        Test Connection
+                                    </Button>
+                                    <TextBlock Grid.Column="1"
+                                               x:Name="TestConnectionResultText"
+                                               Margin="10,0,0,0"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Consolas"
+                                               FontSize="11"
+                                               Foreground="{StaticResource TextDimBrush}"
+                                               TextWrapping="Wrap"/>
+                                </Grid>
+                                <TextBlock Text="Connects using the values above and calls GetInfo to confirm it's StreamerBot. This does not save your settings."
+                                           Style="{StaticResource FieldHint}"/>
                             </StackPanel>
                         </Border>
 
