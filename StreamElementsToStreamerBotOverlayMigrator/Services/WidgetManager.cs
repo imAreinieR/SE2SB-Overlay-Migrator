@@ -166,6 +166,16 @@ public static class WidgetManager
         catch (Exception)
         {}
     }
+
+    public static Widget Clone(Widget widget)
+    {
+        var newWidget = new Widget(widget.Name + " (copy)", widget.RootFolderLocation);
+
+        foreach (WidgetFile file in widget.Files)
+            newWidget.Files.Add(new WidgetFile(file.FileName, file.Content));
+
+        return newWidget;
+    }
     
     public static bool GenerateExportFiles(Widget widget, out string errorMessage)
         => WidgetFileImportAndExportService.GenerateExportFilesForWidget(widget, out errorMessage);

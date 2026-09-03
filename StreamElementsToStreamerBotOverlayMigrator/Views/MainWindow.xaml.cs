@@ -270,19 +270,7 @@ public partial class MainWindow: Window
         if (_selectedWidget is null)
             return;
 
-        var duplicate = new Widget($"{_selectedWidget.Name} (copy)", DefaultRootFolderPath);
-
-        if (_selectedWidget.Files.Any())
-        {
-            List<string> sourcePaths = _selectedWidget.Files
-                .Select(file => Path.Combine(_selectedWidget.FolderLocation, file.FileName))
-                .Where(File.Exists)
-                .ToList();
-
-            if (sourcePaths.Any())
-                AddWidgetFilesToFromPaths(duplicate, sourcePaths);
-        }
-
+        var duplicate = WidgetManager.Clone(_selectedWidget);
         WidgetManager.Save(duplicate);
 
         _widgets.Add(duplicate);
