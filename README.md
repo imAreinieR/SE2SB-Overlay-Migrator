@@ -4,6 +4,21 @@ A desktop utility for migrating StreamElements overlay widgets to [StreamerBot](
 
 ---
 
+## Table of Contents
+- [Overview](#overview)
+- [Download / Installation](#download--installation)
+- [Architecture](#architecture)
+- [Features](#features)
+- [Setting Up the StreamerBot WebSocket Server](#setting-up-the-streamerbot-websocket-server)
+- [Importing the SE2SB Helper Actions](#importing-the-se2sb-helper-actions)
+- [Exporting Your Widget Files from StreamElements](#exporting-your-widget-files-from-streamelements)
+- [How to Get Started with the SE2SB Overlay Migrator](#how-to-get-started-with-the-se2sb-overlay-migrator)
+- [Output Folder Structure](#output-folder-structure)
+- [Notes](#notes)
+- [Disclaimer](#disclaimer)
+
+---
+
 ## Overview
 
 StreamElements hosts overlays and services them with stream events out of the box. StreamerBot can drive apps with events too, but has no native overlay system of its own.
@@ -15,6 +30,17 @@ This tool converts your existing SE overlays to run locally on your machine, wir
 ![Application UI - Edit Configuration](Images/application_ui_2.png)
 
 ![Application UI - Simulate Events](Images/application_ui_3.png)
+
+---
+
+## Download / Installation
+
+1. Head to the [Releases](../../releases/latest) page.
+2. Download the latest zip.
+3. Extract the zip file
+4. Run `SE2SB Overlay Migrator.exe`
+
+That's it — no other setup is required to run the tool itself. Before generating or using widgets, make sure StreamerBot's WebSocket server is enabled (see [Setting Up the StreamerBot WebSocket Server](#setting-up-the-streamerbot-websocket-server)).
 
 ---
 
@@ -82,64 +108,14 @@ flowchart TB
 - This reroutes calls to the [SE API](https://dev.streamelements.com/docs/api-docs) to the [StreamerBot API](https://docs.streamer.bot/api/websocket/requests) and listens for StreamerBot events, re-emitting them as SE events that your widget can understand.
 - It also uses the [Decapi API](https://docs.decapi.me/) to supplement calls with data from Twitch and caches responses to minimize duplicate calls.
 
-**How the bridge works under the hood:**
-- **API interceptors** catches your widget's `fetch()` calls and reroutes them so the widget's original code doesn't need to change:
-  - Calls to the StreamElements API (e.g. channel info, counters) are rerouted to the StreamerBot WebSocket API.
-  - Calls to the `Decapi API` and `unavatar.io` are cached for an hour to cut down on repeat network requests to help avoid hitting rate limits.
-- **`SE_API`** reimplements the subset of the `window.SE_API` helper object that StreamElements widgets commonly use (e.g. `SE_API.store`, `SE_API.counters`, `SE_API.sanitize`), backed by StreamerBot's global variables instead of StreamElements' cloud storage.
-- **Event listeners** subscribe to StreamerBot's Twitch events and translate each one into the matching StreamElements event your widget already knows how to handle:
-
-  | StreamerBot Event | Simulated StreamElements Event |
-  |---|---|
-  | Follow | `follower-latest` |
-  | Subscription (new) | `subscriber-latest` |
-  | Subscription (resub) | `subscriber-latest` |
-  | Gift Sub (individual) | `subscriber-latest` |
-  | Gift Bomb (community) | `subscriber-latest` |
-  | Cheer (bits) | `cheer-latest` |
-  | Raid | `raid-latest` |
-  | Reward Redemption | `event` (`channelPointsRedemption`) |
-  | Chat Message | `message` |
-  | Chat Message Deleted | `delete-message` |
-
-  > Hosting, tips, and a few other legacy StreamElements events aren't supported, as they're either no longer part of Twitch (e.g. hosting) or have no StreamerBot equivalent.
-
-> **Note — Third-party scripts:** The generated bridge file imports the following libraries at runtime:
-  - [jQuery](https://jquery.com/) — DOM utilities used by many SE widgets.
-  - [StreamerBot Client](https://github.com/StreamerBot/client) — official JS client for the StreamerBot WebSocket Server and API.
-  - [profanity-cleaner](https://www.npmjs.com/package/profanity-cleaner) — used by the `SE_API.sanitize` implementation to filter chat message content.
+> **For details on how the bridge works under the hood** (API interceptors, the `SE_API` shim, and the StreamerBot → StreamElements event map), see [docs/bridge-and-session-data.md](docs/bridge-and-session-data.md#how-the-bridge-works-under-the-hood).
 
 ### StreamElements SessionData Replication
 - A `sessionData.js` file is generated alongside your widget files and loaded before the bridge, giving your widget the same `SESSION` object shape that many SE widgets read from (`onWidgetLoad` and `onSessionUpdate` events both include it).
 - On load, the widget asks StreamerBot for your current stats (via the `EmitTwitchChannelStats` Helper Action — see [Importing the SE2SB Helper Actions](#importing-the-se2sb-helper-actions)) and uses the response to populate the SessionData fields below.
 - Only a subset of the full SE SessionData schema currently carries real data — everything else in `SESSION` is initialized to an empty/zero default so widget code referencing it won't throw errors, it just won't update.
 
-**Follower Data:**
-| SessionData Key | What It Tracks | Source | Survives a Refresh? |
-|---|---|---|---|
-| `follower-total` | Current total follower count | StreamerBot (`EmitTwitchChannelStats`) | ✅ Yes |
-| `follower-latest` | Most recent follower's name | StreamerBot (`EmitTwitchChannelStats`) | ✅ Yes |
-| `follower-goal` | Follower goal target | StreamerBot (`Twitch-FetchGoals`) | ✅ Yes |
-| `follower-session` | Followers gained this browser session | In-memory counter, incremented as Follow events come in | ❌ No |
-
-**Subscriber Data:**
-| SessionData Key | What It Tracks | Source | Survives a Refresh? |
-|---|---|---|---|
-| `subscriber-total` | Current total subscriber count | StreamerBot (`EmitTwitchChannelStats`) | ✅ Yes |
-| `subscriber-latest` | Most recent subscriber's name | StreamerBot (`EmitTwitchChannelStats`) | ✅ Yes |
-| `subscriber-goal` | Subscriber goal target | StreamerBot (`Twitch-FetchGoals`) | ✅ Yes |
-| `subscriber-session` | All subs gained this session (new + resub + gifted) | In-memory counter | ❌ No |
-| `subscriber-new-session` | New subs this session | In-memory counter | ❌ No |
-| `subscriber-resub-session` | Resubs this session | In-memory counter | ❌ No |
-| `subscriber-gifted-session` | Gift subs this session | In-memory counter | ❌ No |
-
-**Cheer Data:**
-| SessionData Key | What It Tracks | Source | Survives a Refresh? |
-|---|---|---|---|
-| `cheer-goal` | Bits/cheer goal target | StreamerBot (`Twitch-FetchGoals`) | ✅ Yes |
-| `cheer-session` | Bits cheered this session | In-memory counter | ❌ No |
-
-> **Note — why the session counters reset:** the `-session` counters live only in the widget's in-memory `SESSION` object so refreshing the widget's page resets them back to zero. The `-total` and `-goal` values above don't have this problem, since they're fetched from StreamerBot.
+> **For the full list of SessionData fields and where each one comes from**, see [docs/bridge-and-session-data.md](docs/bridge-and-session-data.md#streamelements-sessiondata-fields).
 
 ### Simple File Imports
 - Import `.html`, `.js`, `.css`, `.json`, images, audio, and video files or even an entire folder or `.zip` file.
