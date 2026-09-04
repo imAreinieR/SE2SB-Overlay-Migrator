@@ -31,8 +31,11 @@ public partial class SettingsWindow: Window
 
         _settings = SettingsService.Current;
 
-        HostBox.TextChanged += HostBox_TextChanged;
-        PortBox.TextChanged += PortBox_TextChanged;
+        HostBox.TextChanged           += HostBox_TextChanged;
+        PortBox.TextChanged           += PortBox_TextChanged;
+        EndpointBox.TextChanged       += EndpointBox_TextChanged;
+        PasswordBox.PasswordChanged   += PasswordBox_PasswordChanged;
+        PasswordRevealBox.TextChanged += PasswordRevealBox_TextChanged;
 
         LoadGeneralTab();
         LoadStreamerBotTab();
@@ -101,6 +104,8 @@ public partial class SettingsWindow: Window
 
         SettingsService.Save(_settings);
 
+        UpdateFormValidity();
+
         DialogResult = true;
         Close();
     }
@@ -109,6 +114,56 @@ public partial class SettingsWindow: Window
     {
         DialogResult = false;
         Close();
+    }
+
+    private void RevertToDefault_Click(object sender, RoutedEventArgs e)
+    {
+        MessageBoxResult confirm = MessageBox.Show
+        (
+            "This will reset every setting back to its default value and save immediately. Continue?",
+            "Revert to Default",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning
+        );
+
+        if (confirm != MessageBoxResult.Yes)
+            return;
+
+        // Theme defaults to Dark (first item in the Theme dropdown).
+        if (ThemeManager.Current != Theme.Dark)
+        {
+            ThemeManager.Toggle();
+            ThemeChanged    = true;
+            StatusText.Text = "Theme will update once this window closes.";
+        }
+
+        _settings.Theme                = ThemeManager.Current;
+        _settings.Host                 = DefaultHost;
+        _settings.Port                 = int.Parse(DefaultPort);
+        _settings.Endpoint             = DefaultEndpoint;
+        _settings.EnableAuthentication = false;
+        _settings.Password             = string.Empty;
+
+        SettingsService.Save(_settings);
+
+        // Reset password reveal state before reloading the field from settings.
+        _isPasswordVisible                  = false;
+        PasswordRevealBox.Text              = string.Empty;
+        PasswordRevealBox.Visibility        = Visibility.Collapsed;
+        PasswordBox.Visibility              = Visibility.Visible;
+        PasswordVisibilityToggleBtn.Content = "Show";
+
+        // Reflect the reverted settings back into the UI.
+        LoadGeneralTab();
+        LoadStreamerBotTab();
+
+        TestConnectionResultText.Text = string.Empty;
+
+        if (!ThemeChanged)
+            StatusText.Text = "Settings reverted to defaults and saved.";
+
+        // The reverted values are now the saved values, so Save/Cancel go back to disabled.
+        UpdateFormValidity();
     }
 
     private void ThemeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -127,10 +182,15 @@ public partial class SettingsWindow: Window
 
         ThemeChanged    = true;
         StatusText.Text = "Theme will update once this window closes.";
+
+        UpdateFormValidity();
     }
 
     private void EnableAuthToggle_Changed(object sender, RoutedEventArgs e)
-        => UpdatePasswordFieldEnabled();
+    {
+        UpdatePasswordFieldEnabled();
+        UpdateFormValidity();
+    }
 
     private void PasswordVisibilityToggle_Click(object sender, RoutedEventArgs e)
     {
@@ -155,12 +215,23 @@ public partial class SettingsWindow: Window
         PasswordVisibilityToggleBtn.Content = _isPasswordVisible
             ? "Hide"
             : "Show";
+
+        UpdateFormValidity();
     }
 
     private void HostBox_TextChanged(object sender, TextChangedEventArgs e)
         => UpdateFormValidity();
 
     private void PortBox_TextChanged(object sender, TextChangedEventArgs e)
+        => UpdateFormValidity();
+
+    private void EndpointBox_TextChanged(object sender, TextChangedEventArgs e)
+        => UpdateFormValidity();
+
+    private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        => UpdateFormValidity();
+
+    private void PasswordRevealBox_TextChanged(object sender, TextChangedEventArgs e)
         => UpdateFormValidity();
 
     private void HostClear_Click(object sender, RoutedEventArgs e)
@@ -203,8 +274,8 @@ public partial class SettingsWindow: Window
         _testConnectionCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         var token = _testConnectionCts.Token;
 
-        _isTestingConnection        = true;
-        TestConnectionBtn.IsEnabled = false;
+        _isTestingConnection = true;
+        UpdateFormValidity();
         SetTestResult(TestResultKind.Pending, "Connecting...");
 
         using var socket = new ClientWebSocket();
