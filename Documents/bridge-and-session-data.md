@@ -1,6 +1,72 @@
-# Bridge Internals & SessionData Reference
+# Technical Reference
 
-This page covers the implementation details behind the generated `streamerBotApiAndEventBridge.js` and `sessionData.js` files. For the high-level overview, see the [main README](../README.md#streamelements---streamerbot-api-and-event-bridge).
+This page covers technical details and the implementation behind the generated `streamerBotApiAndEventBridge.js` and `sessionData.js` files. For the high-level overview, see the [main README](../README.md#streamelements---streamerbot-api-and-event-bridge).
+
+---
+
+## Table of Contents
+- [Technologies Used](#technologies-used)
+- [Architecture](#architecture)
+- [How the Bridge Works Under the Hood](#how-the-bridge-works-under-the-hood)
+- [StreamElements SessionData Fields](#streamelements-sessiondata-fields)
+- [Output Folder Structure](#output-folder-structure)
+- [Notes](#notes)
+
+---
+
+## Technologies Used
+- C# .NET 8.0
+- WPF
+- Sqlite
+- WebView2
+- Html, JavaScript, CSS
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TB
+    classDef twitch  fill:#9146FF,stroke:#7A2FD4,color:#fff
+    classDef se      fill:#1DB954,stroke:#158a3e,color:#fff
+    classDef sb      fill:#F26522,stroke:#c44e10,color:#fff
+    classDef local   fill:#555,stroke:#333,color:#fff
+    classDef obs     fill:#444,stroke:#222,color:#fff
+
+    subgraph SE ["Before"]
+        direction LR
+        subgraph INET1 ["🌐 Internet"]
+            direction LR
+            A[Twitch Events] --> B[StreamElements Platform] --> C[Hosted Overlay Widget]
+        end
+        subgraph LOC1 ["🖥 Local"]
+            direction LR
+            D[OBS]
+        end
+        C --> D
+    end
+
+    subgraph SB ["After"]
+        direction LR
+        subgraph INET2 ["🌐 Internet"]
+            direction LR
+            E[Twitch Events]
+        end
+        subgraph LOC2 ["🖥 Local"]
+            direction LR
+            F[StreamerBot] --> G[Local Overlay Widget] --> H[OBS]
+        end
+        E --> F
+    end
+
+    SE -- this tool --> SB
+
+    class A,E twitch
+    class B,C se
+    class F sb
+    class G local
+    class D,H obs
+```
 
 ---
 
@@ -64,3 +130,39 @@ Only a subset of the full SE SessionData schema currently carries real data — 
 | `cheer-session` | Bits cheered this session | In-memory counter | ❌ No |
 
 > **Note — why the session counters reset:** the `-session` counters live only in the widget's in-memory `SESSION` object so refreshing the widget's page resets them back to zero. The `-total` and `-goal` values above don't have this problem, since they're fetched from StreamerBot.
+
+---
+
+## Output Folder Structure
+
+```
+Documents/
+└── imA-SB-Widgets/
+    └── widget1/
+        ├── index.html
+        ├── index.js
+        ├── index.css
+        ├── config.js
+        ├── sessionData.js
+        ├── streamerBotApiAndEventBridge.js
+        ├── Images/
+        │   └── ...image asset files
+        ├── Audio/
+        │   └── ...audio asset files
+        └── Video/
+            └── ...video asset files
+```
+
+> Asset folders (`Images`, `Audio`, `Video`) are only created if widget includes files of that type.
+
+---
+
+## Notes
+
+- **SE template variables** — `{{variableName}}` and `{variableName}` placeholders in your HTML and CSS are replaced at generation time using values from your `data.json`.
+- **Protocol-relative URLs** — Any `src="//..."` or `href="//..."` references in your HTML are automatically upgraded to `https://` to avoid mixed-content issues.
+- **Multiple `.json` files are allowed** — the tool accepts more than one `.json` file, unlike `.html`, `.css`, and `.js` where only one of each is permitted.
+- **Supported asset formats** — the following file types are recognized on import; other extensions will not be picked up:
+  - **Image:** `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.svg`, `.bmp`, `.ico`
+  - **Audio:** `.mp3`, `.wav`, `.m4a`, `.aac`
+  - **Video:** `.mp4`, `.webm`

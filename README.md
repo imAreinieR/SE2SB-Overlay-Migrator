@@ -6,14 +6,12 @@ A desktop utility for migrating StreamElements overlay widgets to [StreamerBot](
 
 ## Table of Contents
 - [Overview](#overview)
-- [Download / Installation](#download--installation)
-- [Architecture](#architecture)
 - [Features](#features)
-- [Setting Up the StreamerBot WebSocket Server](#setting-up-the-streamerbot-websocket-server)
-- [Importing the SE2SB Helper Actions](#importing-the-se2sb-helper-actions)
-- [Exporting Your Widget Files from StreamElements](#exporting-your-widget-files-from-streamelements)
-- [How to Get Started with the SE2SB Overlay Migrator](#how-to-get-started-with-the-se2sb-overlay-migrator)
-- [Output Folder Structure](#output-folder-structure)
+- [Download / Installation](#download--installation)
+- [Setting Up StreamerBot WebSocket Server](#setting-up-streamerbot-websocket-server)
+- [Importing SE2SB Helper Actions](#importing-se2sb-helper-actions)
+- [Exporting Widget Files from StreamElements](#exporting-widget-files-from-streamelements)
+- [Getting Started with SE2SB Overlay Migrator](#getting-started-with-se2sb-overlay-migrator)
 - [Notes](#notes)
 - [Disclaimer](#disclaimer)
 
@@ -30,64 +28,6 @@ This tool converts your existing SE overlays to run locally on your machine, wir
 ![Application UI - Edit Configuration](Images/application_ui_2.png)
 
 ![Application UI - Simulate Events](Images/application_ui_3.png)
-
----
-
-## Download / Installation
-
-1. Head to the [Releases](../../releases/latest) page.
-2. Download the latest zip.
-3. Extract the zip file
-4. Run `SE2SB Overlay Migrator.exe`
-
-That's it — no other setup is required to run the tool itself. Before generating or using widgets, make sure StreamerBot's WebSocket server is enabled (see [Setting Up the StreamerBot WebSocket Server](#setting-up-the-streamerbot-websocket-server)).
-
----
-
-## Architecture
-
-```mermaid
-flowchart TB
-    classDef twitch  fill:#9146FF,stroke:#7A2FD4,color:#fff
-    classDef se      fill:#1DB954,stroke:#158a3e,color:#fff
-    classDef sb      fill:#F26522,stroke:#c44e10,color:#fff
-    classDef local   fill:#555,stroke:#333,color:#fff
-    classDef obs     fill:#444,stroke:#222,color:#fff
-
-    subgraph SE ["Before"]
-        direction LR
-        subgraph INET1 ["🌐 Internet"]
-            direction LR
-            A[Twitch Events] --> B[StreamElements Platform] --> C[Hosted Overlay Widget]
-        end
-        subgraph LOC1 ["🖥 Local"]
-            direction LR
-            D[OBS]
-        end
-        C --> D
-    end
-
-    subgraph SB ["After"]
-        direction LR
-        subgraph INET2 ["🌐 Internet"]
-            direction LR
-            E[Twitch Events]
-        end
-        subgraph LOC2 ["🖥 Local"]
-            direction LR
-            F[StreamerBot] --> G[Local Overlay Widget] --> H[OBS]
-        end
-        E --> F
-    end
-
-    SE -- this tool --> SB
-
-    class A,E twitch
-    class B,C se
-    class F sb
-    class G local
-    class D,H obs
-```
 
 ---
 
@@ -133,7 +73,18 @@ flowchart TB
 
 ---
 
-## Setting Up the StreamerBot WebSocket Server
+## Download / Installation
+
+1. Head to the [Releases](../../releases/latest) page.
+2. Download the latest zip.
+3. Extract the zip file
+4. Run `SE2SB Overlay Migrator.exe`
+
+That's it — no other setup is required to run the tool itself. Before generating or using widgets, make sure StreamerBot's WebSocket server is enabled (see [Setting Up the StreamerBot WebSocket Server](#setting-up-the-streamerbot-websocket-server)).
+
+---
+
+## Setting Up StreamerBot WebSocket Server
 
 This tool communicates with StreamerBot via its built-in WebSocket server. You'll need to enable and start it before generating or using any widgets.
 
@@ -157,7 +108,7 @@ The WebSocket Server is now running.
 
 ---
 
-## Importing the SE2SB Helper Actions
+## Importing SE2SB Helper Actions
 
 > **Prerequisite:** These Actions are required for widgets that use `SE_API.store.set()` and the [SessionData replication](#streamelements-sessiondata-replication) described above. Without them, those features will silently do nothing. You will only need to import them once.
 
@@ -189,7 +140,7 @@ After importing, you should see a **Helper Actions** group in your actions list 
 
 ---
 
-## Exporting Your Widget Files from StreamElements
+## Exporting Widget Files from StreamElements
 
 Before importing into SE2SB, you need to export your widget's source files from StreamElements. You can either do this manually or use a browser extension (like `widget.io`). The manual method is described below.
 
@@ -221,7 +172,7 @@ Once you have your files saved, follow the steps below to import them into the t
 
 ---
 
-## How to Get Started with the SE2SB Overlay Migrator
+## Getting Started with SE2SB Overlay Migrator
 
 ### Step 1 — Create a widget
 Click **+ New Widget** in the left panel. A widget entry appears with a default name.
@@ -250,30 +201,6 @@ Click **Save & Generate**. The tool saves your chagnes and writes the processed 
 ### Step 7 — Add to OBS
 Copy the URL and create a local browser source in OBS pointing to it.
 ![OBS Browser Source Settings](Images/obs_browser_source.png)
-
----
-
-## Output Folder Structure
-
-```
-Documents/
-└── imA-SB-Widgets/
-    └── widget1/
-        ├── index.html
-        ├── index.js
-        ├── index.css
-        ├── config.js
-        ├── sessionData.js
-        ├── streamerBotApiAndEventBridge.js
-        ├── Images/
-        │   └── ...image asset files
-        ├── Audio/
-        │   └── ...audio asset files
-        └── Video/
-            └── ...video asset files
-```
-
-> Asset folders (`Images`, `Audio`, `Video`) are only created if widget includes files of that type.
 
 ---
 
