@@ -49,6 +49,11 @@ public partial class WidgetConfigWindow: Window
     private          bool                                 _webViewReady           = false;
     private          bool                                 _isConfigSearchActive   = false;
 
+    // The canvas resolution selected in Settings (e.g. 1920x1080). PreviewCanvas's actual
+    // Width/Height are computed from these to fit PreviewPanel — see UpdatePreviewCanvasLayout.
+    private          double                                _previewLogicalWidth    = 1920;
+    private          double                                _previewLogicalHeight   = 1080;
+
     private          StyledDropdown                       _settingsCanvasSize     = null!;
     private          NumericSpinner                       _settingsWidgetWidth    = null!;
     private          NumericSpinner                       _settingsWidgetHeight   = null!;
@@ -91,6 +96,28 @@ public partial class WidgetConfigWindow: Window
     {
         Loaded -= WidgetConfigWindow_Loaded;
         InitializeWebViewAsync();
+
+        PreviewPanel.SizeChanged += (_, _) => UpdatePreviewCanvasLayout();
+    }
+
+    private void UpdatePreviewCanvasLayout()
+    {
+        double availableWidth  = PreviewPanel.ActualWidth;
+        double availableHeight = PreviewPanel.ActualHeight;
+
+        if (availableWidth <= 0 || availableHeight <= 0)
+            return;
+
+        double scale = Math.Min(availableWidth / _previewLogicalWidth, availableHeight / _previewLogicalHeight);
+
+        if (scale <= 0 || double.IsNaN(scale) || double.IsInfinity(scale))
+            return;
+
+        PreviewCanvas.Width  = _previewLogicalWidth  * scale;
+        PreviewCanvas.Height = _previewLogicalHeight * scale;
+
+        if (_webViewReady)
+            PreviewWebView.ZoomFactor = scale;
     }
 
     protected override void OnClosing(CancelEventArgs e)
@@ -108,6 +135,8 @@ public partial class WidgetConfigWindow: Window
 
             PreviewWebView.Visibility     = Visibility.Visible;
             PreviewPlaceholder.Visibility = Visibility.Collapsed;
+
+            UpdatePreviewCanvasLayout();
 
             await PreviewWebView.CoreWebView2.CallDevToolsProtocolMethodAsync("Log.enable", "{}");
             await PreviewWebView.CoreWebView2.CallDevToolsProtocolMethodAsync("Runtime.enable", "{}");
@@ -900,8 +929,10 @@ public partial class WidgetConfigWindow: Window
         if (!int.TryParse(parts[0], out int width) || !int.TryParse(parts[1], out int height))
             return;
 
-        PreviewCanvas.Width  = width;
-        PreviewCanvas.Height = height;
+        _previewLogicalWidth  = width;
+        _previewLogicalHeight = height;
+
+        UpdatePreviewCanvasLayout();
     }
 
     private void SettingsWidget_Changed(object? sender, EventArgs e)
