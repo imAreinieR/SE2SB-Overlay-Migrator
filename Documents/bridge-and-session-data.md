@@ -94,9 +94,9 @@ flowchart TB
   > Hosting, tips, and a few other legacy StreamElements events aren't supported, as they're either no longer part of Twitch (e.g. hosting) or have no StreamerBot equivalent.
 
 > **Note — Third-party scripts:** The generated bridge file imports the following libraries at runtime:
-  - [jQuery](https://jquery.com/) — DOM utilities used by many SE widgets.
-  - [StreamerBot Client](https://github.com/StreamerBot/client) — official JS client for the StreamerBot WebSocket Server and API.
-  - [profanity-cleaner](https://www.npmjs.com/package/profanity-cleaner) — used by the `SE_API.sanitize` implementation to filter chat message content.
+> - [jQuery](https://jquery.com/) — DOM utilities used by many SE widgets.
+> - [StreamerBot Client](https://github.com/StreamerBot/client) — official JS client for the StreamerBot WebSocket Server and API.
+> - [profanity-cleaner](https://www.npmjs.com/package/profanity-cleaner) — used by the `SE_API.sanitize` implementation to filter chat message content.
 
 ---
 

@@ -52,7 +52,7 @@ This tool converts your existing SE overlays to run locally on your machine, wir
 
 ### StreamElements SessionData Replication
 - A `sessionData.js` file is generated alongside your widget files and loaded before the bridge, giving your widget the same `SESSION` object shape that many SE widgets read from (`onWidgetLoad` and `onSessionUpdate` events both include it).
-- On load, the widget asks StreamerBot for your current stats (via the `EmitTwitchChannelStats` Helper Action — see [Importing the SE2SB Helper Actions](#importing-the-se2sb-helper-actions)) and uses the response to populate the SessionData fields below.
+- On load, the widget asks StreamerBot for your current stats (via the `EmitTwitchChannelStats` Helper Action — see [Importing SE2SB Helper Actions](#importing-se2sb-helper-actions)) and uses the response to populate the SessionData fields below.
 - Only a subset of the full SE SessionData schema currently carries real data — everything else in `SESSION` is initialized to an empty/zero default so widget code referencing it won't throw errors, it just won't update.
 
 > **For the full list of SessionData fields and where each one comes from**, see [docs/bridge-and-session-data.md](docs/bridge-and-session-data.md#streamelements-sessiondata-fields).
@@ -80,7 +80,7 @@ This tool converts your existing SE overlays to run locally on your machine, wir
 3. Extract the zip file
 4. Run `SE2SB Overlay Migrator.exe`
 
-That's it — no other setup is required to run the tool itself. Before generating or using widgets, make sure StreamerBot's WebSocket server is enabled (see [Setting Up the StreamerBot WebSocket Server](#setting-up-the-streamerbot-websocket-server)).
+That's it — no other setup is required to run the tool itself. Before generating or using widgets, make sure StreamerBot's WebSocket server is enabled (see [Setting Up StreamerBot WebSocket Server](#setting-up-streamerbot-websocket-server)).
 
 ---
 
@@ -184,7 +184,7 @@ Click **Import** and select your overlay files. You'll typically need:
 - `widget.js`
 - `fields.json` and `data.json`
 
-> **Note:** Make sure to include any nessecary image, audio, or video files (see [supported formats](#notes))
+> **Note:** Make sure to include any necessary image, audio, or video files (see [supported formats](#notes))
 
 ### Step 3 — Fix any warnings
 If the warning banner appears, follow its instructions (e.g. add the missing HTML file, or remove a duplicate). The **Save & Generate** button will remain disabled until the file set is ready.
@@ -196,7 +196,7 @@ Click **Save**.
 Click **Edit Configuration**. Configure the widget settings as needed.
 
 ### Step 6 — Generate
-Click **Save & Generate**. The tool saves your chagnes and writes the processed files to the path shown under **Deploy Location**.
+Click **Save & Generate**. The tool saves your changes and writes the processed files to the path shown under **Deploy Location**.
 
 ### Step 7 — Add to OBS
 Copy the URL and create a local browser source in OBS pointing to it.
