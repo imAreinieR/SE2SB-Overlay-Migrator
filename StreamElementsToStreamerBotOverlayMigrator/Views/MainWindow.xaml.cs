@@ -1,6 +1,7 @@
 using Microsoft.Win32;
 using StreamElementsToStreamerBotOverlayMigrator.Common.ExtensionMethods;
 using StreamElementsToStreamerBotOverlayMigrator.Data;
+using StreamElementsToStreamerBotOverlayMigrator.Dialogs;
 using StreamElementsToStreamerBotOverlayMigrator.Managers;
 using StreamElementsToStreamerBotOverlayMigrator.Services;
 using StreamElementsToStreamerBotOverlayMigrator.Themes;
@@ -134,7 +135,7 @@ public partial class MainWindow: Window
         if (sender is not Button button || button.Tag is not Widget widget)
             return;
 
-        MessageBoxResult messageBoxResult = MessageBox.Show
+        MessageBoxResult messageBoxResult = StyledMessageBox.Show
         (
             $"Are you sure you want to delete '{widget.Name}'? This action cannot be undone.",
             "Confirm Deletion",
@@ -210,7 +211,7 @@ public partial class MainWindow: Window
         if (_selectedWidget is null)
             return;
 
-        MessageBoxResult messageBoxResult = MessageBox.Show
+        MessageBoxResult messageBoxResult = StyledMessageBox.Show
         (
             "Are you sure you want to undo your changes?",
             "Confirm Undo",

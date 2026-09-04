@@ -1,3 +1,4 @@
+using StreamElementsToStreamerBotOverlayMigrator.Dialogs;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -92,7 +93,7 @@ public static class UpdaterService
                     && latestVersion <= currentParsed
             )
             {
-                MessageBox.Show
+                StyledMessageBox.Show
                 (
                     $"Application is up-to-date!",
                     "Up-to-date",
@@ -121,7 +122,7 @@ public static class UpdaterService
                 return;
             }
 
-            var result = MessageBox.Show
+            var result = StyledMessageBox.Show
             (
                 $"Version {latestTag} is available.\n\nUpdate now?",
                 "Update Available",
@@ -206,7 +207,7 @@ public static class UpdaterService
             ? $"Version {latestTag} is available but the updater couldn't run automatically.\n\nOpen the Releases page?"
             : "A new version is available but the updater is missing.\n\nOpen the releases page?";
 
-        MessageBoxResult result = MessageBox.Show
+        MessageBoxResult result = StyledMessageBox.Show
         (
             message,
             "Update Available",

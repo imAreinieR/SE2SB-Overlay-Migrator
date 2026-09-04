@@ -1,4 +1,5 @@
 using StreamElementsToStreamerBotOverlayMigrator.Data;
+using StreamElementsToStreamerBotOverlayMigrator.Dialogs;
 using StreamElementsToStreamerBotOverlayMigrator.Services;
 using StreamElementsToStreamerBotOverlayMigrator.Themes;
 using System.IO;
@@ -118,9 +119,9 @@ public partial class SettingsWindow: Window
 
     private void RevertToDefault_Click(object sender, RoutedEventArgs e)
     {
-        MessageBoxResult confirm = MessageBox.Show
+        MessageBoxResult confirm = StyledMessageBox.Show
         (
-            "This will reset every setting back to its default value and save immediately. Continue?",
+            "This will reset every setting back to its default value.\nContinue?",
             "Revert to Default",
             MessageBoxButton.YesNo,
             MessageBoxImage.Warning
