@@ -512,6 +512,7 @@
                                                        Margin="0,0,2,0"
                                                        Opacity="0"
                                                        Cursor="Hand"
+                                                       ToolTip="Rename widget"
                                                        MouseLeftButtonUp="EditWidgetName_MouseUp"/>
 
                                             <!-- Remove X (hidden, shown on row hover) -->
@@ -520,6 +521,7 @@
                                                     Content="✕"
                                                     Tag="{Binding}"
                                                     Style="{StaticResource RemoveWidgetBtn}"
+                                                    ToolTip="Delete widget"
                                                     Click="RemoveWidget_Click"/>
                                         </Grid>
                                     </Border>
@@ -704,6 +706,7 @@
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <Button Style="{StaticResource SmallImportBtn}"
                                     Height="22"
+                                    ToolTip="Import widget files"
                                     Click="Import_Click">
                                 ＋ Import
                             </Button>
@@ -786,6 +789,7 @@
                                                                 Content="✕"
                                                                 Tag="{Binding}"
                                                                 Style="{StaticResource FileRemoveBtn}"
+                                                                ToolTip="Remove file"
                                                                 Click="RemoveFile_Click"/>
                                                     </Grid>
                                                 </Border>
@@ -851,6 +855,11 @@
                                                    FontFamily="Segoe UI"
                                                    FontSize="10"
                                                    HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Supports .html, .js, .css, .json, .zip"
+                                                   Foreground="{StaticResource TextSubtleBrush}"
+                                                   FontFamily="Segoe UI"
+                                                   FontSize="10"
+                                                   HorizontalAlignment="Center"/>
                                     </StackPanel>
                                 </Grid>
                             </StackPanel>
@@ -892,8 +901,8 @@
                             HorizontalAlignment="Left"
                             IsEnabled="False"
                             Click="Configure_Click"
-                            ToolTip="Configure widget fields">
-                        ⚙  Edit Configuration
+                            ToolTip="Adjust widget settings and test live events">
+                        ⚙  Configure &amp; Test
                     </Button>
 
                     <!-- Widget name / author, parsed from data.json. Hidden when neither is available. -->
