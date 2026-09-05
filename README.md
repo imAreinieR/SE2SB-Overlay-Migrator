@@ -24,9 +24,9 @@ StreamElements hosts overlays and services them with stream events out of the bo
 This tool converts your existing SE overlays to run locally on your machine, wiring them up to StreamerBot instead.
 
 <p align="center">
-  <img src="Images/application_ui_1.png" alt="Application UI - Main Screen" width="270" />
-  <img src="Images/application_ui_2.png" alt="Application UI - Edit Configuration" width="270" />
-  <img src="Images/application_ui_3.png" alt="Application UI - Simulate Events" width="270" />
+  <img src="Images/application_ui_1.png" alt="Application UI - Main Screen" width="800" />
+  <img src="Images/application_ui_2.png" alt="Application UI - Edit Configuration" width="800" />
+  <img src="Images/application_ui_3.png" alt="Application UI - Simulate Events" width="800" />
 </p>
 
 ---
