@@ -75,8 +75,9 @@ This tool converts your existing SE overlays to run locally on your machine, wir
 
 ## Download / Installation
 
-1. Head to the [Releases](../../releases/latest) page.
-2. Download the latest zip.
+1. Navigate to the [Releases](../../releases/latest) page.
+1. Expand on Assets
+2. Download the latest zip (ex: se2sb.overlay.migrator-v0.7.0.zip)
 3. Extract the zip file
 4. Run `SE2SB Overlay Migrator.exe`
 
