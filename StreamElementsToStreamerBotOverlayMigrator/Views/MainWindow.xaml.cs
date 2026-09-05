@@ -138,7 +138,7 @@ public partial class MainWindow: Window
 
         MessageBoxResult messageBoxResult = StyledMessageBox.Show
         (
-            $"Are you sure you want to delete '{widget.Name}'? This action cannot be undone.",
+            $"Are you sure you want to delete '{widget.Name}'?\nThis action cannot be undone.",
             "Confirm Deletion",
             MessageBoxButton.OKCancel,
             MessageBoxImage.Warning
