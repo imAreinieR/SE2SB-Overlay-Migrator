@@ -17,7 +17,7 @@
             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="14"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Width" Value="40"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -364,7 +364,7 @@
                               ToolTip="General">
                     <TextBlock Text="General"
                                FontFamily="Segoe UI"
-                               FontSize="10"
+                               FontSize="14"
                                TextAlignment="Center"
                                TextWrapping="Wrap">
                         <TextBlock.LayoutTransform>
@@ -381,7 +381,7 @@
                               ToolTip="StreamerBot">
                     <TextBlock Text="StreamerBot"
                                FontFamily="Segoe UI"
-                               FontSize="10"
+                               FontSize="14"
                                TextAlignment="Center"
                                TextWrapping="Wrap">
                         <TextBlock.LayoutTransform>
