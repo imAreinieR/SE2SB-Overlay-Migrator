@@ -171,16 +171,27 @@ const client = new StreamerbotClient({
   retries: -1,
   onConnect: async (data) => {
     console.log('Streamer.bot Client Connected!');
+    postStreamerBotStatus(true);
     sendOnWidgetLoadEvent();
     requestEmitTwitchChannelStats();
   },
   onDisconnect: (data) => {
     console.log('Streamer.bot Client Disconnected!');
+    postStreamerBotStatus(false);
   },
   onError: (data) => {
     console.error('Streamer.bot Client Error: ', data);
+    postStreamerBotStatus(false);
   }
 });
+
+function postStreamerBotStatus(connected) {
+  try {
+    window.chrome?.webview?.postMessage(JSON.stringify({ type: 'streamerbot-status', connected }));
+  } catch (error) {
+    console.error('Failed to post Streamer.bot status to host:', error);
+  }
+}
 
 async function sendOnWidgetLoadEvent() {
  console.log('Sending OnWidgetLoadEvent...');

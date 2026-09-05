@@ -531,21 +531,36 @@
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="0,1,0,0"
                             Padding="20,12">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button x:Name="UndoBtn"
-                                    Style="{StaticResource UndoBtn}"
-                                    IsEnabled="False"
-                                    Click="Undo_Click">
-                                Undo
-                            </Button>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                            <Button x:Name="SaveBtn"
-                                    Style="{StaticResource SaveBtn}"
-                                    IsEnabled="False"
-                                    Click="Save_Click">
-                                Save
-                            </Button>
-                        </StackPanel>
+                            <TextBlock x:Name="StatusText"
+                                       Grid.Column="0"
+                                       Foreground="{StaticResource TextDimBrush}"
+                                       FontFamily="Consolas"
+                                       FontSize="11"
+                                       VerticalAlignment="Center"
+                                       Text="Adjust settings then save."/>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Button x:Name="UndoBtn"
+                                        Style="{StaticResource UndoBtn}"
+                                        IsEnabled="False"
+                                        Click="Undo_Click">
+                                    Undo
+                                </Button>
+
+                                <Button x:Name="SaveBtn"
+                                        Style="{StaticResource SaveBtn}"
+                                        IsEnabled="False"
+                                        Click="Save_Click">
+                                    Save
+                                </Button>
+                            </StackPanel>
+                        </Grid>
                     </Border>
                 </Grid>
 
@@ -799,8 +814,8 @@
                     BorderThickness="0,0,0,1">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal">
@@ -822,16 +837,21 @@
                         </ToggleButton>
                     </StackPanel>
 
-                    <TextBlock x:Name="StatusText"
-                               Grid.Column="1"
-                               Foreground="{StaticResource TextDimBrush}"
-                               FontFamily="Consolas"
-                               FontSize="11"
-                               HorizontalAlignment="Right"
-                               VerticalAlignment="Center"
-                               Margin="0,0,16,0"
-                               TextTrimming="CharacterEllipsis"
-                               Text="Adjust settings then save."/>
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Margin="0,0,12,0">
+                        <Ellipse x:Name="StreamerBotStatusDot"
+                                 Width="8"
+                                 Height="8"
+                                 Margin="0,0,6,0"
+                                 Fill="{StaticResource TextDimBrush}"/>
+                        <TextBlock Text="Streamer.bot"
+                                   FontFamily="Segoe UI"
+                                   FontSize="11"
+                                   Foreground="{StaticResource TextDimBrush}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
                 </Grid>
             </Border>
 

@@ -48,6 +48,7 @@ public partial class WidgetConfigWindow: Window
     private          bool                                 _isDirty;
     private          bool                                 _webViewReady           = false;
     private          bool                                 _isConfigSearchActive   = false;
+    private          bool?                                _streamerBotConnected   = null;
 
     // The canvas resolution selected in Settings (e.g. 1920x1080). PreviewCanvas's actual
     // Width/Height are computed from these to fit PreviewPanel — see UpdatePreviewCanvasLayout.
@@ -70,8 +71,9 @@ public partial class WidgetConfigWindow: Window
         ("3840 × 2160  (4K)",    3840, 2160),
     ];
 
-    private record LogEntryEvent(LogEntry entry);
-    private record LogEntry(string source, string level, string text, double timestamp, string? url, int? lineNumber);
+    private record LogEntryEvent           (LogEntry entry);
+    private record LogEntry                (string source, string level, string text, double timestamp, string? url, int? lineNumber);
+    private record StreamerBotStatusMessage(string type, bool connected);
 
     public WidgetConfigWindow(Widget widget)
     {
@@ -88,6 +90,8 @@ public partial class WidgetConfigWindow: Window
         BuildSettingsControls();
 
         PreviewCanvasBackground.Fill = new SolidColorBrush(PreviewCanvasBackgroundColor);
+
+        SetStreamerBotConnectionState(null);
 
         Loaded += WidgetConfigWindow_Loaded;
     }
@@ -147,6 +151,8 @@ public partial class WidgetConfigWindow: Window
             var consoleReceiver = PreviewWebView.CoreWebView2.GetDevToolsProtocolEventReceiver("Runtime.consoleAPICalled");
             consoleReceiver.DevToolsProtocolEventReceived += OnReceivedConsoleApiCall;
 
+            PreviewWebView.CoreWebView2.WebMessageReceived += OnReceivedWebMessage;
+
             PreviewWebView.CoreWebView2.AddWebResourceRequestedFilter
             (
                 "https://app.local/*",
@@ -169,6 +175,8 @@ public partial class WidgetConfigWindow: Window
             return;
 
         _fileNameAndContents.Clear();
+
+        SetStreamerBotConnectionState(null);
 
         string dataJson = BuildDataJson();
 
@@ -1045,6 +1053,30 @@ public partial class WidgetConfigWindow: Window
         Dispatcher.Invoke(() => AppendLog($"[{type.ToUpper()}] {message}"));
     }
 
+    private void OnReceivedWebMessage(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+    {
+        string? json = e.TryGetWebMessageAsString();
+
+        if (string.IsNullOrEmpty(json))
+            return;
+
+        StreamerBotStatusMessage? statusMessage;
+
+        try
+        {
+            statusMessage = JsonSerializer.Deserialize<StreamerBotStatusMessage>(json);
+        }
+        catch (JsonException)
+        {
+            return;
+        }
+
+        if (statusMessage?.type != "streamerbot-status")
+            return;
+
+        Dispatcher.Invoke(() => SetStreamerBotConnectionState(statusMessage.connected));
+    }
+
     private void OnWebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
     {
         var    uri               = new Uri(e.Request.Uri);
@@ -1608,6 +1640,25 @@ public partial class WidgetConfigWindow: Window
 
             _ => "application/octet-stream"
         };
+
+    private void SetStreamerBotConnectionState(bool? connected)
+    {
+        _streamerBotConnected = connected;
+
+        StreamerBotStatusDot.Fill = connected switch
+        {
+            true  => AppColors.StatusSuccess,
+            false => AppColors.StatusError,
+            null  => AppColors.StatusDefault
+        };
+
+        StreamerBotStatusDot.ToolTip = connected switch
+        {
+            true  => "Connected to Streamer.bot",
+            false => "Not connected to Streamer.bot",
+            null  => "Checking Streamer.bot connection…"
+        };
+    }
 
     private void SetStatus(string message, bool error = false, bool success = false)
     {
