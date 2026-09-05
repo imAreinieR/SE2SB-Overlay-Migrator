@@ -183,7 +183,7 @@ public partial class WidgetConfigWindow: Window
         _fileNameAndContents["sessionData.js"] = TemplateFiles.SessionDataFile;
         _fileNameAndContents["streamerBotApiAndEventBridge.js"] = DummyWidgetOnLoadEvent()
             + Environment.NewLine
-            + TemplateFiles.GetApiAndEventBridgeFile(SettingsService.Current);
+            + BuildLivePreviewApiAndEventBridgeFile();
 
         _widget
             .Files
@@ -1678,6 +1678,15 @@ public partial class WidgetConfigWindow: Window
 
     private string JavascriptFunctionCallForAvatarUrl(string username)
         => $"fetchAvatarUrl('{username}')";
+
+    private string BuildLivePreviewApiAndEventBridgeFile()
+        => TemplateFiles.GetApiAndEventBridgeFile
+           (
+               SettingsService.Current,
+               onConnectLivePreviewHook:    "\n    postStreamerBotStatus(true);",
+               onDisconnectLivePreviewHook: "\n    postStreamerBotStatus(false);",
+               onErrorLivePreviewHook:      "\n    postStreamerBotStatus(false);"
+           );
 
     private string DummyWidgetOnLoadEvent()
         => $@"const dummySeEvent = new CustomEvent('onWidgetLoad', {{

@@ -6,6 +6,9 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Templates;
 public static class TemplateFiles
 {
     private const string StreamerBotConnectionConfigPlaceholder = "{{STREAMERBOT_CONNECTION_CONFIG}}";
+    private const string OnConnectLivePreviewHookPlaceholder    = "{{ON_CONNECT_LIVE_PREVIEW_HOOK}}";
+    private const string OnDisconnectLivePreviewHookPlaceholder = "{{ON_DISCONNECT_LIVE_PREVIEW_HOOK}}";
+    private const string OnErrorLivePreviewHookPlaceholder      = "{{ON_ERROR_LIVE_PREVIEW_HOOK}}";
     
     public const string HtmlFile = @"<!DOCTYPE html>
 <html>
@@ -161,8 +164,18 @@ const SESSION = {
         + "\n\n" + StreamerBotEventHandlersFile
         + "\n\n" + StreamElementsSeApiFunctionFile;
 
-    public static string GetApiAndEventBridgeFile(AppSettings settings)
-        => ApiAndEventBridgeFile.Replace(StreamerBotConnectionConfigPlaceholder, BuildStreamerBotConnectionConfig(settings));
+    public static string GetApiAndEventBridgeFile
+    (
+        AppSettings settings,
+        string      onConnectLivePreviewHook    = "",
+        string      onDisconnectLivePreviewHook = "",
+        string      onErrorLivePreviewHook      = ""
+    )
+        => ApiAndEventBridgeFile
+            .Replace(StreamerBotConnectionConfigPlaceholder,    BuildStreamerBotConnectionConfig(settings))
+            .Replace(OnConnectLivePreviewHookPlaceholder,       onConnectLivePreviewHook)
+            .Replace(OnDisconnectLivePreviewHookPlaceholder,    onDisconnectLivePreviewHook)
+            .Replace(OnErrorLivePreviewHookPlaceholder,         onErrorLivePreviewHook);
 
     public const string StreamerBotEventHandlersFile = @"// StreamerBotEventHandlers - bridges StreamerBot with StreamElements Widget
 const client = new StreamerbotClient({
@@ -170,18 +183,15 @@ const client = new StreamerbotClient({
   autoReconnect: true,
   retries: -1,
   onConnect: async (data) => {
-    console.log('Streamer.bot Client Connected!');
-    postStreamerBotStatus(true);
+    console.log('Streamer.bot Client Connected!');{{ON_CONNECT_LIVE_PREVIEW_HOOK}}
     sendOnWidgetLoadEvent();
     requestEmitTwitchChannelStats();
   },
   onDisconnect: (data) => {
-    console.log('Streamer.bot Client Disconnected!');
-    postStreamerBotStatus(false);
+    console.log('Streamer.bot Client Disconnected!');{{ON_DISCONNECT_LIVE_PREVIEW_HOOK}}
   },
   onError: (data) => {
-    console.error('Streamer.bot Client Error: ', data);
-    postStreamerBotStatus(false);
+    console.error('Streamer.bot Client Error: ', data);{{ON_ERROR_LIVE_PREVIEW_HOOK}}
   }
 });
 
