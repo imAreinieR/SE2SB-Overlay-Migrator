@@ -88,7 +88,7 @@ public partial class SettingsWindow: Window
         StreamerBotPanel.Visibility = Visibility.Visible;
     }
 
-    private void Save_Click(object sender, RoutedEventArgs e)
+    private void Apply_Click(object sender, RoutedEventArgs e)
     {
         if (!ValidateHost() || !ValidatePort())
             return;
@@ -402,7 +402,7 @@ public partial class SettingsWindow: Window
     {
         var isValid = ValidateHost() && ValidatePort();
 
-        SaveBtn.IsEnabled           = isValid;
+        ApplyBtn.IsEnabled          = isValid;
         TestConnectionBtn.IsEnabled = isValid && !_isTestingConnection;
     }
 

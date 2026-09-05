@@ -291,8 +291,8 @@
             </Setter>
         </Style>
 
-        <!-- Footer save button (copied from WidgetConfigWindow) -->
-        <Style x:Key="SaveBtn" TargetType="Button">
+        <!-- Footer apply button (copied from WidgetConfigWindow) -->
+        <Style x:Key="ApplyBtn" TargetType="Button">
             <Setter Property="Background" Value="{StaticResource AccentGreenBrush}"/>
             <Setter Property="Foreground" Value="{StaticResource AccentGreenFgBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -633,10 +633,10 @@
                                 Click="Cancel_Click">
                             Cancel
                         </Button>
-                        <Button x:Name="SaveBtn"
-                                Style="{StaticResource SaveBtn}"
-                                Click="Save_Click">
-                            Save
+                        <Button x:Name="ApplyBtn"
+                                Style="{StaticResource ApplyBtn}"
+                                Click="Apply_Click">
+                            Apply
                         </Button>
                     </StackPanel>
                 </Grid>
