@@ -667,7 +667,7 @@
             <!-- Detail content -->
             <ScrollViewer Grid.Row="0" x:Name="DetailContentPanel"
                           VerticalScrollBarVisibility="Auto"
-                          Padding="20,16">
+                          Padding="20,16,30,16">
                 <StackPanel>
 
                     <!-- Warning banner -->
@@ -884,7 +884,8 @@
                                  ToolTip="Click to open folder in File Explorer"
                                  PreviewMouseLeftButtonDown="FolderPathBox_Click"/>
 
-                        <Button Grid.Column="2"
+                        <Button x:Name="CopyPathBtn"
+                                Grid.Column="2"
                                 Style="{StaticResource CopyBtn}"
                                 Height="34"
                                 ToolTip="Copy path to clipboard"

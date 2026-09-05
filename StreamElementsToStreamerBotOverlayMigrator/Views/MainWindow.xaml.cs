@@ -1,4 +1,5 @@
 using Microsoft.Win32;
+using StreamElementsToStreamerBotOverlayMigrator.Behaviors;
 using StreamElementsToStreamerBotOverlayMigrator.Common.ExtensionMethods;
 using StreamElementsToStreamerBotOverlayMigrator.Data;
 using StreamElementsToStreamerBotOverlayMigrator.Dialogs;
@@ -322,6 +323,7 @@ public partial class MainWindow: Window
             return;
 
         Clipboard.SetText(_selectedWidget.FolderLocation);
+        GlowBehavior.SetIsGlowing(CopyPathBtn, false);
         SetStatus("Path copied to clipboard.");
     }
 
@@ -376,9 +378,14 @@ public partial class MainWindow: Window
             WidgetManager.Save(_selectedWidget);
 
         if (WidgetManager.GenerateExportFiles(_selectedWidget, out string errorMessage))
+        {
+            GlowBehavior.SetIsGlowing(CopyPathBtn, true);
             SetStatus(errorMessage, success: true);
+        }
         else
+        {
             SetStatus(errorMessage, error: true);
+        }
 
         _selectedWidget.NotifyStatusChanges();
     }
@@ -596,6 +603,8 @@ public partial class MainWindow: Window
         _selectedWidget      = widget;
         FolderPathBox.Text   = ObscurePath(widget.FolderLocation);
         FileList.ItemsSource = widget.Files;
+
+        GlowBehavior.SetIsGlowing(CopyPathBtn, false);
 
         if (WidgetList.SelectedItem != widget)
             WidgetList.SelectedItem = widget;
