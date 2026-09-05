@@ -249,6 +249,45 @@
             </Setter>
         </Style>
 
+        <!-- Footer undo button -->
+        <Style x:Key="UndoBtn" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Padding" Value="18,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.35"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Preview/Logs tab button -->
         <Style x:Key="PreviewTabBtn" TargetType="ToggleButton">
             <Setter Property="Background" Value="Transparent"/>
@@ -508,13 +547,21 @@
                                        VerticalAlignment="Center"
                                        Text="Adjust settings then save."/>
 
-                            <Button x:Name="SaveBtn"
-                                    Grid.Column="1"
-                                    Style="{StaticResource SaveBtn}"
-                                    IsEnabled="False"
-                                    Click="Save_Click">
-                                Save
-                            </Button>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Button x:Name="UndoBtn"
+                                        Style="{StaticResource UndoBtn}"
+                                        IsEnabled="False"
+                                        Click="Undo_Click">
+                                    Undo
+                                </Button>
+
+                                <Button x:Name="SaveBtn"
+                                        Style="{StaticResource SaveBtn}"
+                                        IsEnabled="False"
+                                        Click="Save_Click">
+                                    Save
+                                </Button>
+                            </StackPanel>
                         </Grid>
                     </Border>
                 </Grid>

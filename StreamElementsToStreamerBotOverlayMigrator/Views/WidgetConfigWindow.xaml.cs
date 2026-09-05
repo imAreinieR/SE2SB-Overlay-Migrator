@@ -38,7 +38,7 @@ public partial class WidgetConfigWindow: Window
     private const    string                               FunnyNumberAmount       = "67";
 
     private static readonly Color                         PreviewCanvasBackgroundColor = Colors.Black;
-    private readonly Widget                               _widget;
+    private          Widget                               _widget;
     private readonly Dictionary<string, FrameworkElement> _fieldControls          = new ();
     private readonly List<WidgetDataField>                _allFields              = new ();
     private readonly Dictionary<string, string>           _fileNameAndContents    = new ();
@@ -809,6 +809,7 @@ public partial class WidgetConfigWindow: Window
         {
             _isDirty          = true;
             SaveBtn.IsEnabled = true;
+            UndoBtn.IsEnabled = true;
             SetStatus("Changes reverted.");
         }
 
@@ -850,6 +851,7 @@ public partial class WidgetConfigWindow: Window
 
             _isDirty          = false;
             SaveBtn.IsEnabled = false;
+            UndoBtn.IsEnabled = false;
 
             SetStatus("Saved.", success: true);
         }
@@ -857,6 +859,54 @@ public partial class WidgetConfigWindow: Window
         {
             SetStatus($"Failed to save: {exception.Message}", error: true);
         }
+    }
+
+    private void Undo_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (_widget.Id > 0)
+            {
+                Widget? freshWidget = WidgetManager.GetById(_widget.Id);
+
+                if (freshWidget is not null)
+                    _widget = freshWidget;
+            }
+
+            RebuildConfigurationUi();
+
+            _isDirty          = false;
+            SaveBtn.IsEnabled = false;
+            UndoBtn.IsEnabled = false;
+
+            ReloadPreview();
+            SetStatus("Changes discarded.");
+        }
+        catch (Exception exception)
+        {
+            SetStatus($"Failed to undo changes: {exception.Message}", error: true);
+        }
+    }
+
+    private void RebuildConfigurationUi()
+    {
+        GroupsPanel.Children.Clear();
+
+        _fieldControls.Clear();
+        _allFields.Clear();
+        _assetFieldControls.Clear();
+        _configGroups.Clear();
+        _dataValues            = null;
+        _isConfigSearchActive  = false;
+
+        LoadConfigurationData();
+        LoadConfigurationFields();
+        UpdateExpandCollapseAllButtonState();
+
+        string query = ConfigSearchBox.Text.Trim();
+
+        if (query.Length > 0)
+            ApplyConfigSearchFilter(query);
     }
 
     private void TabPreview_Checked(object sender, RoutedEventArgs e)
