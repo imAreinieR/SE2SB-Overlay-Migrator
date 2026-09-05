@@ -307,19 +307,19 @@ public partial class SettingsWindow: Window
 
             if (info is null)
             {
-                SetTestResult(TestResultKind.Error, "Connected, but no response to GetInfo was received.");
+                SetTestResult(TestResultKind.Error, "Connected, but no response to GetInfo was received");
             }
             else if (!string.Equals(info.Value.Status, "ok", StringComparison.OrdinalIgnoreCase))
             {
-                SetTestResult(TestResultKind.Error, $"Connected, but the server returned status \"{info.Value.Status}\".");
+                SetTestResult(TestResultKind.Error, $"Connected, but the server returned status \"{info.Value.Status}\"");
             }
             else if (info.Value.Name is null || !info.Value.Name.Contains("Streamer.bot", StringComparison.OrdinalIgnoreCase))
             {
-                SetTestResult(TestResultKind.Error, $"Connected, but this doesn't look like StreamerBot (name: {info.Value.Name ?? "unknown"}).");
+                SetTestResult(TestResultKind.Error, $"Connected, but this doesn't look like StreamerBot (name: {info.Value.Name ?? "unknown"})");
             }
             else
             {
-                SetTestResult(TestResultKind.Success, $"Connected — {info.Value.Name} v{info.Value.Version ?? "?"} ({info.Value.Os ?? "unknown OS"}).");
+                SetTestResult(TestResultKind.Success, $"Connected — {info.Value.Name} v{info.Value.Version ?? "?"} ({info.Value.Os ?? "unknown OS"})");
             }
 
             try
