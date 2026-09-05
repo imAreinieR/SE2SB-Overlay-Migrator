@@ -531,36 +531,21 @@
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="0,1,0,0"
                             Padding="20,12">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button x:Name="UndoBtn"
+                                    Style="{StaticResource UndoBtn}"
+                                    IsEnabled="False"
+                                    Click="Undo_Click">
+                                Undo
+                            </Button>
 
-                            <TextBlock x:Name="StatusText"
-                                       Grid.Column="0"
-                                       Foreground="{StaticResource TextDimBrush}"
-                                       FontFamily="Consolas"
-                                       FontSize="11"
-                                       VerticalAlignment="Center"
-                                       Text="Adjust settings then save."/>
-
-                            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Button x:Name="UndoBtn"
-                                        Style="{StaticResource UndoBtn}"
-                                        IsEnabled="False"
-                                        Click="Undo_Click">
-                                    Undo
-                                </Button>
-
-                                <Button x:Name="SaveBtn"
-                                        Style="{StaticResource SaveBtn}"
-                                        IsEnabled="False"
-                                        Click="Save_Click">
-                                    Save
-                                </Button>
-                            </StackPanel>
-                        </Grid>
+                            <Button x:Name="SaveBtn"
+                                    Style="{StaticResource SaveBtn}"
+                                    IsEnabled="False"
+                                    Click="Save_Click">
+                                Save
+                            </Button>
+                        </StackPanel>
                     </Border>
                 </Grid>
 
@@ -814,6 +799,7 @@
                     BorderThickness="0,0,0,1">
                 <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
@@ -837,7 +823,18 @@
                         </ToggleButton>
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1"
+                    <TextBlock x:Name="StatusText"
+                               Grid.Column="1"
+                               Foreground="{StaticResource TextDimBrush}"
+                               FontFamily="Consolas"
+                               FontSize="11"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Margin="0,0,16,0"
+                               TextTrimming="CharacterEllipsis"
+                               Text="Adjust settings then save."/>
+
+                    <StackPanel Grid.Column="2"
                                 Orientation="Horizontal"
                                 VerticalAlignment="Center"
                                 Margin="0,0,12,0">
