@@ -3,15 +3,15 @@ using System.Windows.Media;
 namespace StreamElementsToStreamerBotOverlayMigrator.Themes;
 
 /// <summary>
-/// Code-behind mirror of Themes/Colors.xaml and Themes/Colors.Light.xaml.
+/// Code-behind mirror of the four Themes/Colors.*.xaml dictionaries.
 /// Use these constants wherever a <see cref="Color"/> or <see cref="SolidColorBrush"/>
 /// must be constructed at runtime (e.g. dynamic brush swaps in event handlers).
 ///
 /// Always access colors through the static properties (e.g. <c>AppColors.Surface</c>)
-/// rather than the nested Dark/Light structs directly — they automatically return
-/// the correct palette for the active theme.
+/// rather than the nested Dark/Light/*ColorBlind structs directly — they automatically
+/// return the correct palette for the active theme.
 ///
-/// Keep in sync with both Colors.xaml files.
+/// Keep in sync with all four Colors.*.xaml files.
 /// </summary>
 public static class AppColors
 {
@@ -35,6 +35,17 @@ public static class AppColors
         public static readonly Color Warning              = Color.FromRgb (0xF0, 0xA0, 0x4B);
     }
 
+    // ── Dark, color-blind-safe palette ──────────────────────────────────────
+    // Only the Danger / Warning / AccentGreen (success) triad changes — those are the
+    // colors carrying red/yellow/green meaning. Everything else is identical to Dark,
+    // so it's referenced directly rather than duplicated.
+    private static class DarkColorBlind
+    {
+        public static readonly Color AccentGreen = Color.FromRgb(0x22, 0xC3, 0xB0); // teal, replaces green
+        public static readonly Color Danger      = Color.FromRgb(0xFF, 0x5C, 0x8A); // rose/magenta, replaces red
+        public static readonly Color Warning     = Color.FromRgb(0xFF, 0xD4, 0x3B); // gold, shifted off orange
+    }
+
     // ── Light palette ────────────────────────────────────────────────────────
     private static class Light
     {
@@ -55,6 +66,14 @@ public static class AppColors
         public static readonly Color Warning              = Color.FromRgb (0xC0, 0x70, 0x10);
     }
 
+    // ── Light, color-blind-safe palette ─────────────────────────────────────
+    private static class LightColorBlind
+    {
+        public static readonly Color AccentGreen = Color.FromRgb(0x0C, 0x3C, 0x55); // deep teal, replaces green
+        public static readonly Color Danger      = Color.FromRgb(0xD6, 0x33, 0x6C); // rose/magenta, replaces red
+        public static readonly Color Warning     = Color.FromRgb(0xB0, 0x8A, 0x00); // gold, shifted off orange
+    }
+
     // ── File-type tag palette ───────────────────────────────────────────────
     private static class FileType
     {
@@ -70,7 +89,8 @@ public static class AppColors
     }
 
     // ── Theme-aware accessors ────────────────────────────────────────────────
-    private static bool IsDark => ThemeManager.Current == Theme.Dark;
+    private static bool IsDark       => ThemeManager.IsDark(ThemeManager.Current);
+    private static bool IsColorBlind => ThemeManager.IsColorBlind(ThemeManager.Current);
 
     public static Color AppBg                => IsDark ? Dark.AppBg                : Light.AppBg;
     public static Color SidebarBg            => IsDark ? Dark.SidebarBg            : Light.SidebarBg;
@@ -82,11 +102,34 @@ public static class AppColors
     public static Color DropZoneActiveBorder => IsDark ? Dark.DropZoneActiveBorder : Light.DropZoneActiveBorder;
     public static Color DropZoneActiveFill   => IsDark ? Dark.DropZoneActiveFill   : Light.DropZoneActiveFill;
     public static Color AccentBlue           => IsDark ? Dark.AccentBlue           : Light.AccentBlue;
-    public static Color AccentGreen          => IsDark ? Dark.AccentGreen          : Light.AccentGreen;
     public static Color TextSecondary        => IsDark ? Dark.TextSecondary        : Light.TextSecondary;
     public static Color TextDim              => IsDark ? Dark.TextDim              : Light.TextDim;
-    public static Color Danger               => IsDark ? Dark.Danger               : Light.Danger;
-    public static Color Warning              => IsDark ? Dark.Warning              : Light.Warning;
+
+    // Danger / Warning / AccentGreen carry red-yellow-green meaning, so they resolve
+    // across both the Dark/Light axis and the normal/ColorBlind axis.
+    public static Color AccentGreen => (IsDark, IsColorBlind) switch
+    {
+        (true,  true)  => DarkColorBlind.AccentGreen,
+        (true,  false) => Dark.AccentGreen,
+        (false, true)  => LightColorBlind.AccentGreen,
+        (false, false) => Light.AccentGreen,
+    };
+
+    public static Color Danger => (IsDark, IsColorBlind) switch
+    {
+        (true,  true)  => DarkColorBlind.Danger,
+        (true,  false) => Dark.Danger,
+        (false, true)  => LightColorBlind.Danger,
+        (false, false) => Light.Danger,
+    };
+
+    public static Color Warning => (IsDark, IsColorBlind) switch
+    {
+        (true,  true)  => DarkColorBlind.Warning,
+        (true,  false) => Dark.Warning,
+        (false, true)  => LightColorBlind.Warning,
+        (false, false) => Light.Warning,
+    };
 
     // ── Convenience factory ──────────────────────────────────────────────────
     /// <summary>Creates a new <see cref="SolidColorBrush"/> from a palette color.</summary>

@@ -333,8 +333,10 @@
             <Setter Property="Padding" Value="14,10"/>
         </Style>
 
-        <!-- Shared error color for field-level validation -->
-        <SolidColorBrush x:Key="ErrorBrush" Color="#E06C75"/>
+        <!-- Shared error color for field-level validation.
+             Sourced from the active theme's DangerColor (not hardcoded) so it
+             follows Dark/Light and Color Blind Mode like everything else. -->
+        <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource DangerColor}"/>
 
     </Window.Resources>
 
@@ -420,6 +422,30 @@
                                     <ComboBoxItem Content="Light"/>
                                 </controls:StyledDropdown>
                                 <TextBlock Text="Changing this restarts the window to apply the new theme."
+                                           Style="{StaticResource FieldHint}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource FieldRow}" BorderThickness="0">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                               Text="Color Blind Mode"
+                                               Style="{StaticResource FieldLabel}"
+                                               Margin="0"
+                                               VerticalAlignment="Center"/>
+                                    <CheckBox Grid.Column="1"
+                                              x:Name="ColorBlindToggle"
+                                              Style="{StaticResource FieldToggle}"
+                                              VerticalAlignment="Center"
+                                              Checked="ColorBlindToggle_Changed"
+                                              Unchecked="ColorBlindToggle_Changed"/>
+                                </Grid>
+                                <TextBlock Text="Swaps the red/yellow/green status colors for a rose/gold/teal palette that's easier to tell apart with color blindness. Changing this restarts the window to apply the new theme."
                                            Style="{StaticResource FieldHint}"/>
                             </StackPanel>
                         </Border>

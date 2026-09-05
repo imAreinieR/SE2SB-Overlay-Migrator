@@ -47,7 +47,8 @@ public partial class SettingsWindow: Window
     private void LoadGeneralTab()
     {
         _suppressThemeChangeHandler = true;
-        ThemeCombo.SelectedIndex    = (int) ThemeManager.Current;
+        ThemeCombo.SelectedIndex    = ThemeManager.IsDark(ThemeManager.Current) ? 0 : 1;
+        ColorBlindToggle.IsChecked  = ThemeManager.IsColorBlind(ThemeManager.Current);
         _suppressThemeChangeHandler = false;
     }
 
@@ -130,10 +131,9 @@ public partial class SettingsWindow: Window
         if (confirm != MessageBoxResult.Yes)
             return;
 
-        // Theme defaults to Dark (first item in the Theme dropdown).
         if (ThemeManager.Current != Theme.Dark)
         {
-            ThemeManager.Toggle();
+            ThemeManager.Apply(Theme.Dark);
             ThemeChanged    = true;
             StatusText.Text = "Theme will update once this window closes.";
         }
@@ -172,14 +172,26 @@ public partial class SettingsWindow: Window
         if (_suppressThemeChangeHandler || ThemeCombo.SelectedItem is not ComboBoxItem item)
             return;
 
-        bool wantsDark = item.Content?.ToString() == "Dark";
-        bool wantsChange = (wantsDark && ThemeManager.Current != Theme.Dark)
-            || (!wantsDark && ThemeManager.Current == Theme.Dark);
+        bool wantsDark   = item.Content?.ToString() == "Dark";
+        bool currentDark = ThemeManager.IsDark(ThemeManager.Current);
 
-        if (!wantsChange)
+        if (wantsDark == currentDark)
             return;
 
         ThemeManager.Toggle();
+
+        ThemeChanged    = true;
+        StatusText.Text = "Theme will update once this window closes.";
+
+        UpdateFormValidity();
+    }
+
+    private void ColorBlindToggle_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_suppressThemeChangeHandler)
+            return;
+
+        ThemeManager.ToggleColorBlindMode();
 
         ThemeChanged    = true;
         StatusText.Text = "Theme will update once this window closes.";

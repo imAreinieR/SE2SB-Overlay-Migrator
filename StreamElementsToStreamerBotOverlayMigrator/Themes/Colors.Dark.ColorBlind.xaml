@@ -2,87 +2,68 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- ══════════════════════════════════════════════════════════════════════
-         APP COLOR PALETTE — LIGHT THEME
-         Drop-in replacement for Colors.Dark.xaml.
-         Every key is identical; only the values differ.
-         Swap at runtime by replacing the merged dictionary entry in App.xaml.
+         APP COLOR PALETTE — DARK, COLOR-BLIND SAFE
+         Identical to Colors.Dark.xaml except for the Danger / Warning / Success
+         triad. Those three are remapped off the red↔green confusion axis onto
+         rose-magenta / gold / teal, which stay distinguishable under
+         protanopia, deuteranopia, and tritanopia. Every other key (including
+         AccentBlueColor, used for non-semantic UI like focus rings) is
+         untouched so the rest of the app looks the same as Colors.Dark.xaml.
     ══════════════════════════════════════════════════════════════════════════ -->
 
     <!-- ── Backgrounds ──────────────────────────────────────────────────── -->
-    <!-- Deepest background; main window root, footer bars -->
-    <Color x:Key="AppBgColor">#F0F2F8</Color>
-    <!-- Sidebar and secondary panel backgrounds -->
-    <Color x:Key="SidebarBgColor">#E6E9F2</Color>
-    <!-- Right / detail panel background -->
-    <Color x:Key="PanelBgColor">#F5F6FA</Color>
-    <!-- Primary raised surface (file list, path box, field inputs) -->
-    <Color x:Key="SurfaceColor">#FFFFFF</Color>
-    <!-- Secondary raised surface (buttons, list item selected, inline edit) -->
-    <Color x:Key="SurfaceAltColor">#EDF0F7</Color>
-    <!-- Deepest control background (dropdown, field input) -->
-    <Color x:Key="SurfaceDeepColor">#FFFFFF</Color>
+    <Color x:Key="AppBgColor">#0E1017</Color>
+    <Color x:Key="SidebarBgColor">#0A0C14</Color>
+    <Color x:Key="PanelBgColor">#13161F</Color>
+    <Color x:Key="SurfaceColor">#1A1E2B</Color>
+    <Color x:Key="SurfaceAltColor">#21263A</Color>
+    <Color x:Key="SurfaceDeepColor">#0F111A</Color>
 
     <!-- ── Borders ───────────────────────────────────────────────────────── -->
-    <!-- Standard border used on panels, inputs, splitters -->
-    <Color x:Key="BorderColor">#D0D5E8</Color>
-    <!-- Subtle border used on the new-widget button outline -->
-    <Color x:Key="BorderAccentColor">#A8B4D8</Color>
-    <!-- Drop zone dashed outline (idle) -->
-    <Color x:Key="DropZoneBorderColor">#9AAAD0</Color>
-    <!-- Hovered border (dropdown, toggle track) -->
-    <Color x:Key="BorderHoverColor">#A0AACC</Color>
-    <!-- Toggle track checked border -->
-    <Color x:Key="ToggleBorderCheckedColor">#A0B0D0</Color>
-    <!-- Toggle checked background -->
-    <Color x:Key="ToggleTrackCheckedColor">#C8DCEF</Color>
-    <!-- ComboBox item highlighted background -->
-    <Color x:Key="ComboItemHighlightColor">#E8EBF5</Color>
-    <!-- ComboBox item selected background -->
-    <Color x:Key="ComboItemSelectedColor">#D4DCEF</Color>
+    <Color x:Key="BorderColor">#252C40</Color>
+    <Color x:Key="BorderAccentColor">#2A3560</Color>
+    <Color x:Key="DropZoneBorderColor">#3D4A6E</Color>
+    <Color x:Key="BorderHoverColor">#3A4060</Color>
+    <Color x:Key="ToggleBorderCheckedColor">#3A4260</Color>
+    <Color x:Key="ToggleTrackCheckedColor">#1A3A52</Color>
+    <Color x:Key="ComboItemHighlightColor">#1E2538</Color>
+    <Color x:Key="ComboItemSelectedColor">#1A2A4A</Color>
 
     <!-- ── Accent ─────────────────────────────────────────────────────────── -->
-    <!-- Primary blue accent: buttons, caret, focus rings, active indicators -->
-    <Color x:Key="AccentBlueColor">#3D6FFF</Color>
-    <!-- Lighter blue used for the slider thumb border -->
-    <Color x:Key="AccentBlueLightColor">#6D96FF</Color>
-    <!-- Generate / save-success green -->
-    <Color x:Key="AccentGreenColor">#28A870</Color>
-    <!-- Foreground on green accent backgrounds -->
-    <Color x:Key="AccentGreenFgColor">#FFFFFF</Color>
+    <!-- Primary blue accent: buttons, caret, focus rings, active indicators (unchanged) -->
+    <Color x:Key="AccentBlueColor">#4F7EFF</Color>
+    <Color x:Key="AccentBlueLightColor">#7FA8FF</Color>
+    <!-- Generate / save-success — teal instead of green so it can't be misread as "danger" -->
+    <Color x:Key="AccentGreenColor">#22C3B0</Color>
+    <!-- Foreground on success accent backgrounds -->
+    <Color x:Key="AccentGreenFgColor">#04211C</Color>
 
     <!-- ── Text ───────────────────────────────────────────────────────────── -->
-    <!-- Primary readable text (widget names, file names, input values) -->
-    <Color x:Key="TextPrimaryColor">#1A1E30</Color>
-    <!-- Secondary / label text (section headers, copy button icon) -->
-    <Color x:Key="TextSecondaryColor">#5A6280</Color>
-    <!-- Field label text -->
-    <Color x:Key="TextFieldLabelColor">#4A5480</Color>
-    <!-- Muted text (drop zone icon) -->
-    <Color x:Key="TextMutedColor">#8890B0</Color>
-    <!-- Drop zone subtitle text -->
-    <Color x:Key="TextSubtleColor">#9098B8</Color>
-    <!-- Drop zone main label -->
-    <Color x:Key="TextDropZoneColor">#6A74A0</Color>
-    <!-- Dimmed status text (idle state) -->
-    <Color x:Key="TextDimColor">#9AA0BC</Color>
-    <!-- Hover foreground for tab buttons -->
-    <Color x:Key="TextHoverColor">#2A3060</Color>
+    <Color x:Key="TextPrimaryColor">#D0D6F0</Color>
+    <Color x:Key="TextSecondaryColor">#7581A5</Color>
+    <Color x:Key="TextFieldLabelColor">#8B94BD</Color>
+    <Color x:Key="TextMutedColor">#4A5680</Color>
+    <Color x:Key="TextSubtleColor">#4A5275</Color>
+    <Color x:Key="TextDropZoneColor">#7A86AA</Color>
+    <Color x:Key="TextDimColor">#3A4060</Color>
+    <Color x:Key="TextHoverColor">#A0AAD0</Color>
 
     <!-- ── Scrollbar ──────────────────────────────────────────────────────── -->
-    <Color x:Key="ScrollThumbColor">#C0C8DC</Color>
-    <!-- ScrollThumbHoverColor reuses DropZoneBorderColor (#9AAAD0) -->
+    <Color x:Key="ScrollThumbColor">#2E3650</Color>
+    <!-- ScrollThumbHoverColor reuses DropZoneBorderColor (#3D4A6E) -->
 
     <!-- ── Semantic: Danger ───────────────────────────────────────────────── -->
-    <!-- Error status text, unsupported-field label -->
-    <Color x:Key="DangerColor">#D93636</Color>
+    <!-- Error status text, unsupported-field label — rose/magenta instead of pure red -->
+    <Color x:Key="DangerColor">#FF5C8A</Color>
     <!-- Remove / delete X buttons -->
-    <Color x:Key="DangerAltColor">#C42C2C</Color>
+    <Color x:Key="DangerAltColor">#FF4F7E</Color>
 
     <!-- ── Semantic: Warning ──────────────────────────────────────────────── -->
-    <Color x:Key="WarningBgColor">#FFF8EC</Color>
-    <Color x:Key="WarningBorderColor">#E8A030</Color>
-    <Color x:Key="WarningIconColor">#C07010</Color>
-    <Color x:Key="WarningTextColor">#7A4800</Color>
+    <!-- Shifted from orange toward pure gold to maximize hue distance from Danger -->
+    <Color x:Key="WarningBgColor">#221D0A</Color>
+    <Color x:Key="WarningBorderColor">#8A6A10</Color>
+    <Color x:Key="WarningIconColor">#FFD43B</Color>
+    <Color x:Key="WarningTextColor">#F5D98C</Color>
 
 
     <!-- ══════════════════════════════════════════════════════════════════════
