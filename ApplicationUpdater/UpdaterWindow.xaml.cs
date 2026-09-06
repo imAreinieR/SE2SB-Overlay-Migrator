@@ -10,6 +10,10 @@ namespace ApplicationUpdater;
 
 public partial class UpdaterWindow: Window
 {
+    private const string LoggingPrefix        = "[Updater]";
+    private const string TempRootFolderName   = "SE2SB";
+    private const string ExtractionFolderName = "SE2SB_Update";
+
     private readonly string                  _downloadUrl;
     private readonly string                  _targetPath;
     private readonly string?                 _checksumUrl;
@@ -38,6 +42,17 @@ public partial class UpdaterWindow: Window
     private async Task RunUpdateAsync(CancellationToken cancellationToken)
     {
         string tempZipPath = _targetPath + ".new.zip";
+        string tempRoot = Path.GetFullPath
+        (
+            Path.Combine
+            (
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                TempRootFolderName
+            )
+        );
+
+        if (!tempRoot.EndsWith(Path.DirectorySeparatorChar))
+            tempRoot += Path.DirectorySeparatorChar;
 
         try
         {
@@ -80,7 +95,7 @@ public partial class UpdaterWindow: Window
 
             await cryptoStream.FlushFinalBlockAsync(cancellationToken);
             string actualHash = Convert.ToHexString(sha256.Hash!).ToLowerInvariant();
-            Debug.WriteLine($"[Updater] Downloaded SHA-256: {actualHash}");
+            Debug.WriteLine($"{LoggingPrefix} Downloaded SHA-256: {actualHash}");
 
             if (_checksumUrl is not null)
             {
@@ -94,7 +109,7 @@ public partial class UpdaterWindow: Window
             }
             else
             {
-                Debug.WriteLine("[Updater] No checksum URL provided, skipping verification.");
+                throw new Exception("Checksum missing — the download cannot be verified.");
             }
 
             SetStatus("Installing update...", 70);
@@ -103,26 +118,16 @@ public partial class UpdaterWindow: Window
             await fileStream.DisposeAsync();
 
             string exeName = Path.GetFileName(_targetPath);
-            string tempRoot = Path.GetFullPath
-            (
-                Path.Combine
-                (
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "SE2SB"
-                )
-            );
-            if (!tempRoot.EndsWith(Path.DirectorySeparatorChar))
-                tempRoot += Path.DirectorySeparatorChar;
 
-            string extractDirectory = Path.GetFullPath(Path.Combine(tempRoot, "SE2SB_Update"));
+            string extractDirectory = Path.GetFullPath(Path.Combine(tempRoot, ExtractionFolderName));
             if (!extractDirectory.StartsWith(tempRoot, StringComparison.OrdinalIgnoreCase))
                 throw new Exception("Invalid extraction directory.");
 
             string canonicalExtractDirectory = extractDirectory + Path.DirectorySeparatorChar;
 
-            TryDeleteDirectory(extractDirectory);
+            TryDeleteDirectory(extractDirectory, tempRoot);
 
-            ZipFile.ExtractToDirectory(tempZipPath, extractDirectory);
+            ZipFile.ExtractToDirectory(tempZipPath, extractDirectory, overwriteFiles: true);
 
             string extractedExe = Directory
                 .GetFiles(extractDirectory, exeName, SearchOption.AllDirectories)
@@ -152,11 +157,11 @@ public partial class UpdaterWindow: Window
                 }
                 catch (Exception exception)
                 {
-                    DisplayError($"[Updater] Failed to delete temp zip: {exception.Message}");
+                    DisplayError($"{LoggingPrefix} Failed to delete temp zip: {exception.Message}");
                 }
             }
 
-            TryDeleteDirectory(Path.Combine(Path.GetTempPath(), "SE2SB_Update"));
+            TryDeleteDirectory(Path.Combine(tempRoot, ExtractionFolderName), tempRoot);
 
             SetStatus("Restarting app...", 100);
             TryRestartApp();
@@ -164,17 +169,20 @@ public partial class UpdaterWindow: Window
         }
     }
 
-    private static void TryDeleteDirectory(string path)
+    private static void TryDeleteDirectory(string path, string allowedRoot)
     {
         try
         {
-            string canonicalTempPath = Path.GetFullPath(Path.GetTempPath());
-            string allowedPath       = Path.GetFullPath(Path.Combine(canonicalTempPath, "SE2SB_Update"));
-            string canonicalPath     = Path.GetFullPath(path);
+            string canonicalAllowedRoot = Path.GetFullPath(allowedRoot);
+            if (!canonicalAllowedRoot.EndsWith(Path.DirectorySeparatorChar))
+                canonicalAllowedRoot += Path.DirectorySeparatorChar;
+
+            string allowedPath   = Path.GetFullPath(Path.Combine(canonicalAllowedRoot, ExtractionFolderName));
+            string canonicalPath = Path.GetFullPath(path);
 
             if (!string.Equals(canonicalPath, allowedPath, StringComparison.OrdinalIgnoreCase))
             {
-                DisplayError($"[Updater] Skipping deletion — path not allowlisted: {canonicalPath}");
+                DisplayError($"{LoggingPrefix} Skipping deletion — path not allowlisted: {canonicalPath}");
                 return;
             }
 
@@ -183,7 +191,7 @@ public partial class UpdaterWindow: Window
         }
         catch (Exception exception)
         {
-            DisplayError($"[Updater] Failed to delete directory: {exception.Message}");
+            DisplayError($"{LoggingPrefix} Failed to delete directory: {exception.Message}");
         }
     }
 
@@ -194,11 +202,11 @@ public partial class UpdaterWindow: Window
             if (File.Exists(_targetPath))
                 Process.Start(new ProcessStartInfo(_targetPath) { UseShellExecute = true });
             else
-                DisplayError($"[Updater] Cannot restart — '{_targetPath}' not found.");
+                DisplayError($"{LoggingPrefix} Cannot restart — '{_targetPath}' not found.");
         }
         catch (Exception exception)
         {
-            DisplayError($"[Updater] Failed to restart app: {exception.Message}");
+            DisplayError($"{LoggingPrefix} Failed to restart app: {exception.Message}");
         }
     }
 
