@@ -1,5 +1,6 @@
 using StreamElementsToStreamerBotOverlayMigrator.Common;
 using StreamElementsToStreamerBotOverlayMigrator.Data;
+using StreamElementsToStreamerBotOverlayMigrator.Services;
 using System.IO;
 using System.Media;
 using System.Windows;
@@ -17,9 +18,11 @@ public class AssetFieldControl: StackPanel, IDisposable
     private readonly Button?               _stopButton;
     private readonly StackPanel?           _transportPanel;
     private readonly bool                  _isVideo;
+    private readonly InMemoryMediaServer   _mediaServer = MediaServerHost.Instance;
 
     private          SoundPlayer?          _wavPlayer;
-    private          string?               _tempFilePath;
+    private          MemoryStream?         _wavStream;
+    private          Uri?                  _activeMediaUri;
     private          bool                  _isPlaying;
 
     public           StyledDropdown        Dropdown  { get; }
@@ -125,7 +128,7 @@ public class AssetFieldControl: StackPanel, IDisposable
     {
         StopPlayback();
         ReleaseWavPlayer();
-        ReleaseTempFile();
+        ReleaseActiveMediaUri();
 
         if (_preview is not null)
             LoadImagePreview(widgetFile);
@@ -180,27 +183,27 @@ public class AssetFieldControl: StackPanel, IDisposable
             return;
         }
 
-        bool useWavPlayer = !_isVideo && Path.GetExtension(widgetFile.FileName).Equals(".wav", StringComparison.OrdinalIgnoreCase);
+        string extension    = Path.GetExtension(widgetFile.FileName);
+        bool   useWavPlayer = !_isVideo && extension.Equals(".wav", StringComparison.OrdinalIgnoreCase);
 
         try
         {
             byte[] fileBytes = Convert.FromBase64String(widgetFile.Content);
-            string extension = Path.GetExtension(widgetFile.FileName);
-            string tempPath  = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}{extension}");
-
-            File.WriteAllBytes(tempPath, fileBytes);
-            _tempFilePath = tempPath;
 
             if (useWavPlayer)
             {
-                var soundPlayer = new System.Media.SoundPlayer(tempPath);
+                var memoryStream = new MemoryStream(fileBytes);
+                var soundPlayer  = new SoundPlayer(memoryStream);
                 soundPlayer.Load();
 
+                _wavStream = memoryStream;
                 _wavPlayer = soundPlayer;
             }
             else
             {
-                _player!.Source = new Uri(tempPath);
+                Uri mediaUri = _mediaServer.Register(fileBytes, extension);
+                _activeMediaUri = mediaUri;
+                _player!.Source = mediaUri;
             }
 
             if (_isVideo)
@@ -306,42 +309,40 @@ public class AssetFieldControl: StackPanel, IDisposable
         if (_wavPlayer is null)
             return;
 
-        SoundPlayer wavPlayer = _wavPlayer;
+        SoundPlayer   wavPlayer = _wavPlayer;
+        MemoryStream? wavStream = _wavStream;
         _wavPlayer = null;
+        _wavStream = null;
 
         try
         {
             wavPlayer.Stop();
             wavPlayer.Dispose();
+            wavStream?.Dispose();
         }
         catch
         {}
     }
 
-    private void ReleaseTempFile()
+    private void ReleaseActiveMediaUri()
     {
-        if (_tempFilePath is null)
-            return;
-
-        string tempFilePath = _tempFilePath;
-        _tempFilePath = null;
-
         if (_player is not null)
             _player.Source = null;
 
-        try
-        {
-            File.Delete(tempFilePath);
-        }
-        catch
-        {}
+        if (_activeMediaUri is null)
+            return;
+
+        Uri mediaUri = _activeMediaUri;
+        _activeMediaUri = null;
+
+        _mediaServer.Unregister(mediaUri);
     }
 
     public void Dispose()
     {
         StopPlayback();
         ReleaseWavPlayer();
-        ReleaseTempFile();
+        ReleaseActiveMediaUri();
         GC.SuppressFinalize(this);
     }
 }
