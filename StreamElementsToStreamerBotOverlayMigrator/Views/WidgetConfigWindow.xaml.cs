@@ -1,4 +1,5 @@
 using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.Wpf;
 using Microsoft.Win32;
 using StreamElementsToStreamerBotOverlayMigrator.Common;
 using StreamElementsToStreamerBotOverlayMigrator.Common.ExtensionMethods;
@@ -47,6 +48,8 @@ public partial class WidgetConfigWindow: Window
     private          Dictionary<string, JsonElement>?     _dataValues;
     private          bool                                 _isDirty;
     private          bool                                 _webViewReady           = false;
+    private          FloatingWebViewHost                  _webViewHost            = null!;
+    private          WebView2                             PreviewWebView          = null!;
     private          bool                                 _isConfigSearchActive   = false;
     private          bool?                                _streamerBotConnected   = null;
 
@@ -79,8 +82,11 @@ public partial class WidgetConfigWindow: Window
     {
         InitializeComponent();
 
-        _widget = widget;
-        Title   = $"Configure — {widget.Name}";
+        _webViewHost              = new FloatingWebViewHost(this, PreviewCanvas);
+        PreviewWebView            = _webViewHost.WebView;
+        PreviewWebView.Visibility = Visibility.Hidden;
+        _widget                   = widget;
+        Title                     = $"Configure — {widget.Name}";
 
         LoadConfigurationData();
         LoadConfigurationFields();
