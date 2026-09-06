@@ -6,13 +6,14 @@ namespace StreamElementsToStreamerBotOverlayMigrator.Services;
 
 public static class SettingsService
 {
-    private static readonly string DatabaseFilePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "database.db"));
-    private static readonly string ConnectionString = $"Data Source={DatabaseFilePath}";
+    private static readonly string ConnectionString = DatabaseManager.GetDatabaseConnectionString();
 
     public static AppSettings Current { get; private set; } = new AppSettings();
 
     public static void Initialize()
     {
+        DatabaseManager.RestoreDatabaseBackupIfNeeded();
+
         using SqliteConnection connection = new SqliteConnection(ConnectionString);
         connection.Open();
 

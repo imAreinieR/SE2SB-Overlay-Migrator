@@ -61,8 +61,8 @@ public partial class MainWindow: Window
 
     protected override void OnClosing(CancelEventArgs e)
     {
-        WidgetManager.ResizeDatabaseIfNeeded();
-        WidgetManager.CreateDatabaseBackupIfNeeded();
+        DatabaseManager.ResizeDatabaseIfNeeded();
+        DatabaseManager.CreateDatabaseBackupIfNeeded();
         base.OnClosing(e);
     }
 

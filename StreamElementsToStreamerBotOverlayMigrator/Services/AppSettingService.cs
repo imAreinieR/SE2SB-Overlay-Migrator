@@ -32,8 +32,8 @@ public static class AppSettingService
 
     public static void PopulateFromSettings(AppSettings appSettings, IEnumerable<Setting> settings)
     {
-        Dictionary<string, PropertyInfo> propertiesByName =
-            GetSettingProperties().ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, PropertyInfo> propertiesByName = GetSettingProperties()
+            .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
 
         foreach (Setting setting in settings)
         {
